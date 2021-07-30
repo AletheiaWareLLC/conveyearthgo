@@ -1,0 +1,6 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="600" height="300" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+    <image xlink:href="convey.svg" width="432" height="290" transform="translate(164,55) rotate(-22.6198649 200 200)" preserveAspectRatio="xMidYMid meet">
+        <animate attributeName="xlink:href" repeatCount="3" dur="1s" from="convey.svg" to="convey-bezier.svg" />
+    </image>
+</svg>

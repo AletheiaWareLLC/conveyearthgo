@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <title>Convey - Aletheia Ware</title>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="/static/logo.svg" />
+                </a>
+            </div>
+
+            <h1>Convey</h1>
+
+            <embed class="banner" src="/static/banner.svg" />
+
+            <p class="subtitle">Quality Public Dialogue.</p>
+
+            {{if .Account -}}
+            <p class="center">Hello {{.Account.Username}}!<br />What will you convey today?</p>
+            {{- else -}}
+
+            <p class="center">
+                <!--
+                    <a class="call-to-action" href="/static/join-waitlist.html">Join Waitlist</a>
+                -->
+                <a href="/sign-in">Sign In</a> - <a href="/sign-up">Sign Up</a>
+            </p>
+
+            <p style="color: deepskyblue; text-align: center;">
+                Sick of Spam?
+                <br /><br />
+                Tired of Trolls?
+                <br /><br />
+                Done with Doomscrolling?
+                <br /><br />
+                Exhausted by Echo Chambers?
+                <br /><br />
+                Turned Off by Targeted Advertising?
+                <br /><br />
+                Had Enough Harassment, Heckling, and Hate?
+                <br /><br />
+            </p>
+
+            <h2 style="text-align: center;">Ready for Something New?</h2>
+
+            <p style="text-align: center;">Convey is a Communication Platform that Incentivizes Quality Content, Collaboration, and Discussion.</p>
+
+            {{- end}}
+
+            <table class="features">
+                <tr>
+                    <td class="features">
+                        <img class="feature" src="/static/value-quality-not-quantity.svg" />
+                    </td>
+                    <td class="features">
+                        <h2 style="text-align: right;">Value Quality, not Quantity</h2>
+                        <p style="text-align: right;">Contributions are charged by size to incentivize brevity and allow people to "put their money where their mouth is."</p>
+                        <p style="text-align: right;">Authors are rewarded when other people respond to their content; higher quality, more responses, deeper discussions, bigger yields.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="features">
+                        <h2 style="text-align: left;">Starve the Trolls</h2>
+                        <p style="text-align: left;">By only responding to messages that are of value to the community, an incentive is created for high-quality content while low-quality content that doesn't generate a response results in a net loss.</p>
+                        <p style="text-align: left;">If a troll replies to your content, ignore them and enjoy the points you received from them!</p>
+                    </td>
+                    <td class="features">
+                        <img class="feature" src="/static/starve-the-trolls.svg" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="features">
+                        <img class="feature" src="/static/world.svg" />
+                    </td>
+                    <td class="features">
+                        <h2 style="text-align: right;">Move the World</h2>
+                        <p style="text-align: right;">Convey your message to a global audience.</p>
+                        <p style="text-align: right;">Enjoy high-quality content from other authors around the world, covering a wide range of topics.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- TODO Comparison to existing products
+                - News
+                    - BBC
+                    - CNN
+                    - Fox
+                    - Hacker News
+                - Social Media
+                    - Facebook
+                    - Instagram
+                    - LinkedIn
+                    - Twitter
+            -->
+
+            <!--
+                <p class="center">
+                    Get notified when Convey goes live!
+                    <a class="call-to-action" href="/static/join-waitlist.html">Join Waitlist</a>
+                </p>
+            -->
+
+            <p class="center">
+                <a class="call-to-action" href="/demo">How it Works</a>
+            </p>
+
+            <div class="footer">
+                <ul class="nav">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/publish">Publish</a></li>
+                    <li><a href="/best">Best</a></li>
+                    <li><a href="/recent">Recent</a></li>
+                    <!--<li><a href="/digest">Digest</a></li>-->
+                </ul>
+                <ul class="nav">
+                    <li><a href="mailto:support@aletheiaware.com">Support</a></li>
+                </ul>
+                <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,12 @@
+{{define "conversations" -}}
+{{if gt (len .Conversations) 0 -}}
+<ol>
+    {{range .Conversations -}}
+    <li>
+        <a href="/conversation?id={{.ID}}">{{.Topic}}</a>
+        <p class="meta">{{template "date-time" .Created}} {{.User}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
+    </li>
+    {{- end}}
+</ol>
+{{- end}}
+{{- end}}

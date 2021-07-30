@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <title>Convey</title>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="static/logo.svg" />
+                </a>
+            </div>
+
+            {{if eq .Period "day" -}}
+            <h1>Best of the Day</h1>
+            {{- else if eq .Period "week" -}}
+            <h1>Best of the Week</h1>
+            {{- else if eq .Period "year" -}}
+            <h1>Best of the Year</h1>
+            {{- else if eq .Period "all" -}}
+            <h1>Best of All</h1>
+            {{- end}}
+
+            <p class="center">
+                {{if ne .Period "day"}}<a href="/best?period=day">Day</a>{{end}}
+                {{if ne .Period "week"}}<a href="/best?period=week">Week</a>{{end}}
+                {{if ne .Period "year"}}<a href="/best?period=year">Year</a>{{end}}
+                {{if ne .Period "all"}}<a href="/best?period=all">All</a>{{end}}
+            </p>
+
+            {{template "conversations" .}}
+
+            {{if gt (len .Conversations) 0 -}}
+            <p class="center"><a href="/best?period={{.Period}}&limit={{.Limit}}">More</a></p>
+            {{- end}}
+
+            <div class="footer">
+                <ul class="nav">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/publish">Publish</a></li>
+                    <li><a href="/recent">Recent</a></li>
+                    <!--<li><a href="/digest">Digest</a></li>-->
+                </ul>
+                <ul class="nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="mailto:support@aletheiaware.com">Support</a></li>
+                </ul>
+                <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>

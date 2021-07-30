@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <title>Convey</title>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="static/logo.svg" />
+                </a>
+            </div>
+
+            <h1>Account Recovery</h1>
+
+            {{if ne .Error "" -}}
+            <p class="error">{{.Error}}</p>
+            {{- end}}
+
+            <p style="text-align: center;">Enter the email address associated with your account.</p>
+
+            <form action="/account-recovery" method="post" id="account-recovery-form">
+                <!-- TODO(v2) add CSRF token
+                <input type="hidden" id="token" name="token" value="{ { .Token } }" />
+                -->
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" value="{{.Email}}" autocomplete="email" />
+
+                <input type="submit" value="Recover Account" />
+            </form>
+
+            <p class="center">
+                or
+                <br />
+                <br />
+                <a href="sign-in">Sign In</a>
+            </p>
+
+            <div class="footer">
+                <ul class="nav">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/publish">Publish</a></li>
+                    <li><a href="/best">Best</a></li>
+                    <li><a href="/recent">Recent</a></li>
+                    <!--<li><a href="/digest">Digest</a></li>-->
+                </ul>
+                <ul class="nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="mailto:support@aletheiaware.com">Support</a></li>
+                </ul>
+                <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>

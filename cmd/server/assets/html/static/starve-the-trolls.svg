@@ -1,0 +1,70 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="480" height="480" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet">
+    <g fill="deepskyblue" stroke="none">
+        <circle cx="240" cy="240" r="220" />
+    </g>
+    <defs>
+        <rect id="blackout" x="0" y="0" width="480" height="480" fill="black" />
+        <path id="mouth" d="M 118,235 Q 123,240 116,245 M 120,240 Q 300,300 360,240 Q 320,440 120,240" />
+        <path id="teeth" d="M 120,260 Q 260,325 360,270 L 360,290 Q 280,350 120,260 Z M 140,240 L 140,340 M 180,240 L 180,340 M 220,240 L 220,340 M 260,240 L 260,340 M 300,240 L 300,340 M 340,240 L 340,340" fill="black" mask="url(#mouth-mask)" />
+        <path id="left-eye" d="M 280,210 Q 300,200 320,210 Q 300,190 280,210" />
+        <path id="right-eye" d="M 150,210 Q 180,195 210,210 Q 180,180 150,210" />
+        <g id="pupils" mask="url(#eye-mask)" fill="black" stroke="none">
+            <circle cx="298" cy="202" r="10" />
+            <circle cx="178" cy="202" r="10" />
+        </g>
+    </defs>
+    <mask id="mouth-mask">
+        <use xlink:href="#blackout" />
+        <use xlink:href="#mouth" fill="white" />
+    </mask>
+    <mask id="eye-mask">
+        <use xlink:href="#blackout" />
+        <use xlink:href="#left-eye" fill="white" />
+        <use xlink:href="#right-eye" fill="white" />
+    </mask>
+    <!-- Guide
+    <g fill="none" stroke="grey" stroke-width="1">
+        <polyline points="240,0 240,480" />
+        <polyline points="0,240 480,240" />
+    </g> -->
+    <g stroke="black" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Face -->
+        <path d="M 130,140 C 130,140 330,130 350,140 S 360,160 370,190 S 410,220 380,260 S 380,350 350,390 S 280,390 240,380 S 160,340 110,280 S 90,240 100,200 S 110,140 130,140" fill="white" stroke-width="4" />
+        <g fill="none">
+            <g stroke-width="2">
+                <!-- Eyes -->
+                <use xlink:href="#left-eye" x="0" y="0" />
+                <use xlink:href="#right-eye" x="0" y="0" />
+                <!-- Eye Brows -->
+                <path d="M 280,170 Q 300,165 320,175 M 278,175 Q 275,180 275,190" />
+                <path d="M 150,180 Q 180,160 200,170 M 202,175 Q 208,180 208,185" />
+                <!-- Teeth -->
+                <use xlink:href="#teeth" x="0" y="0" />
+                <!-- Thin Wrinkles -->
+                <path d="M 130,170 S 165,140 210,150 S 300,145 340,150" />
+                <path d="M 140,175 S 165,150 210,160 S 300,150 350,165" />
+                <path d="M 110,215 S 100,225 95,230 S 95,245 100,255" />
+                <path d="M 350,210 S 365,210 370,215 S 380,225 380,235 S 380,245 370,255" />
+                <path d="M 160,300 C 200,340 220,345 240,350 S 260,355 290,360 S 330,350 335,340" />
+                <path d="M 150,305 C 200,350 220,360 250,365 S 270,375 300,375 S 340,370 350,350" />
+            </g>
+            <g stroke-width="4">
+                <!-- Nose -->
+                <path d="M 260,200 C 275,210 265,220 270,225 S 290,245 280,250 S 265,265 260,250 M 250,250 L 240,250 M 230,250 Q 230,245 235,245"/>
+                <!-- Mouth -->
+                <use xlink:href="#mouth" x="0" y="0" />
+                <!-- Thick Wrinkles -->
+                <path d="M 165,215 C 160,220 150,225 140,225 S 110,220 108,235 S 110,250 120,260" />
+                <path d="M 345,235 Q 360,215 370,240" />
+            </g>
+        </g>
+        <!-- Pupils -->
+        <use xlink:href="#pupils" x="0" y="0" />
+        <!-- Crossout -->
+        <g fill="none" stroke-width="15">
+            <circle cx="240" cy="240" r="190" />
+            <line x1="110" y1="110" x2="370" y2="370" />
+        </g>
+    </g>
+</svg>

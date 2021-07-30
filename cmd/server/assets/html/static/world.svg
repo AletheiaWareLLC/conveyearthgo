@@ -1,0 +1,34 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="480" height="480" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet">
+    <g fill="deepskyblue" stroke="none">
+        <circle cx="240" cy="240" r="220" />
+    </g>
+    <mask id="mask">
+        <rect x="0" y="0" width="480" height="480" fill="black" />
+        <circle cx="240" cy="240" r="220" fill="white" />
+    </mask>
+    <g fill="none" stroke="white" stroke-width="1" mask="url(#mask)">
+        <line x1="20" y1="240" x2="460" y2="240" />
+        <line x1="240" y1="20" x2="240" y2="460" />
+        <ellipse cx="240" cy="240" rx="120" ry="220" />
+        <ellipse cx="240" cy="20" rx="220" ry="120" />
+        <ellipse cx="240" cy="460" rx="220" ry="120" />
+    </g>
+    <!-- TODO Make with Actual Earth Data. -->
+    <g fill="white" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+        <!-- Africa & Europe -->
+        <path d="M 240,218 S 210,220 195,210 S 178,188 180,175 S 182,155 195,140 S 205,120 230,110 S 265,110 290,125 S 310,122 348,128 S 350,110 320,105 S 322,95 345,90 S 335,80 320,80 S 315,90 305,100 S 275,80 290,100 S 260,85 255,85 S 230,105 218,108 S 212,100 215,90 S 235,85 235,75 S 250,65 265,60 S 285,60 275,40 S 270,55 250,45 S 260,35 275,30 S 295,40 320,20 L 480,0 L 455,190 S 440,165 425,150 S 385,130 400,150 S 420,160 410,175 S 395,190 365,150 S 370,170 380,185 S 390,195 410,195 S 400,230 385,255 S 385,275 368,305 S 360,320 350,335 S 345,345 330,355 S 320,360 310,365 S 295,350 295,340 S 295,330 288,310 S 295,280 285,260 S 275,240 275,230 S 275,225 260,221 S 250,218 240,218 Z" />
+        <!-- Madagascar -->
+        <path d="M 390,295 S 385,315 375,330 S 380,310 390,295 Z" />
+        <!-- UK -->
+        <path d="M 241,48 S 246,63 238,66 S 236,58 241,48 M 232,56 S 231,59 229,58 S 227,56 232,56 Z" />
+        <!-- Greenland -->
+        <path d="M 200,20 S 130,90 260,15 Z" />
+        <!-- North America -->
+        <path d="M 135,45 S 130,60 105,75 S 90,90 75,105 S 55,110 45,110 S 40,50 135,45 Z" />
+        <!-- South America -->
+        <path d="M 10,200 S 40,200 50,210 S 65,225 70,240 S 90,248 105,270 S 100,290 95,325 S 90,340 85,370 S 110,410 10,410 Z" />
+        <!-- Antarctica -->
+        <path d="M 160,470 S 150,470 180,450 S 230,445 260,445 S 300,440 340,470 Z" />
+    </g>
+</svg>

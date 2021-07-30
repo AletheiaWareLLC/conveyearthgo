@@ -1,0 +1,11 @@
+{{define "message" -}}
+<div class="message">
+    <p class="meta">{{template "date-time" .Created}} {{.User}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
+
+    {{.Content}}
+
+    {{if .Conversation -}}
+    <p><small><a href="reply?conversation={{.Conversation}}&message={{.Message}}">reply</a></small></p>
+    {{- end}}
+</div>
+{{- end}}

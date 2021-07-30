@@ -1,0 +1,219 @@
+/* TODO FIXME should 'a' be in this? */
+a, h1, h2, h3, h4, h5, h6 {
+    color: deepskyblue;
+    text-align: center;
+}
+a:hover {
+    color: lightskyblue;
+}
+a.call-to-action {
+    background-color: white;
+    border-color: deepskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    color: deepskyblue;
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 16px auto 16px auto;
+    min-width: 96px;
+    padding: 16px 32px;
+    text-align: center;
+    text-decoration: none;
+    width: 10%;
+}
+a.call-to-action:hover {
+    background-color: deepskyblue;
+    color: white;
+}
+body {
+    background-color: white;
+    font-family: Helvetica, sans-serif;
+}
+div.message {
+    overflow-x: visible;
+}
+embed.banner {
+    display: block;
+    height: auto;
+    margin: 10px auto 0px auto;
+    min-width: 320px;
+    width: 50%;
+}
+form {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+@media screen and (max-width: 600px) {
+    form {
+        width: 100%;
+    }
+}
+img.feature {
+    display: block;
+    height: auto;
+    margin: 0px auto;
+    max-width: 480px;
+    width: 100%;
+}
+input {
+    border-color: deepskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    box-sizing: border-box;
+    margin: 8px 0;
+    padding: 8px 16px;
+}
+input:focus {
+    border-color: lightskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    outline: none;
+}
+input:not([type=radio]) {
+    width: 100%;
+}
+input[type=button], input[type=submit], input[type=reset] {
+    background-color: deepskyblue;
+    border-style: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 4px 0;
+    padding: 16px 32px;
+    text-decoration: none;
+}
+input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
+    background-color: lightskyblue;
+}
+input[type=button]:disabled, input[type=submit]:disabled, input[type=reset]:disabled {
+    background-color: lightgrey;
+    cursor: not-allowed;
+}
+p.center {
+    padding: 16px;
+    text-align: center;
+}
+p.error {
+    color: red;
+    text-align:center;
+}
+p.meta {
+    color: lightskyblue;
+    font-size: x-small;
+    margin: 3px 0px 3px 0px;
+}
+p.subtitle {
+    text-align: center;
+}
+table.bundles {
+    border-collapse: separate;
+    border-spacing: 8px;
+    margin-left: auto;
+    margin-right: auto;
+}
+td.bundles {
+    border-color: deepskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    text-align: center;
+    margin: 8px;
+    padding: 8px;
+}
+table.features {
+    table-layout: fixed;
+    text-align: center;
+    width: 100%;
+}
+td.features {
+    width: 50%;
+}
+textarea {
+    border-color: deepskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    box-sizing: border-box;
+    margin: 8px 0;
+    padding: 8px 16px;
+    width: 100%;
+}
+textarea:focus {
+    border-color: lightskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    outline: none;
+}
+ul {
+    padding-left: 20px;
+}
+.content {
+    margin: auto;
+    max-width: 960px;
+    padding: 10px;
+}
+.demo {
+    border-color: deepskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 8px;
+    width: 50%;
+}
+@media screen and (max-width: 600px) {
+    .demo {
+        width: 100%;
+    }
+}
+.header {
+    border-bottom: 1px solid deepskyblue;
+    overflow: hidden;
+    padding-bottom: 10px;
+}
+.header img {
+    display: block;
+    margin: auto;
+}
+.footer {
+    border-top: 1px solid deepskyblue;
+    overflow: hidden;
+    padding-top: 10px;
+}
+.footer p {
+    text-align: center;
+}
+.nav {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+}
+.nav a {
+    color: deepskyblue;
+    display: inline-block;
+    padding: 8px;
+    text-decoration: none;
+}
+.nav a:hover {
+    color: lightskyblue;
+}
+.nav li {
+    display: inline;
+}
+.reply {
+    list-style-type: none;
+}
+.user-content {
+    width: 100%;
+    height: 600px;
+}

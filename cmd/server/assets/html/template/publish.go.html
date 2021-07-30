@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <title>Convey</title>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="static/logo.svg" />
+                </a>
+            </div>
+
+            <h1>Publish</h1>
+            <p class="subtitle">What will you Convey to the World?</p>
+
+            {{if ne .Error "" -}}
+            <p class="error">{{.Error}}</p>
+            {{- end}}
+
+            <form action="/publish" enctype="multipart/form-data" method="post" id="publish-form">
+                <!-- TODO(v2) add CSRF token
+                <input type="hidden" id="token" name="token" value="{ { .Token } }" />
+                -->
+                <label for="topic">Topic</label>
+                <input type="text" id="topic" name="topic" value="{{.Topic}}" />
+
+                <label for="content">Content</label>
+                <textarea rows="5" cols="50" id="content" name="content">{{.Content}}</textarea>
+
+                <label for="attachment">Attachment</label>
+                <input type="file" id="attachment" name="attachment" />
+
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="text-align: right; width: 50%">Cost</td>
+                        <td style="text-align: left; width: 50%;" id="cost">0{{template "currency"}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right; width: 50%">Balance</td>
+                        <td style="text-align: left; width: 50%;">{{.Balance}}{{template "currency"}}</td>
+                    </tr>
+                </table>
+
+                <input type="submit" id="submit" value="Publish" />
+            </form>
+
+            <script type="text/javascript" src="/static/count-bytes.js"></script>
+            <script type="text/javascript">
+                const content = document.getElementById('content');
+                const attachment = document.getElementById('attachment');
+                const cost = document.getElementById('cost');
+                const limit = {{.Balance}};
+                const submit = document.getElementById('submit');
+                const suffix = `{{template "currency"}}`;
+                AttachByteCount(content, attachment, cost, limit, submit, suffix)
+            </script>
+
+            <div class="footer">
+                <ul class="nav">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/best">Best</a></li>
+                    <li><a href="/recent">Recent</a></li>
+                    <!--<li><a href="/digest">Digest</a></li>-->
+                </ul>
+                <ul class="nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="mailto:support@aletheiaware.com">Support</a></li>
+                </ul>
+                <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>
