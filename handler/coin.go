@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/redirect"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"fmt"
 	"github.com/stripe/stripe-go/v72"
@@ -30,6 +31,7 @@ func CoinBuy(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *templa
 			return
 		}
 		data := &CoinBuyData{
+			Live:    netgo.IsLive(),
 			Account: account,
 		}
 		bundles := make(map[string]*BundleData)
@@ -137,6 +139,7 @@ func executeCoinBuyTemplate(w http.ResponseWriter, ts *template.Template, data *
 }
 
 type CoinBuyData struct {
+	Live    bool
 	Error   string
 	Account *authgo.Account
 	Bundles []*BundleData

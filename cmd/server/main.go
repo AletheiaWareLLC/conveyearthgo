@@ -47,7 +47,7 @@ func main() {
 	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	secure := authgo.Secure()
+	secure := netgo.IsSecure()
 
 	scheme := "http"
 	if secure {

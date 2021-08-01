@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/redirect"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"html/template"
 	"log"
@@ -33,10 +34,12 @@ func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templat
 			Created time.Time
 		}
 		data := struct {
+			Live          bool
 			Account       *authgo.Account
 			Conversations []*ConversationData
 			Limit         int64
 		}{
+			Live:    netgo.IsLive(),
 			Account: account,
 		}
 		limit := int64(8)

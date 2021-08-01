@@ -16,6 +16,9 @@
                 <a href="https://aletheiaware.com">
                     <img src="static/logo.svg" />
                 </a>
+                {{if not .Live -}}
+                <div class="beta">BETA</div>
+                {{- end}}
             </div>
 
             <h1>Buy Coins</h1>
@@ -41,6 +44,12 @@
                         {{- end}}
                     </tr>
                 </table>
+
+                <p class="center">Payment Information and Processing handled by <a href="https://stripe.com">Stripe</a></p>
+
+                {{if not .Live -}}
+                <div class="beta">Convey is in BETA so coins are free!<br />Simply complete your purchase using the credit card number 4242 4242 4242 4242 <a style="color: white;" href="https://stripe.com/docs/testing#cards">more info</a></div>
+                {{- end}}
 
                 <input type="submit" value="Buy Coins" />
             </form>

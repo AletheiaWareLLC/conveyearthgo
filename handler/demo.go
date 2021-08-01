@@ -2,6 +2,7 @@ package handler
 
 import (
 	"aletheiaware.com/authgo"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"html/template"
 	"log"
@@ -66,8 +67,10 @@ func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
 			Topic string
 		}
 		data := struct {
+			Live                bool
 			Step1, Step2, Step3 ConversationData
 		}{
+			Live: netgo.IsLive(),
 			Step1: ConversationData{
 				Topic: topic,
 				MessageData: MessageData{

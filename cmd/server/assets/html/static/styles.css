@@ -31,6 +31,19 @@ body {
     background-color: white;
     font-family: Helvetica, sans-serif;
 }
+div.beta {
+    background-color: red;
+    border-style: none;
+    border-radius: 4px;
+    border-width: 2px;
+    color: white;
+    display: table;
+    font-size: x-small;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 auto;
+    padding: 4px;
+}
 div.message {
     overflow-x: visible;
 }

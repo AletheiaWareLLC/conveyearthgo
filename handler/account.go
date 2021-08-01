@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/redirect"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"html/template"
 	"log"
@@ -23,6 +24,7 @@ func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *templa
 		}
 		data := &AccountData{
 			Account: account,
+			Live:    netgo.IsLive(),
 		}
 		balance, err := am.AccountBalance(account.ID)
 		if err != nil {
@@ -43,6 +45,7 @@ func executeAccountTemplate(w http.ResponseWriter, ts *template.Template, data *
 }
 
 type AccountData struct {
+	Live    bool
 	Error   string
 	Account *authgo.Account
 	Balance int64

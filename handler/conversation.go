@@ -3,6 +3,7 @@ package handler
 import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"html/template"
 	"log"
@@ -45,9 +46,11 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 		}
 		data := struct {
 			MessageData
+			Live    bool
 			Account *authgo.Account
 			Topic   string
 		}{
+			Live:    netgo.IsLive(),
 			Account: account,
 		}
 		data.Conversation = id

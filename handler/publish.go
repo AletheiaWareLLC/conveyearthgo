@@ -5,6 +5,7 @@ import (
 	authredirect "aletheiaware.com/authgo/redirect"
 	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/conveyearthgo/redirect"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"fmt"
 	"html/template"
@@ -30,6 +31,7 @@ func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveye
 			return
 		}
 		data := &PublishData{
+			Live:    netgo.IsLive(),
 			Account: account,
 		}
 		balance, err := am.AccountBalance(account.ID)
@@ -162,6 +164,7 @@ func executePublishTemplate(w http.ResponseWriter, ts *template.Template, data *
 }
 
 type PublishData struct {
+	Live    bool
 	Error   string
 	Account *authgo.Account
 	Balance int64

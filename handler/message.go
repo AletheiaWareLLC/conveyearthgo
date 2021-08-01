@@ -3,6 +3,7 @@ package handler
 import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"html/template"
 	"log"
@@ -51,6 +52,7 @@ func Message(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templa
 			return
 		}
 		data := struct {
+			Live         bool
 			Account      *authgo.Account
 			Conversation int64
 			Message      int64
@@ -61,6 +63,7 @@ func Message(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templa
 			Content      template.HTML
 			Created      time.Time
 		}{
+			Live:         netgo.IsLive(),
 			Account:      account,
 			Conversation: m.Conversation,
 			Message:      id,

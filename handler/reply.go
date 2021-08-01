@@ -5,6 +5,7 @@ import (
 	authredirect "aletheiaware.com/authgo/redirect"
 	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/conveyearthgo/redirect"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"fmt"
 	"html/template"
@@ -66,6 +67,7 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			return
 		}
 		data := &ReplyData{
+			Live:         netgo.IsLive(),
 			Account:      account,
 			Conversation: conversation,
 			Message:      message,
@@ -194,6 +196,7 @@ func executeReplyTemplate(w http.ResponseWriter, ts *template.Template, data *Re
 }
 
 type ReplyData struct {
+	Live         bool
 	Error        string
 	Account      *authgo.Account
 	Balance      int64
