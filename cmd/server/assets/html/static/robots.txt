@@ -1,0 +1,27 @@
+# Health
+User-agent: *
+Disallow: /health
+
+# Account
+User-agent: *
+Disallow: /account
+Disallow: /coin
+Disallow: /sign
+
+# Content
+User-agent: *
+Disallow: /best
+Disallow: /content
+Disallow: /conversation
+Disallow: /message
+Disallow: /publish
+Disallow: /recent
+Disallow: /reply
+
+# Stripe
+User-agent: *
+Disallow: /stripe-webhook
+
+# Everything Else OK
+User-agent: *
+Allow: /

@@ -181,6 +181,11 @@ func main() {
 	// Handle Demo
 	handler.AttachDemoHandler(mux, auth, templates)
 
+	// Handle robots.txt
+	mux.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/static/robots.txt", http.StatusFound)
+	})
+
 	// Handle Index
 	handler.AttachIndexHandler(mux, auth, templates)
 
