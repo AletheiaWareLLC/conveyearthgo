@@ -226,7 +226,10 @@ ul {
 .reply {
     list-style-type: none;
 }
-.user-content {
+img.user-content {
+    max-width: 100%;
+}
+object.user-content {
     width: 100%;
     height: 600px;
 }

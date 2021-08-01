@@ -200,7 +200,7 @@ func (m *contentManager) ToHTML(hash, mime string) (template.HTML, error) {
 		MIME_IMAGE_PNG,
 		MIME_IMAGE_SVG,
 		MIME_IMAGE_WEBP:
-		return template.HTML("<img src=\"/content/" + hash + "?mime=" + url.QueryEscape(mime) + "\" width=\"100%\" />"), nil
+		return template.HTML("<img class=\"user-content\" src=\"/content/" + hash + "?mime=" + url.QueryEscape(mime) + "\" />"), nil
 	case MIME_TEXT_PLAIN:
 		file, err := m.Open(hash)
 		if err != nil {
