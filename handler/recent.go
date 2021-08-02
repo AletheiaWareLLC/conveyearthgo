@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func AttachRecentHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) {
@@ -25,18 +24,10 @@ func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templat
 			redirect.SignIn(w, r)
 			return
 		}
-		type ConversationData struct {
-			ID      int64
-			Topic   string
-			User    string
-			Cost    int64
-			Yield   int64
-			Created time.Time
-		}
 		data := struct {
 			Live          bool
 			Account       *authgo.Account
-			Conversations []*ConversationData
+			Conversations []*conveyearthgo.Conversation
 			Limit         int64
 		}{
 			Live:    netgo.IsLive(),
@@ -51,15 +42,8 @@ func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templat
 			}
 		}
 		data.Limit = limit * 2
-		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation, cost, yield int64) error {
-			data.Conversations = append(data.Conversations, &ConversationData{
-				ID:      c.ID,
-				Topic:   c.Topic,
-				User:    c.User,
-				Cost:    cost,
-				Yield:   yield,
-				Created: c.Created,
-			})
+		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation) error {
+			data.Conversations = append(data.Conversations, c)
 			return nil
 		}, limit); err != nil {
 			log.Println(err)

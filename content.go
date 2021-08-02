@@ -90,8 +90,8 @@ type ContentManager interface {
 	ToHTML(string, string) (template.HTML, error)
 	NewConversation(*authgo.Account, string, []string, []string, []int64) (*Conversation, *Message, error)
 	LookupConversation(int64) (*Conversation, error)
-	LookupBestConversations(func(*Conversation, int64, int64) error, time.Time, int64) error
-	LookupRecentConversations(func(*Conversation, int64, int64) error, int64) error
+	LookupBestConversations(func(*Conversation) error, time.Time, int64) error
+	LookupRecentConversations(func(*Conversation) error, int64) error
 	NewMessage(*authgo.Account, int64, int64, []string, []string, []int64) (*Message, error)
 	LookupMessage(int64) (*Message, error)
 	LookupMessages(int64, func(*Message) error) error
@@ -272,25 +272,29 @@ func (m *contentManager) LookupConversation(id int64) (*Conversation, error) {
 	}, nil
 }
 
-func (m *contentManager) LookupBestConversations(callback func(*Conversation, int64, int64) error, since time.Time, limit int64) error {
-	return m.database.LookupBestConversations(func(id, user int64, username string, topic string, created time.Time, cost, yield int64) error {
+func (m *contentManager) LookupBestConversations(callback func(*Conversation) error, since time.Time, limit int64) error {
+	return m.database.LookupBestConversations(func(id, user int64, username, topic string, created time.Time, cost, yield int64) error {
 		return callback(&Conversation{
 			ID:      id,
 			User:    username,
 			Topic:   topic,
+			Cost:    cost,
+			Yield:   yield,
 			Created: created,
-		}, cost, yield)
+		})
 	}, since, limit)
 }
 
-func (m *contentManager) LookupRecentConversations(callback func(*Conversation, int64, int64) error, limit int64) error {
-	return m.database.LookupRecentConversations(func(id, user int64, username string, topic string, created time.Time, cost, yield int64) error {
+func (m *contentManager) LookupRecentConversations(callback func(*Conversation) error, limit int64) error {
+	return m.database.LookupRecentConversations(func(id, user int64, username, topic string, created time.Time, cost, yield int64) error {
 		return callback(&Conversation{
 			ID:      id,
 			User:    username,
 			Topic:   topic,
+			Cost:    cost,
+			Yield:   yield,
 			Created: created,
-		}, cost, yield)
+		})
 	}, limit)
 }
 
