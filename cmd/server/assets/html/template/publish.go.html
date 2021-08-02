@@ -33,7 +33,7 @@
                 <input type="hidden" id="token" name="token" value="{ { .Token } }" />
                 -->
                 <label for="topic">Topic</label>
-                <input type="text" id="topic" name="topic" value="{{.Topic}}" />
+                <input type="text" id="topic" name="topic" value="{{.Topic}}" maxlength="100"/>
 
                 <label for="content">Content</label>
                 <textarea rows="5" cols="50" id="content" name="content">{{.Content}}</textarea>
