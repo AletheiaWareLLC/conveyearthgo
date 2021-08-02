@@ -28,7 +28,20 @@
             <p class="subtitle">Quality Public Dialogue.</p>
 
             {{if .Account -}}
-            <p class="center">Hello {{.Account.Username}}!<br />What will you convey today?</p>
+            <p class="center">
+                Hello {{.Account.Username}}!
+                <br />
+                <br />
+                What will you Convey today?
+                <br />
+                <br />
+                <a href="/account">Account</a>
+                <a href="/publish">Publish</a>
+                <a href="/best">Best</a>
+                <a href="/recent">Recent</a>
+                <!--<a href="/digest">Digest</a>-->
+            </p>
+
             {{- else -}}
 
             <p class="center">
@@ -117,13 +130,6 @@
             </p>
 
             <div class="footer">
-                <ul class="nav">
-                    <li><a href="/account">Account</a></li>
-                    <li><a href="/publish">Publish</a></li>
-                    <li><a href="/best">Best</a></li>
-                    <li><a href="/recent">Recent</a></li>
-                    <!--<li><a href="/digest">Digest</a></li>-->
-                </ul>
                 <ul class="nav">
                     <li><a href="mailto:support@aletheiaware.com">Support</a></li>
                 </ul>
