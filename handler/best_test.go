@@ -34,7 +34,7 @@ func TestBest(t *testing.T) {
 		mux := http.NewServeMux()
 		handler.AttachBestHandler(mux, auth, cm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/best", nil)
-		request.AddCookie(authgo.NewSignInSessionCookie(token))
+		request.AddCookie(auth.NewSignInSessionCookie(token))
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)
 		result := response.Result()

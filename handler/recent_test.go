@@ -34,7 +34,7 @@ func TestRecent(t *testing.T) {
 		mux := http.NewServeMux()
 		handler.AttachRecentHandler(mux, auth, cm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/recent", nil)
-		request.AddCookie(authgo.NewSignInSessionCookie(token))
+		request.AddCookie(auth.NewSignInSessionCookie(token))
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)
 		result := response.Result()

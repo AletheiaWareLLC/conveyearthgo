@@ -1,7 +1,6 @@
 package handler_test
 
 import (
-	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
 	"aletheiaware.com/conveyearthgo/handler"
 	"github.com/stretchr/testify/assert"
@@ -22,7 +21,7 @@ func TestIndex(t *testing.T) {
 		mux := http.NewServeMux()
 		handler.AttachIndexHandler(mux, auth, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
-		request.AddCookie(authgo.NewSignInSessionCookie(token))
+		request.AddCookie(auth.NewSignInSessionCookie(token))
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)
 		result := response.Result()
