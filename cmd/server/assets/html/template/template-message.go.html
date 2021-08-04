@@ -1,5 +1,5 @@
 {{define "message" -}}
-<div class="message">
+<div class="message" id="message{{.Message}}">
     <p class="meta">{{template "date-time" .Created}} {{.User}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
 
     {{.Content}}

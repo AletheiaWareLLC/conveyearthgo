@@ -152,7 +152,7 @@ func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveye
 				return
 			}
 
-			redirect.Conversation(w, r, conversation.ID)
+			redirect.Conversation(w, r, conversation.ID, 0)
 		}
 	})
 }

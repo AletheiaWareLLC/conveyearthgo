@@ -177,14 +177,15 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			}
 
 			// Record message
-			if _, err := cm.NewMessage(account, conversation, message, hashes, mimes, sizes); err != nil {
+			m, err := cm.NewMessage(account, conversation, message, hashes, mimes, sizes)
+			if err != nil {
 				log.Println(err)
 				data.Error = err.Error()
 				executeReplyTemplate(w, ts, data)
 				return
 			}
 
-			redirect.Conversation(w, r, conversation)
+			redirect.Conversation(w, r, conversation, m.ID)
 		}
 	})
 }
