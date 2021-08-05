@@ -1,3 +1,7 @@
+# Blocked for Excessive Traffic
+User-agent: PetalBot
+Disallow: /
+
 # Health
 User-agent: *
 Disallow: /health
