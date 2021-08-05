@@ -137,14 +137,14 @@ func main() {
 	// Create a Account Manager
 	am := conveyearthgo.NewAccountManager(db)
 
-	uploads, ok := os.LookupEnv("USER_CONTENT_DIRECTORY")
+	uploads, ok := os.LookupEnv("UPLOAD_DIRECTORY")
 	if !ok {
 		uploads = "uploads"
 	}
 	if err := os.MkdirAll(uploads, os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
-	log.Println("User Content Directory:", uploads)
+	log.Println("Uploads Directory:", uploads)
 
 	// Create a Content Manager
 	cm := conveyearthgo.NewContentManager(db, filesystem.NewOnDisk(uploads))
