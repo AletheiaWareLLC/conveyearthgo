@@ -32,20 +32,21 @@ var embeddedFS embed.FS
 
 func main() {
 	// Configure Logging
-	store, ok := os.LookupEnv("LOG_DIRECTORY")
+	logs, ok := os.LookupEnv("LOG_DIRECTORY")
 	if !ok {
-		store = "logs"
+		logs = "logs"
 	}
-	if err := os.MkdirAll(store, os.ModePerm); err != nil {
+	if err := os.MkdirAll(logs, os.ModePerm); err != nil {
 		log.Fatal(err)
 	}
-	logFile, err := os.OpenFile(path.Join(store, time.Now().UTC().Format(time.RFC3339)), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+	logFile, err := os.OpenFile(path.Join(logs, time.Now().UTC().Format(time.RFC3339)), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer logFile.Close()
 	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.Println("Log:", logFile.Name())
 
 	secure := netgo.IsSecure()
 
