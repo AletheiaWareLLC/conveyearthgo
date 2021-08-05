@@ -118,6 +118,9 @@ func (m *contentManager) Open(path string) (fs.File, error) {
 	}
 
 	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
 	if stat.IsDir() {
 		// Directory Listings Disallowed
 		return nil, fs.ErrNotExist

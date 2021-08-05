@@ -125,6 +125,23 @@ p.meta {
 p.subtitle {
     text-align: center;
 }
+select {
+    border-color: deepskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    box-sizing: border-box;
+    margin: 8px 0;
+    padding: 8px 16px;
+    width: 100%;
+}
+select:focus {
+    border-color: lightskyblue;
+    border-style: solid;
+    border-radius: 8px;
+    border-width: 2px;
+    outline: none;
+}
 table.bundles {
     border-collapse: separate;
     border-spacing: 8px;

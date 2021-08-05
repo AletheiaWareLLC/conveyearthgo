@@ -21,20 +21,39 @@
                 {{- end}}
             </div>
 
-            <h1>Recent</h1>
+            <h1>Digest</h1>
 
-            {{template "conversations" .}}
-
-            {{if gt (len .Conversations) 0 -}}
-            <p class="center"><a href="/recent?limit={{.Limit}}">More</a></p>
+            {{if ne .Error "" -}}
+            <p class="error">{{.Error}}</p>
             {{- end}}
+
+            <form action="/digest" method="post" id="digest-form">
+                <!-- TODO(v2) add CSRF token
+                <input type="hidden" id="token" name="token" value="{ { .Token } }" />
+                -->
+                <label for="year">Year</label>
+                <select name="year" id="year">
+                    {{range .Years -}}
+                    <option value="{{.}}" {{if eq . $.Year}}selected{{end}}>{{.}}</option>
+                    {{- end}}
+                </select>
+
+                <label for="month">Month</label>
+                <select name="month" id="month">
+                    {{range .Months -}}
+                    <option value="{{.}}" {{if eq . $.Month}}selected{{end}}>{{.}}</option>
+                    {{- end}}
+                </select>
+
+                <input type="submit" value="Download Digest" />
+            </form>
 
             <div class="footer">
                 <ul class="nav">
                     <li><a href="/account">Account</a></li>
                     <li><a href="/publish">Publish</a></li>
                     <li><a href="/best">Best</a></li>
-                    <li><a href="/digest">Digest</a></li>
+                    <li><a href="/recent">Recent</a></li>
                 </ul>
                 <ul class="nav">
                     <li><a href="/">Home</a></li>

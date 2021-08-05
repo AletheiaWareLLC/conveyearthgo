@@ -151,6 +151,21 @@ func main() {
 	// Handle Content
 	handler.AttachContentHandler(mux, cm)
 
+	digests, ok := os.LookupEnv("DIGEST_DIRECTORY")
+	if !ok {
+		digests = "digests"
+	}
+	if err := os.MkdirAll(digests, os.ModePerm); err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Digests Directory:", digests)
+
+	// Create a Digest Manager
+	dm := conveyearthgo.NewDigestManager(filesystem.NewOnDisk(digests))
+
+	// Handle Digest
+	handler.AttachDigestHandler(mux, auth, dm, templates)
+
 	// Handle Account
 	handler.AttachAccountHandler(mux, auth, am, templates)
 
