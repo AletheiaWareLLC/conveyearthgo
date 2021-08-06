@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func AttachIndexHandler(m *http.ServeMux, a authgo.Authenticator, ts *template.Template) {
@@ -15,6 +16,10 @@ func AttachIndexHandler(m *http.ServeMux, a authgo.Authenticator, ts *template.T
 
 func Index(a authgo.Authenticator, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if p := strings.TrimSuffix(r.URL.Path, "index.html"); p != "/" {
+			http.NotFound(w, r)
+			return
+		}
 		data := struct {
 			Live    bool
 			Account *authgo.Account
