@@ -83,6 +83,26 @@ var (
 	anchors  = regexp.MustCompile(`\b(file|ftp|https?):\/\/\S+[\/\w]`)
 )
 
+type ContentDatabase interface {
+	CreateConversation(int64, string, time.Time) (int64, error)
+	SelectConversation(int64) (int64, string, string, time.Time, error)
+	LookupBestConversations(func(int64, int64, string, string, time.Time, int64, int64) error, time.Time, int64) error
+	LookupRecentConversations(func(int64, int64, string, string, time.Time, int64, int64) error, int64) error
+
+	CreateMessage(int64, int64, int64, time.Time) (int64, error)
+	SelectMessage(int64) (int64, string, int64, int64, time.Time, int64, int64, error)
+	LookupMessage(int64, int64) (int64, int64, time.Time, int64, int64, error)
+	LookupMessages(int64, func(int64, int64, string, int64, time.Time, int64, int64) error) error
+	LookupMessageParent(int64) (int64, error)
+
+	CreateFile(int64, string, string, time.Time) (int64, error)
+	SelectFile(int64) (int64, string, string, time.Time, error)
+	LookupFiles(int64, func(int64, string, string, time.Time) error) error
+
+	CreateCharge(int64, int64, int64, int64, time.Time) (int64, error)
+	CreateYield(int64, int64, int64, int64, int64, time.Time) (int64, error)
+}
+
 type ContentManager interface {
 	fs.FS
 	AddText([]byte) (string, int64, error)
@@ -99,7 +119,7 @@ type ContentManager interface {
 	LookupFiles(int64, func(*File) error) error
 }
 
-func NewContentManager(db Database, fs Filesystem) ContentManager {
+func NewContentManager(db ContentDatabase, fs Filesystem) ContentManager {
 	return &contentManager{
 		database:   db,
 		filesystem: fs,
@@ -107,7 +127,7 @@ func NewContentManager(db Database, fs Filesystem) ContentManager {
 }
 
 type contentManager struct {
-	database   Database
+	database   ContentDatabase
 	filesystem Filesystem
 }
 

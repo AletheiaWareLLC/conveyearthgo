@@ -8,19 +8,24 @@ import (
 
 var ErrInsufficientBalance = errors.New("Insufficient Balance")
 
+type AccountDatabase interface {
+	LookupAccountBalance(int64) (int64, error)
+	CreatePurchase(int64, string, string, string, string, int64, int64, time.Time) (int64, error)
+}
+
 type AccountManager interface {
 	AccountBalance(int64) (int64, error)
 	NewPurchase(int64, string, string, string, string, int64, int64) error
 }
 
-func NewAccountManager(db Database) AccountManager {
+func NewAccountManager(db AccountDatabase) AccountManager {
 	return &accountManager{
 		database: db,
 	}
 }
 
 type accountManager struct {
-	database Database
+	database AccountDatabase
 }
 
 func (m *accountManager) AccountBalance(user int64) (int64, error) {
