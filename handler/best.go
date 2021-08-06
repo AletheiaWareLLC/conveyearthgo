@@ -48,11 +48,11 @@ func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.
 		case "all":
 		case "year":
 			since = now.Truncate(PERIOD_YEARLY)
+		default:
+			period = "week"
+			fallthrough
 		case "week":
 			since = now.Truncate(PERIOD_WEEKLY)
-		default:
-			period = "day"
-			fallthrough
 		case "day":
 			since = now.Truncate(PERIOD_DAILY)
 		}
