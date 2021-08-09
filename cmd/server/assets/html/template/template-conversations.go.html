@@ -4,7 +4,7 @@
     {{range .Conversations -}}
     <li>
         <a href="/conversation?id={{.ID}}">{{.Topic}}</a>
-        <p class="meta">{{template "date-time" .Created}} {{.User}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
+        <p class="meta">{{template "date-time" .Created}} {{.Author.Username}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
     </li>
     {{- end}}
 </ol>

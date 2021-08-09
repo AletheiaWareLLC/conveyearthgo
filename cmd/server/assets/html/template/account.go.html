@@ -55,6 +55,24 @@
                 <a href="/coin-buy">Buy Coins</a>
             </p>
 
+            <h4>Notifications</h4>
+
+            <h5>Responses</h5>
+
+            <p class="center">You {{if .NotificationResponses}}will{{else}}will not{{end}} be notified when someone responds to one of your messages.</p>
+
+            <h5>Mentions</h5>
+
+            <p class="center">You {{if .NotificationMentions}}will{{else}}will not{{end}} be notified when someone mentions you.</p>
+
+            <h5>Digests</h5>
+
+            <p class="center">You {{if .NotificationDigests}}will{{else}}will not{{end}} be notified when a new digest is published.</p>
+
+            <p class="center">
+                <a href="/account-notification-preferences">Change Notification Preferences</a>
+            </p>
+
             <p class="center">
                 <a href="/sign-out">Sign Out</a>
             </p>

@@ -16,11 +16,11 @@ import (
 	"time"
 )
 
-func AttachReplyHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, ts *template.Template) {
-	m.Handle("/reply", handler.Log(Reply(a, am, cm, ts)))
+func AttachReplyHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
+	m.Handle("/reply", handler.Log(Reply(a, am, cm, nm, ts)))
 }
 
-func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
+func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {
@@ -47,6 +47,12 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
+		c, err := cm.LookupConversation(conversation)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
 		m, err := cm.LookupMessage(message)
 		if err != nil {
 			log.Println(err)
@@ -67,15 +73,16 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			return
 		}
 		data := &ReplyData{
-			Live:         netgo.IsLive(),
-			Account:      account,
-			Conversation: conversation,
-			Message:      message,
-			User:         m.User,
-			Cost:         m.Cost,
-			Yield:        m.Yield,
-			Content:      content,
-			Created:      m.Created,
+			Live:           netgo.IsLive(),
+			Account:        account,
+			Topic:          c.Topic,
+			ConversationID: conversation,
+			MessageID:      message,
+			Author:         m.Author,
+			Cost:           m.Cost,
+			Yield:          m.Yield,
+			Content:        content,
+			Created:        m.Created,
 		}
 		balance, err := am.AccountBalance(account.ID)
 		if err != nil {
@@ -177,7 +184,7 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			}
 
 			// Record message
-			m, err := cm.NewMessage(account, conversation, message, hashes, mimes, sizes)
+			response, err := cm.NewMessage(account, conversation, message, hashes, mimes, sizes)
 			if err != nil {
 				log.Println(err)
 				data.Error = err.Error()
@@ -185,7 +192,26 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 				return
 			}
 
-			redirect.Conversation(w, r, conversation, m.ID)
+			// Send Reply Notification
+			if account.ID != m.Author.ID {
+				if err := nm.NotifyResponse(m.Author, account, conversation, c.Topic, response.ID); err != nil {
+					log.Println(err)
+				}
+			}
+
+			// Send Mention Notifications
+			for _, username := range conveyearthgo.Mentions(reply) {
+				a, err := am.Account(username)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				if err := nm.NotifyMention(a, account, conversation, c.Topic, response.ID); err != nil {
+					log.Println(err)
+				}
+			}
+
+			redirect.Conversation(w, r, conversation, response.ID)
 		}
 	})
 }
@@ -197,16 +223,17 @@ func executeReplyTemplate(w http.ResponseWriter, ts *template.Template, data *Re
 }
 
 type ReplyData struct {
-	Live         bool
-	Error        string
-	Account      *authgo.Account
-	Balance      int64
-	Conversation int64
-	Message      int64
-	User         string
-	Cost         int64
-	Yield        int64
-	Content      template.HTML
-	Created      time.Time
-	Reply        string
+	Live           bool
+	Error          string
+	Account        *authgo.Account
+	Balance        int64
+	Topic          string
+	ConversationID int64
+	MessageID      int64
+	Author         *authgo.Account
+	Cost           int64
+	Yield          int64
+	Content        template.HTML
+	Created        time.Time
+	Reply          string
 }

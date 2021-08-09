@@ -1,11 +1,11 @@
 {{define "message" -}}
-<div class="message" id="message{{.Message}}">
-    <p class="meta">{{template "date-time" .Created}} {{.User}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
+<div class="message" id="message{{.MessageID}}">
+    <p class="meta">{{template "date-time" .Created}} {{.Author.Username}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
 
     {{.Content}}
 
-    {{if .Conversation -}}
-    <p><small><a href="reply?conversation={{.Conversation}}&message={{.Message}}">reply</a></small></p>
+    {{if .ConversationID -}}
+    <p><small><a href="reply?conversation={{.ConversationID}}&message={{.MessageID}}">reply</a></small></p>
     {{- end}}
 </div>
 {{- end}}

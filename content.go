@@ -15,6 +15,7 @@ import (
 	"mime/multipart"
 	"net/url"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -81,18 +82,25 @@ func MimeTypeFromHeader(header *multipart.FileHeader) (string, error) {
 var (
 	newlines = regexp.MustCompile(`\r?\n\r?\n`)
 	anchors  = regexp.MustCompile(`\b(file|ftp|https?):\/\/\S+[\/\w]`)
+	mentions = regexp.MustCompile(`(^|\s)@[[:alnum:]]{3,}`)
 )
+
+func Mentions(input string) (usernames []string) {
+	for _, u := range mentions.FindAllString(input, -1) {
+		usernames = append(usernames, strings.TrimPrefix(strings.TrimSpace(u), "@"))
+	}
+	return
+}
 
 type ContentDatabase interface {
 	CreateConversation(int64, string, time.Time) (int64, error)
-	SelectConversation(int64) (int64, string, string, time.Time, error)
-	LookupBestConversations(func(int64, int64, string, string, time.Time, int64, int64) error, time.Time, int64) error
-	LookupRecentConversations(func(int64, int64, string, string, time.Time, int64, int64) error, int64) error
+	SelectConversation(int64) (*authgo.Account, string, time.Time, error)
+	LookupBestConversations(func(int64, *authgo.Account, string, time.Time, int64, int64) error, time.Time, int64) error
+	LookupRecentConversations(func(int64, *authgo.Account, string, time.Time, int64, int64) error, int64) error
 
 	CreateMessage(int64, int64, int64, time.Time) (int64, error)
-	SelectMessage(int64) (int64, string, int64, int64, time.Time, int64, int64, error)
-	LookupMessage(int64, int64) (int64, int64, time.Time, int64, int64, error)
-	LookupMessages(int64, func(int64, int64, string, int64, time.Time, int64, int64) error) error
+	SelectMessage(int64) (*authgo.Account, int64, int64, time.Time, int64, int64, error)
+	LookupMessages(int64, func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error
 	LookupMessageParent(int64) (int64, error)
 
 	CreateFile(int64, string, string, time.Time) (int64, error)
@@ -270,36 +278,36 @@ func (m *contentManager) NewConversation(account *authgo.Account, topic string, 
 	log.Println("Created Charge", charge)
 	return &Conversation{
 			ID:      conversation,
-			User:    account.Username,
+			Author:  account,
 			Topic:   topic,
 			Created: created,
 		}, &Message{
-			ID:           message,
-			User:         account.Username,
-			Conversation: conversation,
-			Cost:         cost,
-			Created:      created,
+			ID:             message,
+			Author:         account,
+			ConversationID: conversation,
+			Cost:           cost,
+			Created:        created,
 		}, nil
 }
 
 func (m *contentManager) LookupConversation(id int64) (*Conversation, error) {
-	_, username, topic, created, err := m.database.SelectConversation(id)
+	author, topic, created, err := m.database.SelectConversation(id)
 	if err != nil {
 		return nil, err
 	}
 	return &Conversation{
 		ID:      id,
-		User:    username,
+		Author:  author,
 		Topic:   topic,
 		Created: created,
 	}, nil
 }
 
 func (m *contentManager) LookupBestConversations(callback func(*Conversation) error, since time.Time, limit int64) error {
-	return m.database.LookupBestConversations(func(id, user int64, username, topic string, created time.Time, cost, yield int64) error {
+	return m.database.LookupBestConversations(func(id int64, author *authgo.Account, topic string, created time.Time, cost, yield int64) error {
 		return callback(&Conversation{
 			ID:      id,
-			User:    username,
+			Author:  author,
 			Topic:   topic,
 			Cost:    cost,
 			Yield:   yield,
@@ -309,10 +317,10 @@ func (m *contentManager) LookupBestConversations(callback func(*Conversation) er
 }
 
 func (m *contentManager) LookupRecentConversations(callback func(*Conversation) error, limit int64) error {
-	return m.database.LookupRecentConversations(func(id, user int64, username, topic string, created time.Time, cost, yield int64) error {
+	return m.database.LookupRecentConversations(func(id int64, author *authgo.Account, topic string, created time.Time, cost, yield int64) error {
 		return callback(&Conversation{
 			ID:      id,
-			User:    username,
+			Author:  author,
 			Topic:   topic,
 			Cost:    cost,
 			Yield:   yield,
@@ -357,41 +365,41 @@ func (m *contentManager) NewMessage(account *authgo.Account, conversation, paren
 		}
 	}
 	return &Message{
-		ID:           message,
-		User:         account.Username,
-		Conversation: conversation,
-		Parent:       parent,
-		Cost:         cost,
-		Created:      created,
+		ID:             message,
+		Author:         account,
+		ConversationID: conversation,
+		ParentID:       parent,
+		Cost:           cost,
+		Created:        created,
 	}, nil
 }
 
 func (m *contentManager) LookupMessage(id int64) (*Message, error) {
-	_, username, conversation, parent, created, cost, yield, err := m.database.SelectMessage(id)
+	author, conversation, parent, created, cost, yield, err := m.database.SelectMessage(id)
 	if err != nil {
 		return nil, err
 	}
 	return &Message{
-		ID:           id,
-		User:         username,
-		Conversation: conversation,
-		Parent:       parent,
-		Cost:         cost,
-		Yield:        yield,
-		Created:      created,
+		ID:             id,
+		Author:         author,
+		ConversationID: conversation,
+		ParentID:       parent,
+		Cost:           cost,
+		Yield:          yield,
+		Created:        created,
 	}, nil
 }
 
 func (m *contentManager) LookupMessages(conversation int64, callback func(*Message) error) error {
-	return m.database.LookupMessages(conversation, func(id, user int64, username string, parent int64, created time.Time, cost, yield int64) error {
+	return m.database.LookupMessages(conversation, func(id int64, author *authgo.Account, parent int64, created time.Time, cost, yield int64) error {
 		return callback(&Message{
-			ID:           id,
-			User:         username,
-			Conversation: conversation,
-			Parent:       parent,
-			Cost:         cost,
-			Yield:        yield,
-			Created:      created,
+			ID:             id,
+			Author:         author,
+			ConversationID: conversation,
+			ParentID:       parent,
+			Cost:           cost,
+			Yield:          yield,
+			Created:        created,
 		})
 	})
 }

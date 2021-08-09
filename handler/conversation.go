@@ -34,15 +34,15 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			return
 		}
 		type MessageData struct {
-			Conversation int64
-			Message      int64
-			Parent       int64
-			User         string
-			Cost         int64
-			Yield        int64
-			Content      template.HTML
-			Replies      []*MessageData
-			Created      time.Time
+			ConversationID int64
+			MessageID      int64
+			ParentID       int64
+			Author         *authgo.Account
+			Cost           int64
+			Yield          int64
+			Content        template.HTML
+			Replies        []*MessageData
+			Created        time.Time
 		}
 		data := struct {
 			MessageData
@@ -53,7 +53,7 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			Live:    netgo.IsLive(),
 			Account: account,
 		}
-		data.Conversation = id
+		data.ConversationID = id
 		c, err := cm.LookupConversation(id)
 		if err != nil {
 			log.Println(err)
@@ -66,35 +66,22 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 		// Lookup Messages
 		messages := make(map[int64]*MessageData)
 		if err := cm.LookupMessages(id, func(m *conveyearthgo.Message) error {
-			var content template.HTML
-			if err := cm.LookupFiles(m.ID, func(f *conveyearthgo.File) error {
-				c, err := cm.ToHTML(f.Hash, f.Mime)
-				if err != nil {
-					return err
-				}
-				content += c
-				return nil
-			}); err != nil {
-				return err
-			}
-			if m.Parent == 0 {
-				data.Conversation = m.Conversation
-				data.Message = m.ID
-				data.Parent = m.Parent
-				data.User = m.User
+			if m.ParentID == 0 {
+				data.ConversationID = m.ConversationID
+				data.MessageID = m.ID
+				data.ParentID = m.ParentID
+				data.Author = m.Author
 				data.Cost = m.Cost
 				data.Yield = m.Yield
-				data.Content = content
 			} else {
 				messages[m.ID] = &MessageData{
-					Conversation: m.Conversation,
-					Message:      m.ID,
-					Created:      m.Created,
-					Parent:       m.Parent,
-					User:         m.User,
-					Cost:         m.Cost,
-					Yield:        m.Yield,
-					Content:      content,
+					ConversationID: m.ConversationID,
+					MessageID:      m.ID,
+					Created:        m.Created,
+					ParentID:       m.ParentID,
+					Author:         m.Author,
+					Cost:           m.Cost,
+					Yield:          m.Yield,
 				}
 			}
 			return nil
@@ -103,12 +90,37 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
-		// Set Replies
+		// Set Content
+		if err := cm.LookupFiles(data.MessageID, func(f *conveyearthgo.File) error {
+			c, err := cm.ToHTML(f.Hash, f.Mime)
+			if err != nil {
+				return err
+			}
+			data.Content += c
+			return nil
+		}); err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+		// Set Content and Replies
 		for _, m := range messages {
-			if m.Parent == data.Message {
+			if err := cm.LookupFiles(m.MessageID, func(f *conveyearthgo.File) error {
+				c, err := cm.ToHTML(f.Hash, f.Mime)
+				if err != nil {
+					return err
+				}
+				m.Content += c
+				return nil
+			}); err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+			if m.ParentID == data.MessageID {
 				data.Replies = append(data.Replies, m)
 			} else {
-				p := messages[m.Parent]
+				p := messages[m.ParentID]
 				p.Replies = append(p.Replies, m)
 			}
 		}

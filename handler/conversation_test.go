@@ -24,7 +24,7 @@ func TestConversation(t *testing.T) {
 	assert.Nil(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
-	tmpl, err := template.New("conversation.go.html").Parse(`{{with .Account}}{{.Username}}{{end}}{{.Topic}}{{.User}}{{.Cost}}{{.Yield}}{{.Content}}`)
+	tmpl, err := template.New("conversation.go.html").Parse(`{{with .Account}}{{.Username}}{{end}}{{.Topic}}{{.Author.Username}}{{.Cost}}{{.Yield}}{{.Content}}`)
 	assert.Nil(t, err)
 	t.Run("Returns 200 When Not Signed In And Conversation Exists", func(t *testing.T) {
 		db := database.NewInMemory()

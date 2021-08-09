@@ -6,6 +6,7 @@ import (
 	"aletheiaware.com/authgo/email"
 	authhandler "aletheiaware.com/authgo/handler"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/conveyearthgo/conveytest"
 	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/filesystem"
 	"aletheiaware.com/conveyearthgo/handler"
@@ -116,11 +117,13 @@ func main() {
 	}
 
 	// Create Email Verifier
-	ev := authtest.NewEmailVerifier()
+	var ev authgo.EmailVerifier
 	if secure {
 		server := os.Getenv("SMTP_SERVER")
 		sender := os.Getenv("SMTP_SENDER")
 		ev = email.NewSmtpEmailVerifier(server, host, sender, templates.Lookup("email-verification.go.html"))
+	} else {
+		ev = authtest.NewEmailVerifier()
 	}
 
 	// Create an Authenticator
@@ -136,6 +139,20 @@ func main() {
 
 	// Create a Account Manager
 	am := conveyearthgo.NewAccountManager(db)
+
+	// Create a Notification Manager
+	var ns conveyearthgo.NotificationSender
+	if secure {
+		server := os.Getenv("SMTP_SERVER")
+		sender := os.Getenv("SMTP_SENDER")
+		ns = conveyearthgo.NewSmtpNotificationSender(scheme, host, server, host, sender, templates)
+	} else {
+		ns = conveytest.NewNotificationSender()
+	}
+	nm := conveyearthgo.NewNotificationManager(db, ns)
+
+	// Handle Notification Preferences
+	handler.AttachNotificationPreferencesHandler(mux, auth, nm, templates)
 
 	uploads, ok := os.LookupEnv("UPLOAD_DIRECTORY")
 	if !ok {
@@ -168,7 +185,7 @@ func main() {
 	handler.AttachDigestHandler(mux, auth, dm, templates)
 
 	// Handle Account
-	handler.AttachAccountHandler(mux, auth, am, templates)
+	handler.AttachAccountHandler(mux, auth, am, nm, templates)
 
 	// Handle Buy Coins
 	handler.AttachCoinBuyHandler(mux, auth, am, templates, scheme, host)
@@ -183,10 +200,10 @@ func main() {
 	handler.AttachMessageHandler(mux, auth, cm, templates)
 
 	// Handle Publish
-	handler.AttachPublishHandler(mux, auth, am, cm, templates)
+	handler.AttachPublishHandler(mux, auth, am, cm, nm, templates)
 
 	// Handle Reply
-	handler.AttachReplyHandler(mux, auth, am, cm, templates)
+	handler.AttachReplyHandler(mux, auth, am, cm, nm, templates)
 
 	// Handle Best
 	handler.AttachBestHandler(mux, auth, cm, templates)

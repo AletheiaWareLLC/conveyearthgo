@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/conveyearthgo/conveytest"
 	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/filesystem"
 	"aletheiaware.com/conveyearthgo/handler"
@@ -33,6 +34,7 @@ func TestReply(t *testing.T) {
 		token, _ := authtest.SignIn(t, auth)
 		am := conveyearthgo.NewAccountManager(db)
 		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
 		topic := "FooBar"
 		content := "Hello World!"
 		hash, size, err := cm.AddText([]byte(content))
@@ -41,7 +43,7 @@ func TestReply(t *testing.T) {
 		c, m, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
 		assert.Nil(t, err)
 		mux := http.NewServeMux()
-		handler.AttachReplyHandler(mux, auth, am, cm, tmpl)
+		handler.AttachReplyHandler(mux, auth, am, cm, nm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/reply?conversation=%d&message=%d", c.ID, m.ID), nil)
 		request.AddCookie(auth.NewSignInSessionCookie(token))
 		response := httptest.NewRecorder()
@@ -60,8 +62,9 @@ func TestReply(t *testing.T) {
 		token, _ := authtest.SignIn(t, auth)
 		am := conveyearthgo.NewAccountManager(db)
 		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
 		mux := http.NewServeMux()
-		handler.AttachReplyHandler(mux, auth, am, cm, tmpl)
+		handler.AttachReplyHandler(mux, auth, am, cm, nm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/reply?conversation=10&message=10", nil)
 		request.AddCookie(auth.NewSignInSessionCookie(token))
 		response := httptest.NewRecorder()
@@ -78,8 +81,9 @@ func TestReply(t *testing.T) {
 		auth := authgo.NewAuthenticator(db, ev)
 		am := conveyearthgo.NewAccountManager(db)
 		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
 		mux := http.NewServeMux()
-		handler.AttachReplyHandler(mux, auth, am, cm, tmpl)
+		handler.AttachReplyHandler(mux, auth, am, cm, nm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/reply", nil)
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)

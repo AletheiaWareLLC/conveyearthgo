@@ -1,6 +1,7 @@
 package database
 
 import (
+	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/database"
 	"sort"
 	"sync"
@@ -9,88 +10,100 @@ import (
 
 func NewInMemory() *InMemory {
 	return &InMemory{
-		InMemory:                    database.NewInMemory(),
-		ConversationId:              make(map[int64]bool),
-		ConversationUser:            make(map[int64]int64),
-		ConversationTopic:           make(map[int64]string),
-		ConversationCreated:         make(map[int64]time.Time),
-		MessageId:                   make(map[int64]bool),
-		MessageUser:                 make(map[int64]int64),
-		MessageConversation:         make(map[int64]int64),
-		MessageParent:               make(map[int64]int64),
-		MessageCreated:              make(map[int64]time.Time),
-		FileId:                      make(map[int64]bool),
-		FileMessage:                 make(map[int64]int64),
-		FileHash:                    make(map[int64]string),
-		FileMime:                    make(map[int64]string),
-		FileCreated:                 make(map[int64]time.Time),
-		ChargeId:                    make(map[int64]bool),
-		ChargeUser:                  make(map[int64]int64),
-		ChargeConversation:          make(map[int64]int64),
-		ChargeMessage:               make(map[int64]int64),
-		ChargeAmount:                make(map[int64]int64),
-		ChargeCreated:               make(map[int64]time.Time),
-		YieldId:                     make(map[int64]bool),
-		YieldUser:                   make(map[int64]int64),
-		YieldConversation:           make(map[int64]int64),
-		YieldMessage:                make(map[int64]int64),
-		YieldParent:                 make(map[int64]int64),
-		YieldAmount:                 make(map[int64]int64),
-		YieldCreated:                make(map[int64]time.Time),
-		PurchaseId:                  make(map[int64]bool),
-		PurchaseUser:                make(map[int64]int64),
-		PurchaseStripeSession:       make(map[int64]string),
-		PurchaseStripeCustomer:      make(map[int64]string),
-		PurchaseStripePaymentIntent: make(map[int64]string),
-		PurchaseStripeCurrency:      make(map[int64]string),
-		PurchaseStripeAmount:        make(map[int64]int64),
-		PurchaseBundleSize:          make(map[int64]int64),
-		PurchaseCreated:             make(map[int64]time.Time),
+		InMemory:                         database.NewInMemory(),
+		ConversationId:                   make(map[int64]bool),
+		ConversationUser:                 make(map[int64]int64),
+		ConversationTopic:                make(map[int64]string),
+		ConversationCreated:              make(map[int64]time.Time),
+		MessageId:                        make(map[int64]bool),
+		MessageUser:                      make(map[int64]int64),
+		MessageConversation:              make(map[int64]int64),
+		MessageParent:                    make(map[int64]int64),
+		MessageCreated:                   make(map[int64]time.Time),
+		FileId:                           make(map[int64]bool),
+		FileMessage:                      make(map[int64]int64),
+		FileHash:                         make(map[int64]string),
+		FileMime:                         make(map[int64]string),
+		FileCreated:                      make(map[int64]time.Time),
+		ChargeId:                         make(map[int64]bool),
+		ChargeUser:                       make(map[int64]int64),
+		ChargeConversation:               make(map[int64]int64),
+		ChargeMessage:                    make(map[int64]int64),
+		ChargeAmount:                     make(map[int64]int64),
+		ChargeCreated:                    make(map[int64]time.Time),
+		YieldId:                          make(map[int64]bool),
+		YieldUser:                        make(map[int64]int64),
+		YieldConversation:                make(map[int64]int64),
+		YieldMessage:                     make(map[int64]int64),
+		YieldParent:                      make(map[int64]int64),
+		YieldAmount:                      make(map[int64]int64),
+		YieldCreated:                     make(map[int64]time.Time),
+		PurchaseId:                       make(map[int64]bool),
+		PurchaseUser:                     make(map[int64]int64),
+		PurchaseStripeSession:            make(map[int64]string),
+		PurchaseStripeCustomer:           make(map[int64]string),
+		PurchaseStripePaymentIntent:      make(map[int64]string),
+		PurchaseStripeCurrency:           make(map[int64]string),
+		PurchaseStripeAmount:             make(map[int64]int64),
+		PurchaseBundleSize:               make(map[int64]int64),
+		PurchaseCreated:                  make(map[int64]time.Time),
+		NotificationPreferencesId:        make(map[int64]bool),
+		NotificationPreferencesUser:      make(map[int64]int64),
+		NotificationPreferencesResponses: make(map[int64]bool),
+		NotificationPreferencesMentions:  make(map[int64]bool),
+		NotificationPreferencesDigests:   make(map[int64]bool),
 	}
 }
 
 type InMemory struct {
 	sync.RWMutex
 	*database.InMemory
-	ConversationId              map[int64]bool
-	ConversationUser            map[int64]int64
-	ConversationTopic           map[int64]string
-	ConversationCreated         map[int64]time.Time
-	MessageId                   map[int64]bool
-	MessageUser                 map[int64]int64
-	MessageConversation         map[int64]int64
-	MessageParent               map[int64]int64
-	MessageCreated              map[int64]time.Time
-	FileId                      map[int64]bool
-	FileMessage                 map[int64]int64
-	FileHash                    map[int64]string
-	FileMime                    map[int64]string
-	FileCreated                 map[int64]time.Time
-	ChargeId                    map[int64]bool
-	ChargeUser                  map[int64]int64
-	ChargeConversation          map[int64]int64
-	ChargeMessage               map[int64]int64
-	ChargeAmount                map[int64]int64
-	ChargeCreated               map[int64]time.Time
-	YieldId                     map[int64]bool
-	YieldUser                   map[int64]int64
-	YieldConversation           map[int64]int64
-	YieldMessage                map[int64]int64
-	YieldParent                 map[int64]int64
-	YieldAmount                 map[int64]int64
-	YieldCreated                map[int64]time.Time
-	PurchaseId                  map[int64]bool
-	PurchaseUser                map[int64]int64
-	PurchaseStripeSession       map[int64]string
-	PurchaseStripeCustomer      map[int64]string
-	PurchaseStripePaymentIntent map[int64]string
-	PurchaseStripeCurrency      map[int64]string
-	PurchaseStripeAmount        map[int64]int64
-	PurchaseBundleSize          map[int64]int64
-	PurchaseCreated             map[int64]time.Time
+	ConversationId                   map[int64]bool
+	ConversationUser                 map[int64]int64
+	ConversationTopic                map[int64]string
+	ConversationCreated              map[int64]time.Time
+	MessageId                        map[int64]bool
+	MessageUser                      map[int64]int64
+	MessageConversation              map[int64]int64
+	MessageParent                    map[int64]int64
+	MessageCreated                   map[int64]time.Time
+	FileId                           map[int64]bool
+	FileMessage                      map[int64]int64
+	FileHash                         map[int64]string
+	FileMime                         map[int64]string
+	FileCreated                      map[int64]time.Time
+	ChargeId                         map[int64]bool
+	ChargeUser                       map[int64]int64
+	ChargeConversation               map[int64]int64
+	ChargeMessage                    map[int64]int64
+	ChargeAmount                     map[int64]int64
+	ChargeCreated                    map[int64]time.Time
+	YieldId                          map[int64]bool
+	YieldUser                        map[int64]int64
+	YieldConversation                map[int64]int64
+	YieldMessage                     map[int64]int64
+	YieldParent                      map[int64]int64
+	YieldAmount                      map[int64]int64
+	YieldCreated                     map[int64]time.Time
+	PurchaseId                       map[int64]bool
+	PurchaseUser                     map[int64]int64
+	PurchaseStripeSession            map[int64]string
+	PurchaseStripeCustomer           map[int64]string
+	PurchaseStripePaymentIntent      map[int64]string
+	PurchaseStripeCurrency           map[int64]string
+	PurchaseStripeAmount             map[int64]int64
+	PurchaseBundleSize               map[int64]int64
+	PurchaseCreated                  map[int64]time.Time
+	NotificationPreferencesId        map[int64]bool
+	NotificationPreferencesUser      map[int64]int64
+	NotificationPreferencesResponses map[int64]bool
+	NotificationPreferencesMentions  map[int64]bool
+	NotificationPreferencesDigests   map[int64]bool
 }
 
 func (db *InMemory) LookupAccountBalance(user int64) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
 	var account int64
 	for cid := range db.ChargeId {
 		if db.ChargeUser[cid] != user {
@@ -124,18 +137,27 @@ func (db *InMemory) CreateConversation(user int64, topic string, created time.Ti
 	return id, nil
 }
 
-func (db *InMemory) SelectConversation(id int64) (int64, string, string, time.Time, error) {
+func (db *InMemory) SelectConversation(id int64) (*authgo.Account, string, time.Time, error) {
+	db.Lock()
+	defer db.Unlock()
 	if _, ok := db.ConversationId[id]; !ok {
-		return 0, "", "", time.Time{}, database.ErrNoSuchRecord
+		return nil, "", time.Time{}, database.ErrNoSuchRecord
 	}
 	user := db.ConversationUser[id]
 	username := db.username(user)
+	email := db.AccountEmail[username]
 	topic := db.ConversationTopic[id]
 	created := db.ConversationCreated[id]
-	return user, username, topic, created, nil
+	return &authgo.Account{
+		ID:       user,
+		Username: username,
+		Email:    email,
+	}, topic, created, nil
 }
 
-func (db *InMemory) LookupBestConversations(callback func(int64, int64, string, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
+func (db *InMemory) LookupBestConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
+	db.Lock()
+	defer db.Unlock()
 	costs := make(map[int64]int64)
 	yields := make(map[int64]int64)
 	var results []int64
@@ -160,18 +182,25 @@ func (db *InMemory) LookupBestConversations(callback func(int64, int64, string, 
 		cid := results[i]
 		user := db.ConversationUser[cid]
 		username := db.username(user)
+		email := db.AccountEmail[username]
 		topic := db.ConversationTopic[cid]
 		created := db.ConversationCreated[cid]
 		cost := costs[cid]
 		yield := yields[cid]
-		if err := callback(cid, user, username, topic, created, cost, yield); err != nil {
+		if err := callback(cid, &authgo.Account{
+			ID:       user,
+			Username: username,
+			Email:    email,
+		}, topic, created, cost, yield); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (db *InMemory) LookupRecentConversations(callback func(int64, int64, string, string, time.Time, int64, int64) error, limit int64) error {
+func (db *InMemory) LookupRecentConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, limit int64) error {
+	db.Lock()
+	defer db.Unlock()
 	costs := make(map[int64]int64)
 	yields := make(map[int64]int64)
 	var results []int64
@@ -193,11 +222,16 @@ func (db *InMemory) LookupRecentConversations(callback func(int64, int64, string
 		cid := results[i]
 		user := db.ConversationUser[cid]
 		username := db.username(user)
+		email := db.AccountEmail[username]
 		topic := db.ConversationTopic[cid]
 		created := db.ConversationCreated[cid]
 		cost := costs[cid]
 		yield := yields[cid]
-		if err := callback(cid, user, username, topic, created, cost, yield); err != nil {
+		if err := callback(cid, &authgo.Account{
+			ID:       user,
+			Username: username,
+			Email:    email,
+		}, topic, created, cost, yield); err != nil {
 			return err
 		}
 	}
@@ -216,49 +250,46 @@ func (db *InMemory) CreateMessage(user, conversation, parent int64, created time
 	return id, nil
 }
 
-func (db *InMemory) SelectMessage(id int64) (int64, string, int64, int64, time.Time, int64, int64, error) {
+func (db *InMemory) SelectMessage(id int64) (*authgo.Account, int64, int64, time.Time, int64, int64, error) {
+	db.Lock()
+	defer db.Unlock()
 	if _, ok := db.MessageId[id]; !ok {
-		return 0, "", 0, 0, time.Time{}, 0, 0, database.ErrNoSuchRecord
+		return nil, 0, 0, time.Time{}, 0, 0, database.ErrNoSuchRecord
 	}
 	user := db.MessageUser[id]
 	username := db.username(user)
+	email := db.AccountEmail[username]
 	conversation := db.MessageConversation[id]
 	parent := db.MessageParent[id]
 	created := db.MessageCreated[id]
 	cost := db.cost(id)
 	yield := db.yield(id)
-	return user, username, conversation, parent, created, cost, yield, nil
+	return &authgo.Account{
+		ID:       user,
+		Username: username,
+		Email:    email,
+	}, conversation, parent, created, cost, yield, nil
 }
 
-func (db *InMemory) LookupMessage(conversation int64, parent int64) (int64, int64, time.Time, int64, int64, error) {
-	for id := range db.MessageId {
-		if db.MessageConversation[id] != conversation {
-			continue
-		}
-		if db.MessageParent[id] != parent {
-			continue
-		}
-		user := db.MessageUser[id]
-		created := db.MessageCreated[id]
-		cost := db.cost(id)
-		yield := db.yield(id)
-		return id, user, created, cost, yield, nil
-	}
-	return 0, 0, time.Time{}, 0, 0, database.ErrNoSuchRecord
-}
-
-func (db *InMemory) LookupMessages(conversation int64, callback func(int64, int64, string, int64, time.Time, int64, int64) error) error {
+func (db *InMemory) LookupMessages(conversation int64, callback func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error {
+	db.Lock()
+	defer db.Unlock()
 	for id := range db.MessageId {
 		if db.MessageConversation[id] != conversation {
 			continue
 		}
 		user := db.MessageUser[id]
 		username := db.username(user)
+		email := db.AccountEmail[username]
 		parent := db.MessageParent[id]
 		created := db.MessageCreated[id]
 		cost := db.cost(id)
 		yield := db.yield(id)
-		if err := callback(id, user, username, parent, created, cost, yield); err != nil {
+		if err := callback(id, &authgo.Account{
+			ID:       user,
+			Username: username,
+			Email:    email,
+		}, parent, created, cost, yield); err != nil {
 			return err
 		}
 	}
@@ -266,6 +297,8 @@ func (db *InMemory) LookupMessages(conversation int64, callback func(int64, int6
 }
 
 func (db *InMemory) LookupMessageParent(id int64) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
 	if _, ok := db.MessageId[id]; !ok {
 		return 0, database.ErrNoSuchRecord
 	}
@@ -285,6 +318,8 @@ func (db *InMemory) CreateFile(message int64, hash, mime string, created time.Ti
 }
 
 func (db *InMemory) SelectFile(id int64) (int64, string, string, time.Time, error) {
+	db.Lock()
+	defer db.Unlock()
 	if _, ok := db.FileId[id]; !ok {
 		return 0, "", "", time.Time{}, database.ErrNoSuchRecord
 	}
@@ -296,6 +331,8 @@ func (db *InMemory) SelectFile(id int64) (int64, string, string, time.Time, erro
 }
 
 func (db *InMemory) LookupFiles(message int64, callback func(int64, string, string, time.Time) error) error {
+	db.Lock()
+	defer db.Unlock()
 	for id := range db.FileId {
 		if db.FileMessage[id] != message {
 			continue
@@ -351,6 +388,31 @@ func (db *InMemory) CreatePurchase(user int64, stripeSession, stripeCustomer, st
 	db.PurchaseBundleSize[id] = bundle_size
 	db.PurchaseCreated[id] = created
 	return id, nil
+}
+
+func (db *InMemory) UpdateNotificationPreferences(id, user int64, responses, mentions, digests bool) (int64, error) {
+	db.NotificationPreferencesId[id] = true
+	db.NotificationPreferencesUser[id] = user
+	db.NotificationPreferencesResponses[id] = responses
+	db.NotificationPreferencesMentions[id] = mentions
+	db.NotificationPreferencesDigests[id] = digests
+	return 1, nil
+}
+
+func (db *InMemory) SelectNotificationPreferences(user int64) (int64, bool, bool, bool, error) {
+	var id int64
+	responses := true
+	mentions := true
+	digests := true
+	for i := range db.NotificationPreferencesId {
+		if db.NotificationPreferencesUser[i] == user {
+			id = i
+			responses = db.NotificationPreferencesResponses[i]
+			mentions = db.NotificationPreferencesMentions[i]
+			digests = db.NotificationPreferencesDigests[i]
+		}
+	}
+	return id, responses, mentions, digests, nil
 }
 
 func (db *InMemory) username(id int64) string {

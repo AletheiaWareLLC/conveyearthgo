@@ -1,12 +1,13 @@
 package conveyearthgo
 
 import (
+	"aletheiaware.com/authgo"
 	"time"
 )
 
 type Conversation struct {
 	ID      int64
-	User    string
+	Author  *authgo.Account
 	Topic   string
 	Cost    int64
 	Yield   int64

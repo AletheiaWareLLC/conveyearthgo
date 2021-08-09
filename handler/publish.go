@@ -19,11 +19,11 @@ const (
 	MAXIMUM_PARSE_MEMORY = 32 << 20
 )
 
-func AttachPublishHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, ts *template.Template) {
-	m.Handle("/publish", handler.Log(Publish(a, am, cm, ts)))
+func AttachPublishHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
+	m.Handle("/publish", handler.Log(Publish(a, am, cm, nm, ts)))
 }
 
-func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
+func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {
@@ -150,6 +150,18 @@ func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveye
 				data.Error = err.Error()
 				executePublishTemplate(w, ts, data)
 				return
+			}
+
+			// Send Mention Notifications
+			for _, username := range conveyearthgo.Mentions(content) {
+				a, err := am.Account(username)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				if err := nm.NotifyMention(a, account, conversation.ID, topic, 0); err != nil {
+					log.Println(err)
+				}
 			}
 
 			redirect.Conversation(w, r, conversation.ID, 0)

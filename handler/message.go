@@ -52,27 +52,27 @@ func Message(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templa
 			return
 		}
 		data := struct {
-			Live         bool
-			Account      *authgo.Account
-			Conversation int64
-			Message      int64
-			Parent       int64
-			User         string
-			Cost         int64
-			Yield        int64
-			Content      template.HTML
-			Created      time.Time
+			Live           bool
+			Account        *authgo.Account
+			ConversationID int64
+			MessageID      int64
+			ParentID       int64
+			Author         *authgo.Account
+			Cost           int64
+			Yield          int64
+			Content        template.HTML
+			Created        time.Time
 		}{
-			Live:         netgo.IsLive(),
-			Account:      account,
-			Conversation: m.Conversation,
-			Message:      id,
-			Parent:       m.Parent,
-			User:         m.User,
-			Cost:         m.Cost,
-			Yield:        m.Yield,
-			Content:      content,
-			Created:      m.Created,
+			Live:           netgo.IsLive(),
+			Account:        account,
+			ConversationID: m.ConversationID,
+			MessageID:      id,
+			ParentID:       m.ParentID,
+			Author:         m.Author,
+			Cost:           m.Cost,
+			Yield:          m.Yield,
+			Content:        content,
+			Created:        m.Created,
 		}
 		if err := ts.ExecuteTemplate(w, "message.go.html", data); err != nil {
 			log.Println(err)

@@ -525,9 +525,9 @@ func (db *Sql) CreateConversation(user int64, topic string, created time.Time) (
 	return result.LastInsertId()
 }
 
-func (db *Sql) SelectConversation(id int64) (int64, string, string, time.Time, error) {
+func (db *Sql) SelectConversation(id int64) (*authgo.Account, string, time.Time, error) {
 	row := db.QueryRow(`
-		SELECT tbl_conversations.user, tbl_users.username, tbl_conversations.topic, tbl_conversations.created_unix
+		SELECT tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_conversations.topic, tbl_conversations.created_unix
 		FROM tbl_conversations
 		INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
 		WHERE tbl_conversations.id=?`, id)
@@ -535,18 +535,23 @@ func (db *Sql) SelectConversation(id int64) (int64, string, string, time.Time, e
 	var (
 		user     int64
 		username string
+		email    string
 		topic    string
 		created  int64
 	)
-	if err := row.Scan(&user, &username, &topic, &created); err != nil {
-		return 0, "", "", time.Time{}, err
+	if err := row.Scan(&user, &username, &email, &topic, &created); err != nil {
+		return nil, "", time.Time{}, err
 	}
-	return user, username, topic, time.Unix(created, 0), nil
+	return &authgo.Account{
+		ID:       user,
+		Username: username,
+		Email:    email,
+	}, topic, time.Unix(created, 0), nil
 }
 
-func (db *Sql) LookupBestConversations(callback func(int64, int64, string, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
+func (db *Sql) LookupBestConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
 	rows, err := db.Query(`
-		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield,0)
+		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield,0)
 		FROM tbl_conversations
 		INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
 		INNER JOIN tbl_messages ON tbl_conversations.id=tbl_messages.conversation AND tbl_messages.parent IS NULL
@@ -567,24 +572,29 @@ func (db *Sql) LookupBestConversations(callback func(int64, int64, string, strin
 			id       int64
 			user     int64
 			username string
+			email    string
 			topic    string
 			created  int64
 			cost     int64
 			yield    int64
 		)
-		if err := rows.Scan(&id, &user, &username, &topic, &created, &cost, &yield); err != nil {
+		if err := rows.Scan(&id, &user, &username, &email, &topic, &created, &cost, &yield); err != nil {
 			return err
 		}
-		if err := callback(id, user, username, topic, time.Unix(created, 0), cost, yield); err != nil {
+		if err := callback(id, &authgo.Account{
+			ID:       user,
+			Username: username,
+			Email:    email,
+		}, topic, time.Unix(created, 0), cost, yield); err != nil {
 			return err
 		}
 	}
 	return rows.Err()
 }
 
-func (db *Sql) LookupRecentConversations(callback func(int64, int64, string, string, time.Time, int64, int64) error, limit int64) error {
+func (db *Sql) LookupRecentConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, limit int64) error {
 	rows, err := db.Query(`
-		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
+		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_conversations
 		INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
 		INNER JOIN tbl_messages ON tbl_conversations.id=tbl_messages.conversation AND tbl_messages.parent IS NULL
@@ -604,15 +614,20 @@ func (db *Sql) LookupRecentConversations(callback func(int64, int64, string, str
 			id       int64
 			user     int64
 			username string
+			email    string
 			topic    string
 			created  int64
 			cost     int64
 			yield    int64
 		)
-		if err := rows.Scan(&id, &user, &username, &topic, &created, &cost, &yield); err != nil {
+		if err := rows.Scan(&id, &user, &username, &email, &topic, &created, &cost, &yield); err != nil {
 			return err
 		}
-		if err := callback(id, user, username, topic, time.Unix(created, 0), cost, yield); err != nil {
+		if err := callback(id, &authgo.Account{
+			ID:       user,
+			Username: username,
+			Email:    email,
+		}, topic, time.Unix(created, 0), cost, yield); err != nil {
 			return err
 		}
 	}
@@ -649,9 +664,9 @@ func (db *Sql) CreateFile(message int64, hash, mime string, created time.Time) (
 	return result.LastInsertId()
 }
 
-func (db *Sql) SelectMessage(id int64) (int64, string, int64, int64, time.Time, int64, int64, error) {
+func (db *Sql) SelectMessage(id int64) (*authgo.Account, int64, int64, time.Time, int64, int64, error) {
 	row := db.QueryRow(`
-		SELECT tbl_messages.user, tbl_users.username, tbl_messages.conversation, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
+		SELECT tbl_messages.user, tbl_users.username, tbl_users.email, tbl_messages.conversation, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_messages
 		INNER JOIN tbl_users ON tbl_messages.user=tbl_users.id
 		INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
@@ -665,60 +680,26 @@ func (db *Sql) SelectMessage(id int64) (int64, string, int64, int64, time.Time, 
 	var (
 		user         int64
 		username     string
+		email        string
 		conversation int64
 		parent       int64
 		created      int64
 		cost         int64
 		yield        int64
 	)
-	if err := row.Scan(&user, &username, &conversation, &parent, &created, &cost, &yield); err != nil {
-		return 0, "", 0, 0, time.Time{}, 0, 0, err
+	if err := row.Scan(&user, &username, &email, &conversation, &parent, &created, &cost, &yield); err != nil {
+		return nil, 0, 0, time.Time{}, 0, 0, err
 	}
-	return user, username, conversation, parent, time.Unix(created, 0), cost, yield, nil
+	return &authgo.Account{
+		ID:       user,
+		Username: username,
+		Email:    email,
+	}, conversation, parent, time.Unix(created, 0), cost, yield, nil
 }
 
-func (db *Sql) LookupMessage(conversation int64, parent int64) (int64, int64, time.Time, int64, int64, error) {
-	var row *sql.Row
-	if parent == 0 {
-		row = db.QueryRow(`
-			SELECT tbl_messages.id, tbl_messages.user, tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
-			FROM tbl_messages
-			INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
-			LEFT JOIN (
-				SELECT parent, SUM(amount) AS yield
-				FROM tbl_yields
-				GROUP BY parent
-			) AS yields ON tbl_messages.id=yields.parent
-			WHERE tbl_messages.conversation=? AND tbl_messages.parent IS NULL`, conversation)
-	} else {
-		row = db.QueryRow(`
-			SELECT tbl_messages.id, tbl_messages.user, tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
-			FROM tbl_messages
-			INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
-			LEFT JOIN (
-				SELECT parent, SUM(amount) AS yield
-				FROM tbl_yields
-				GROUP BY parent
-			) AS yields ON tbl_messages.id=yields.parent
-			WHERE tbl_messages.conversation=? AND tbl_messages.parent=?`, conversation, parent)
-	}
-
-	var (
-		id      int64
-		user    int64
-		created int64
-		cost    int64
-		yield   int64
-	)
-	if err := row.Scan(&id, &user, &created, &cost, &yield); err != nil {
-		return 0, 0, time.Time{}, 0, 0, err
-	}
-	return id, user, time.Unix(created, 0), cost, yield, nil
-}
-
-func (db *Sql) LookupMessages(conversation int64, callback func(int64, int64, string, int64, time.Time, int64, int64) error) error {
+func (db *Sql) LookupMessages(conversation int64, callback func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error {
 	rows, err := db.Query(`
-		SELECT tbl_messages.id, tbl_messages.user, tbl_users.username, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
+		SELECT tbl_messages.id, tbl_messages.user, tbl_users.username, tbl_users.email, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_messages
 		INNER JOIN tbl_users ON tbl_messages.user=tbl_users.id
 		INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
@@ -736,15 +717,20 @@ func (db *Sql) LookupMessages(conversation int64, callback func(int64, int64, st
 			id       int64
 			user     int64
 			username string
+			email    string
 			parent   int64
 			created  int64
 			cost     int64
 			yield    int64
 		)
-		if err := rows.Scan(&id, &user, &username, &parent, &created, &cost, &yield); err != nil {
+		if err := rows.Scan(&id, &user, &username, &email, &parent, &created, &cost, &yield); err != nil {
 			return err
 		}
-		if err := callback(id, user, username, parent, time.Unix(created, 0), cost, yield); err != nil {
+		if err := callback(id, &authgo.Account{
+			ID:       user,
+			Username: username,
+			Email:    email,
+		}, parent, time.Unix(created, 0), cost, yield); err != nil {
 			return err
 		}
 	}
@@ -832,6 +818,49 @@ func (db *Sql) CreatePurchase(user int64, sessionID, customerID, paymentIntentID
 	result, err := db.Exec(`
 		INSERT INTO tbl_purchases
 		SET user=?, stripe_session=?, stripe_customer=?, stripe_payment_intent=?, stripe_currency=?, stripe_amount=?, bundle_size=?, created_unix=?`, user, sessionID, customerID, paymentIntentID, currency, amount, size, created.Unix())
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+func (db *Sql) SelectNotificationPreferences(user int64) (int64, bool, bool, bool, error) {
+	row := db.QueryRow(`
+		SELECT id, responses, mentions, digests
+		FROM tbl_notification_preferences
+		WHERE user=?`, user)
+
+	var (
+		id        int64
+		responses bool
+		mentions  bool
+		digests   bool
+	)
+	if err := row.Scan(&id, &responses, &mentions, &digests); err != nil {
+		if err == sql.ErrNoRows {
+			// Notification preferences default to enabled
+			return 0, true, true, true, nil
+		}
+		return 0, false, false, false, err
+	}
+	return id, responses, mentions, digests, nil
+}
+
+func (db *Sql) UpdateNotificationPreferences(id, user int64, responses, mentions, digests bool) (int64, error) {
+	var (
+		result sql.Result
+		err    error
+	)
+	if id == 0 {
+		result, err = db.Exec(`
+		INSERT INTO tbl_notification_preferences (user, responses, mentions, digests)
+		VALUES (?, ?, ?, ?)`, user, responses, mentions, digests)
+	} else {
+		result, err = db.Exec(`
+		UPDATE tbl_notification_preferences
+		SET user=?, responses=?, mentions=?, digests=?
+		WHERE id=?`, user, responses, mentions, digests, id)
+	}
 	if err != nil {
 		return 0, err
 	}

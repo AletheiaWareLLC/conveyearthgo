@@ -24,7 +24,7 @@ func TestMessage(t *testing.T) {
 	assert.Nil(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
-	tmpl, err := template.New("message.go.html").Parse(`{{with .Account}}{{.Username}}{{end}}{{.User}}{{.Cost}}{{.Yield}}{{.Content}}`)
+	tmpl, err := template.New("message.go.html").Parse(`{{with .Account}}{{.Username}}{{end}}{{.Author.Username}}{{.Cost}}{{.Yield}}{{.Content}}`)
 	assert.Nil(t, err)
 	t.Run("Returns 200 When Not Signed In And Message Exists", func(t *testing.T) {
 		db := database.NewInMemory()

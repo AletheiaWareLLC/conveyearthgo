@@ -165,6 +165,13 @@ table.features {
 td.features {
     width: 50%;
 }
+table.notifications {
+    width: 100%;
+}
+td.notifications {
+    text-align: center;
+    width: 10%;
+}
 textarea {
     border-color: deepskyblue;
     border-style: solid;

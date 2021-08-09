@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/conveyearthgo/conveytest"
 	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/filesystem"
 	"aletheiaware.com/conveyearthgo/handler"
@@ -32,8 +33,9 @@ func TestPublish(t *testing.T) {
 		token, _ := authtest.SignIn(t, auth)
 		am := conveyearthgo.NewAccountManager(db)
 		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
 		mux := http.NewServeMux()
-		handler.AttachPublishHandler(mux, auth, am, cm, tmpl)
+		handler.AttachPublishHandler(mux, auth, am, cm, nm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/publish", nil)
 		request.AddCookie(auth.NewSignInSessionCookie(token))
 		response := httptest.NewRecorder()
@@ -51,8 +53,9 @@ func TestPublish(t *testing.T) {
 		authtest.NewTestAccount(t, auth)
 		am := conveyearthgo.NewAccountManager(db)
 		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
 		mux := http.NewServeMux()
-		handler.AttachPublishHandler(mux, auth, am, cm, tmpl)
+		handler.AttachPublishHandler(mux, auth, am, cm, nm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/publish", nil)
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)

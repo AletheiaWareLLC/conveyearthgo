@@ -12,6 +12,64 @@ import (
 	"testing"
 )
 
+func TestMentions(t *testing.T) {
+	for name, tt := range map[string]struct {
+		input    string
+		expected []string
+	}{
+		"empty": {
+			input: "",
+		},
+		"single": {
+			input: "@alice",
+			expected: []string{
+				"alice",
+			},
+		},
+		"single-start": {
+			input: "@alice hello",
+			expected: []string{
+				"alice",
+			},
+		},
+		"single-center": {
+			input: "hello @alice!",
+			expected: []string{
+				"alice",
+			},
+		},
+		"single-end": {
+			input: "hello @alice",
+			expected: []string{
+				"alice",
+			},
+		},
+		"double-comma": {
+			input: "@alice, @bob",
+			expected: []string{
+				"alice",
+				"bob",
+			},
+		},
+		"double-space": {
+			input: "@alice @bob",
+			expected: []string{
+				"alice",
+				"bob",
+			},
+		},
+		"email": {
+			input: "test@example.com",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			mentions := conveyearthgo.Mentions(tt.input)
+			assert.Equal(t, len(tt.expected), len(mentions))
+			assert.Equal(t, tt.expected, mentions)
+		})
+	}
+}
+
 func TestContentManager_AddText(t *testing.T) {
 	db := database.NewInMemory()
 	dir, err := ioutil.TempDir("", "test")

@@ -11,11 +11,11 @@ import (
 	"net/http"
 )
 
-func AttachAccountHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, ts *template.Template) {
-	m.Handle("/account", handler.Log(Account(a, am, ts)))
+func AttachAccountHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
+	m.Handle("/account", handler.Log(Account(a, am, nm, ts)))
 }
 
-func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *template.Template) http.Handler {
+func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {
@@ -34,6 +34,16 @@ func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *templa
 			return
 		}
 		data.Balance = balance
+		_, responses, mentions, digests, err := nm.NotificationPreferences(account.ID)
+		if err != nil {
+			log.Println(err)
+			data.Error = err.Error()
+			executeAccountTemplate(w, ts, data)
+			return
+		}
+		data.NotificationResponses = responses
+		data.NotificationMentions = mentions
+		data.NotificationDigests = digests
 		executeAccountTemplate(w, ts, data)
 	})
 }
@@ -45,8 +55,11 @@ func executeAccountTemplate(w http.ResponseWriter, ts *template.Template, data *
 }
 
 type AccountData struct {
-	Live    bool
-	Error   string
-	Account *authgo.Account
-	Balance int64
+	Live                  bool
+	Error                 string
+	Account               *authgo.Account
+	Balance               int64
+	NotificationResponses bool
+	NotificationMentions  bool
+	NotificationDigests   bool
 }
