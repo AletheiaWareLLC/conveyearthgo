@@ -1,9 +1,9 @@
-aletheiaware.com/authgo v0.0.5 h1:210zNy2NQh51HmlWHk3M97lV8bCIUuMcSdvLnLznYUI=
-aletheiaware.com/authgo v0.0.5/go.mod h1:EmRnXSzhuknneRTlosyNkEgfcuGbSD5wc9LV1w942IY=
+aletheiaware.com/authgo v0.0.6 h1:O4jAIT45ASfCv6ESaW8HwYxDAzigFpH0ZG6T4CX6TyQ=
+aletheiaware.com/authgo v0.0.6/go.mod h1:ZB5gQwgjeR3NW/8vPWmNbxwfz8mCM06sAgXdTVQJIg0=
 aletheiaware.com/cryptogo v1.2.2 h1:d7vEEgf3bZFnLk+HG1wCAY/pgRz+zNYvKFpxsli3Mng=
 aletheiaware.com/cryptogo v1.2.2/go.mod h1:B1mJVIsfEDJoovkD2fLsZXgXxR1AAe2cDmjFwt7Eau4=
-aletheiaware.com/netgo v1.2.5 h1:Mmh9Hlj7GxHD+qaDMNjIIW1fK70gnzqZdtHwLpuoS8Q=
-aletheiaware.com/netgo v1.2.5/go.mod h1:hOmTADW1i6QTns2MHHdXU3ZVbs7Qsmn+r5f0qzcXlaE=
+aletheiaware.com/netgo v1.2.6 h1:+3cZ1dJccJT5sCR/Sk0ymzStnizfiovuyP7EKnHkPsU=
+aletheiaware.com/netgo v1.2.6/go.mod h1:hOmTADW1i6QTns2MHHdXU3ZVbs7Qsmn+r5f0qzcXlaE=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.38.0/go.mod h1:990N+gfupTy94rShfmMCWGDn0LpTmnzTp2qbd1dvSRU=

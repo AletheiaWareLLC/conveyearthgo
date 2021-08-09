@@ -226,7 +226,7 @@ func main() {
 		log.Println("Certificate Directory:", certificates)
 
 		// Serve HTTPS Requests
-		config := &tls.Config{MinVersion: tls.VersionTLS10}
+		config := &tls.Config{MinVersion: tls.VersionTLS12}
 		server := &http.Server{Addr: ":443",
 			Handler:           mux,
 			TLSConfig:         config,
