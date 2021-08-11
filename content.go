@@ -85,11 +85,16 @@ var (
 	mentions = regexp.MustCompile(`(^|\s)@[[:alnum:]]{3,}`)
 )
 
-func Mentions(input string) (usernames []string) {
+func Mentions(input string) []string {
+	usernames := make(map[string]struct{})
 	for _, u := range mentions.FindAllString(input, -1) {
-		usernames = append(usernames, strings.TrimPrefix(strings.TrimSpace(u), "@"))
+		usernames[strings.TrimPrefix(strings.TrimSpace(u), "@")] = struct{}{}
 	}
-	return
+	var us []string
+	for u := range usernames {
+		us = append(us, u)
+	}
+	return us
 }
 
 type ContentDatabase interface {
