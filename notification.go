@@ -21,8 +21,8 @@ type NotificationManager interface {
 }
 
 type NotificationSender interface {
-	SendResponseNotification(string, string, string, int64, int64) error
-	SendMentionNotification(string, string, string, int64, int64) error
+	SendResponseNotification(*authgo.Account, string, string, int64, int64) error
+	SendMentionNotification(*authgo.Account, string, string, int64, int64) error
 }
 
 func NewNotificationManager(db NotificationDatabase, sender NotificationSender) NotificationManager {
@@ -55,7 +55,7 @@ func (m *notificationManager) NotifyResponse(author, responder *authgo.Account, 
 		// User disabled reponse notifications
 		return nil
 	}
-	return m.sender.SendResponseNotification(author.Email, responder.Username, topic, conversation, message)
+	return m.sender.SendResponseNotification(author, responder.Username, topic, conversation, message)
 }
 
 func (m *notificationManager) NotifyMention(author, mentioner *authgo.Account, conversation int64, topic string, message int64) error {
@@ -67,7 +67,7 @@ func (m *notificationManager) NotifyMention(author, mentioner *authgo.Account, c
 		// User disabled mention notifications
 		return nil
 	}
-	return m.sender.SendMentionNotification(author.Email, mentioner.Username, topic, conversation, message)
+	return m.sender.SendMentionNotification(author, mentioner.Username, topic, conversation, message)
 }
 
 func NewSmtpNotificationSender(scheme, host, server, identity, sender string, templates *template.Template) NotificationSender {
@@ -90,40 +90,44 @@ type smtpNotificationSender struct {
 	templates *template.Template
 }
 
-func (s *smtpNotificationSender) SendResponseNotification(email, responder, topic string, conversation, message int64) error {
-	log.Println("Notifying", email, "of response")
+func (s *smtpNotificationSender) SendResponseNotification(account *authgo.Account, responder, topic string, conversation, message int64) error {
+	log.Println("Notifying", account.Email, "of response")
 	data := struct {
 		From      string
 		To        string
 		Topic     string
+		Username  string
 		Responder string
 		Link      string
 	}{
 		From:      s.sender,
-		To:        email,
+		To:        account.Email,
 		Topic:     topic,
+		Username:  account.Username,
 		Responder: responder,
 		Link:      createLink(s.scheme, s.host, conversation, message),
 	}
-	return authemail.SendEmail(s.server, s.identity, s.sender, email, s.templates.Lookup("email-notification-response.go.html"), data)
+	return authemail.SendEmail(s.server, s.identity, s.sender, account.Email, s.templates.Lookup("email-notification-response.go.html"), data)
 }
 
-func (s *smtpNotificationSender) SendMentionNotification(email, mentioner, topic string, conversation, message int64) error {
-	log.Println("Notifying", email, "of mention")
+func (s *smtpNotificationSender) SendMentionNotification(account *authgo.Account, mentioner, topic string, conversation, message int64) error {
+	log.Println("Notifying", account.Email, "of mention")
 	data := struct {
 		From      string
 		To        string
 		Topic     string
+		Username  string
 		Mentioner string
 		Link      string
 	}{
 		From:      s.sender,
-		To:        email,
+		To:        account.Email,
 		Topic:     topic,
+		Username:  account.Username,
 		Mentioner: mentioner,
 		Link:      createLink(s.scheme, s.host, conversation, message),
 	}
-	return authemail.SendEmail(s.server, s.identity, s.sender, email, s.templates.Lookup("email-notification-mention.go.html"), data)
+	return authemail.SendEmail(s.server, s.identity, s.sender, account.Email, s.templates.Lookup("email-notification-mention.go.html"), data)
 }
 
 func createLink(scheme, host string, conversation, message int64) string {
