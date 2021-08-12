@@ -25,7 +25,7 @@
 
             <h2 style="color: white;">Step 1</h2>
 
-            <p>Authors spend 1 coin per byte to start a conversation which incentivizes brevity and disincentivizes spam. In the example below, {{.Step1.User}} spents {{.Step1.Cost}} coins to start a fictional bedtime story.</p>
+            <p>Authors spend 1 coin per byte to start a conversation which incentivizes brevity and disincentivizes spam. In the example below, {{.Step1.Author.Username}} spents {{.Step1.Cost}} coins to start a fictional bedtime story.</p>
 
             <div class="demo">
                 <h4 style="margin: 8px 0px;">{{.Step1.Topic}}</h4>
@@ -35,7 +35,7 @@
 
             <h2 style="color: white;">Step 2</h2>
 
-            <p>Conversations can branch into multiple threads to explore different directions and perspectives. Replies also cost 1 coin per byte, half of which are paid to the original author to encourage and support their future content, and the other half go to the platform to pay for the services provided. In the example below, Bob and Beatrice spend {{(index .Step2.Replies 0).Cost}} and {{(index .Step2.Replies 1).Cost}} respectively to respond, yielding {{.Step2.User}} {{.Step2.Yield}} coins.</p>
+            <p>Conversations can branch into multiple threads to explore different directions and perspectives. Replies also cost 1 coin per byte, half of which are paid to the original author to encourage and support their future content, and the other half go to the platform to pay for the services provided. In the example below, Bob and Beatrice spend {{(index .Step2.Replies 0).Cost}} and {{(index .Step2.Replies 1).Cost}} respectively to respond, yielding {{.Step2.Author.Username}} {{.Step2.Yield}} coins.</p>
 
             <div class="demo">
                 <h4 style="margin: 8px 0px;">{{.Step2.Topic}}</h4>

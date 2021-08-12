@@ -53,14 +53,14 @@ func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
 			return
 		}
 		type MessageData struct {
-			Created      time.Time
-			Conversation int64
-			Message      int64
-			User         string
-			Content      template.HTML
-			Cost         int
-			Yield        int
-			Replies      []MessageData
+			Created        time.Time
+			ConversationID int64
+			MessageID      int64
+			Author         *authgo.Account
+			Content        template.HTML
+			Cost           int
+			Yield          int
+			Replies        []MessageData
 		}
 		type ConversationData struct {
 			MessageData
@@ -75,7 +75,7 @@ func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
 				Topic: topic,
 				MessageData: MessageData{
 					Created: time1,
-					User:    "Alice",
+					Author:  &authgo.Account{Username: "Alice"},
 					Content: toHTML(content1),
 					Cost:    len([]byte(content1)),
 				},
@@ -84,20 +84,20 @@ func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
 				Topic: topic,
 				MessageData: MessageData{
 					Created: time1,
-					User:    "Alice",
+					Author:  &authgo.Account{Username: "Alice"},
 					Content: toHTML(content1),
 					Cost:    len([]byte(content1)),
 					Yield:   toYield(len([]byte(content2a))) + toYield(len([]byte(content2b))),
 					Replies: []MessageData{
 						MessageData{
 							Created: time2,
-							User:    "Bob",
+							Author:  &authgo.Account{Username: "Bob"},
 							Content: toHTML(content2a),
 							Cost:    len([]byte(content2a)),
 						},
 						MessageData{
 							Created: time2,
-							User:    "Beatrice",
+							Author:  &authgo.Account{Username: "Beatrice"},
 							Content: toHTML(content2b),
 							Cost:    len([]byte(content2b)),
 						},
@@ -108,56 +108,56 @@ func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
 				Topic: topic,
 				MessageData: MessageData{
 					Created: time1,
-					User:    "Alice",
+					Author:  &authgo.Account{Username: "Alice"},
 					Content: toHTML(content1),
 					Cost:    len([]byte(content1)),
 					Yield:   toYield(len([]byte(content2a)), len([]byte(content3a)), len([]byte(content4a)), len([]byte(content5a)), len([]byte(content6a)), len([]byte(content7a)), len([]byte(content8a))) + toYield(len([]byte(content2b)), len([]byte(content3b)), len([]byte(content4b)), len([]byte(content5b)), len([]byte(content6b)), len([]byte(content7b)), len([]byte(content8b))),
 					Replies: []MessageData{
 						MessageData{
 							Created: time2,
-							User:    "Bob",
+							Author:  &authgo.Account{Username: "Bob"},
 							Content: toHTML(content2a),
 							Cost:    len([]byte(content2a)),
 							Yield:   toYield(len([]byte(content3a)), len([]byte(content4a)), len([]byte(content5a)), len([]byte(content6a)), len([]byte(content7a)), len([]byte(content8a))),
 							Replies: []MessageData{
 								MessageData{
 									Created: time3,
-									User:    "Claire",
+									Author:  &authgo.Account{Username: "Claire"},
 									Content: toHTML(content3a),
 									Cost:    len([]byte(content3a)),
 									Yield:   toYield(len([]byte(content4a)), len([]byte(content5a)), len([]byte(content6a)), len([]byte(content7a)), len([]byte(content8a))),
 									Replies: []MessageData{
 										MessageData{
 											Created: time4,
-											User:    "Daniel",
+											Author:  &authgo.Account{Username: "Daniel"},
 											Content: toHTML(content4a),
 											Cost:    len([]byte(content4a)),
 											Yield:   toYield(len([]byte(content5a)), len([]byte(content6a)), len([]byte(content7a)), len([]byte(content8a))),
 											Replies: []MessageData{
 												MessageData{
 													Created: time5,
-													User:    "Elizabeth",
+													Author:  &authgo.Account{Username: "Elizabeth"},
 													Content: toHTML(content5a),
 													Cost:    len([]byte(content5a)),
 													Yield:   toYield(len([]byte(content6a)), len([]byte(content7a)), len([]byte(content8a))),
 													Replies: []MessageData{
 														MessageData{
 															Created: time6,
-															User:    "Fred",
+															Author:  &authgo.Account{Username: "Fred"},
 															Content: toHTML(content6a),
 															Cost:    len([]byte(content6a)),
 															Yield:   toYield(len([]byte(content7a)), len([]byte(content8a))),
 															Replies: []MessageData{
 																MessageData{
 																	Created: time7,
-																	User:    "Ginny",
+																	Author:  &authgo.Account{Username: "Ginny"},
 																	Content: toHTML(content7a),
 																	Cost:    len([]byte(content7a)),
 																	Yield:   toYield(len([]byte(content8a))),
 																	Replies: []MessageData{
 																		MessageData{
 																			Created: time8,
-																			User:    "Helen",
+																			Author:  &authgo.Account{Username: "Helen"},
 																			Content: toHTML(content8a),
 																			Cost:    len([]byte(content8a)),
 																		},
@@ -175,49 +175,49 @@ func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
 						},
 						MessageData{
 							Created: time2,
-							User:    "Beatrice",
+							Author:  &authgo.Account{Username: "Beatrice"},
 							Content: toHTML(content2b),
 							Cost:    len([]byte(content2b)),
 							Yield:   toYield(len([]byte(content3b)), len([]byte(content4b)), len([]byte(content5b)), len([]byte(content6b)), len([]byte(content7b)), len([]byte(content8b))),
 							Replies: []MessageData{
 								MessageData{
 									Created: time3,
-									User:    "Charlie",
+									Author:  &authgo.Account{Username: "Charlie"},
 									Content: toHTML(content3b),
 									Cost:    len([]byte(content3b)),
 									Yield:   toYield(len([]byte(content4b)), len([]byte(content5b)), len([]byte(content6b)), len([]byte(content7b)), len([]byte(content8b))),
 									Replies: []MessageData{
 										MessageData{
 											Created: time4,
-											User:    "Dina",
+											Author:  &authgo.Account{Username: "Dina"},
 											Content: toHTML(content4b),
 											Cost:    len([]byte(content4b)),
 											Yield:   toYield(len([]byte(content5b)), len([]byte(content6b)), len([]byte(content7b)), len([]byte(content8b))),
 											Replies: []MessageData{
 												MessageData{
 													Created: time5,
-													User:    "Edgar",
+													Author:  &authgo.Account{Username: "Edgar"},
 													Content: toHTML(content5b),
 													Cost:    len([]byte(content5b)),
 													Yield:   toYield(len([]byte(content6b)), len([]byte(content7b)), len([]byte(content8b))),
 													Replies: []MessageData{
 														MessageData{
 															Created: time6,
-															User:    "Fiona",
+															Author:  &authgo.Account{Username: "Fiona"},
 															Content: toHTML(content6b),
 															Cost:    len([]byte(content6b)),
 															Yield:   toYield(len([]byte(content7b)), len([]byte(content8b))),
 															Replies: []MessageData{
 																MessageData{
 																	Created: time7,
-																	User:    "George",
+																	Author:  &authgo.Account{Username: "George"},
 																	Content: toHTML(content7b),
 																	Cost:    len([]byte(content7b)),
 																	Yield:   toYield(len([]byte(content8b))),
 																	Replies: []MessageData{
 																		MessageData{
 																			Created: time8,
-																			User:    "Harold",
+																			Author:  &authgo.Account{Username: "Harold"},
 																			Content: toHTML(content8b),
 																			Cost:    len([]byte(content8b)),
 																		},
