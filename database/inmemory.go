@@ -101,31 +101,6 @@ type InMemory struct {
 	NotificationPreferencesDigests   map[int64]bool
 }
 
-func (db *InMemory) LookupAccountBalance(user int64) (int64, error) {
-	db.Lock()
-	defer db.Unlock()
-	var account int64
-	for cid := range db.ChargeId {
-		if db.ChargeUser[cid] != user {
-			continue
-		}
-		account -= db.ChargeAmount[cid]
-	}
-	for yid := range db.YieldId {
-		if db.YieldUser[yid] != user {
-			continue
-		}
-		account += db.YieldAmount[yid]
-	}
-	for pid := range db.PurchaseId {
-		if db.PurchaseUser[pid] != user {
-			continue
-		}
-		account += db.PurchaseBundleSize[pid]
-	}
-	return account, nil
-}
-
 func (db *InMemory) CreateConversation(user int64, topic string, created time.Time) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
@@ -360,6 +335,19 @@ func (db *InMemory) CreateCharge(user, conversation, message, amount int64, crea
 	return id, nil
 }
 
+func (db *InMemory) LookupCharges(user int64) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
+	var charges int64
+	for cid := range db.ChargeId {
+		if db.ChargeUser[cid] != user {
+			continue
+		}
+		charges += db.ChargeAmount[cid]
+	}
+	return charges, nil
+}
+
 func (db *InMemory) CreateYield(user, conversation, message, parent, amount int64, created time.Time) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
@@ -372,6 +360,19 @@ func (db *InMemory) CreateYield(user, conversation, message, parent, amount int6
 	db.YieldAmount[id] = amount
 	db.YieldCreated[id] = created
 	return id, nil
+}
+
+func (db *InMemory) LookupYields(user int64) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
+	var yields int64
+	for yid := range db.YieldId {
+		if db.YieldUser[yid] != user {
+			continue
+		}
+		yields += db.YieldAmount[yid]
+	}
+	return yields, nil
 }
 
 func (db *InMemory) CreatePurchase(user int64, stripeSession, stripeCustomer, stripePaymentIntent, stripeCurrency string, stripeAmount, bundle_size int64, created time.Time) (int64, error) {
@@ -388,6 +389,19 @@ func (db *InMemory) CreatePurchase(user int64, stripeSession, stripeCustomer, st
 	db.PurchaseBundleSize[id] = bundle_size
 	db.PurchaseCreated[id] = created
 	return id, nil
+}
+
+func (db *InMemory) LookupPurchases(user int64) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
+	var purchases int64
+	for pid := range db.PurchaseId {
+		if db.PurchaseUser[pid] != user {
+			continue
+		}
+		purchases += db.PurchaseBundleSize[pid]
+	}
+	return purchases, nil
 }
 
 func (db *InMemory) UpdateNotificationPreferences(id, user int64, responses, mentions, digests bool) (int64, error) {

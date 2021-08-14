@@ -74,25 +74,6 @@ FROM tbl_yields;
 SELECT *
 FROM tbl_purchases;
 
-// Show all account balances
-SELECT tbl_users.id, tbl_users.username, IFNULL(total_yields,0) - IFNULL(total_charges,0) + IFNULL(total_purchases,0) AS balance
-FROM tbl_users
-LEFT JOIN (
-	SELECT user, SUM(IFNULL(amount, 0)) AS total_yields
-	FROM tbl_yields
-	GROUP BY user
-) y ON y.user=tbl_users.id
-LEFT JOIN (
-	SELECT user, SUM(IFNULL(amount, 0)) AS total_charges
-	FROM tbl_charges
-	GROUP BY user
-) c ON c.user=tbl_users.id
-LEFT JOIN (
-	SELECT user, SUM(IFNULL(bundle_size, 0)) AS total_purchases
-	FROM tbl_purchases
-	GROUP BY user
-) p ON p.user=tbl_users.id;
-
 // Show best content
 SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 FROM tbl_conversations
@@ -485,36 +466,6 @@ func (db *Sql) UpdateAccountRecoverySessionChallenge(token, challenge string) (i
 	return result.RowsAffected()
 }
 
-func (db *Sql) LookupAccountBalance(user int64) (int64, error) {
-	row := db.QueryRow(`
-		SELECT IFNULL(total_yields,0) - IFNULL(total_charges,0) + IFNULL(total_purchases,0) AS balance
-		FROM tbl_users
-		LEFT JOIN (
-			SELECT user, SUM(IFNULL(amount, 0)) AS total_yields
-			FROM tbl_yields
-			GROUP BY user
-		) y ON y.user=tbl_users.id
-		LEFT JOIN (
-			SELECT user, SUM(IFNULL(amount, 0)) AS total_charges
-			FROM tbl_charges
-			GROUP BY user
-		) c ON c.user=tbl_users.id
-		LEFT JOIN (
-			SELECT user, SUM(IFNULL(bundle_size, 0)) AS total_purchases
-			FROM tbl_purchases
-			GROUP BY user
-		) p ON p.user=tbl_users.id
-		WHERE tbl_users.id=?`, user)
-
-	var (
-		balance int64
-	)
-	if err := row.Scan(&balance); err != nil {
-		return 0, err
-	}
-	return balance, nil
-}
-
 func (db *Sql) CreateConversation(user int64, topic string, created time.Time) (int64, error) {
 	result, err := db.Exec(`
 		INSERT INTO tbl_conversations
@@ -804,6 +755,29 @@ func (db *Sql) CreateCharge(user, conversation, message, amount int64, created t
 	return result.LastInsertId()
 }
 
+func (db *Sql) LookupCharges(user int64) (int64, error) {
+	row := db.QueryRow(`
+		SELECT SUM(IFNULL(total_charges,0))
+		FROM tbl_users
+		LEFT JOIN (
+			SELECT id, user
+			FROM tbl_messages
+		) AS ms ON ms.user=tbl_users.id
+		LEFT JOIN (
+			SELECT message, SUM(IFNULL(amount,0)) AS total_charges
+			FROM tbl_charges
+			GROUP BY message
+		) AS cs ON cs.message=ms.id
+		WHERE tbl_users.id=?`, user)
+	var (
+		charges int64
+	)
+	if err := row.Scan(&charges); err != nil {
+		return 0, err
+	}
+	return charges, nil
+}
+
 func (db *Sql) CreateYield(user, conversation, message, parent, amount int64, created time.Time) (int64, error) {
 	result, err := db.Exec(`
 		INSERT INTO tbl_yields
@@ -814,6 +788,29 @@ func (db *Sql) CreateYield(user, conversation, message, parent, amount int64, cr
 	return result.LastInsertId()
 }
 
+func (db *Sql) LookupYields(user int64) (int64, error) {
+	row := db.QueryRow(`
+		SELECT SUM(IFNULL(total_yields,0))
+		FROM tbl_users
+		LEFT JOIN (
+			SELECT id, user
+			FROM tbl_messages
+		) AS ms ON ms.user=tbl_users.id
+		LEFT JOIN (
+			SELECT parent, SUM(IFNULL(amount,0)) AS total_yields
+			FROM tbl_yields
+			GROUP BY parent
+		) AS ys ON ys.parent=ms.id
+		WHERE tbl_users.id=?`, user)
+	var (
+		yields int64
+	)
+	if err := row.Scan(&yields); err != nil {
+		return 0, err
+	}
+	return yields, nil
+}
+
 func (db *Sql) CreatePurchase(user int64, sessionID, customerID, paymentIntentID, currency string, amount, size int64, created time.Time) (int64, error) {
 	result, err := db.Exec(`
 		INSERT INTO tbl_purchases
@@ -822,6 +819,20 @@ func (db *Sql) CreatePurchase(user int64, sessionID, customerID, paymentIntentID
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+func (db *Sql) LookupPurchases(user int64) (int64, error) {
+	row := db.QueryRow(`
+		SELECT IFNULL(SUM(IFNULL(bundle_size,0)),0)
+		FROM tbl_purchases
+		WHERE tbl_purchases.user=?`, user)
+	var (
+		purchases int64
+	)
+	if err := row.Scan(&purchases); err != nil {
+		return 0, err
+	}
+	return purchases, nil
 }
 
 func (db *Sql) SelectNotificationPreferences(user int64) (int64, bool, bool, bool, error) {

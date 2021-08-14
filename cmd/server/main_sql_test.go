@@ -11,6 +11,7 @@ import (
 	"io/fs"
 	"path"
 	"testing"
+	"time"
 )
 
 //go:embed assets
@@ -30,6 +31,17 @@ func NewSqlAuthenticator(t *testing.T) authgo.Authenticator {
 		migrate -database 'mysql://tester:tester123@tcp(localhost:3306)/testdb' -path cmd/server/assets/database/migrations/ up
 	*/
 
+	// Create database
+	db := NewSqlDatabase(t)
+
+	// Create Email Verifier
+	ev := authtest.NewEmailVerifier()
+
+	// Create an Authenticator
+	return authgo.NewAuthenticator(db, ev)
+}
+
+func NewSqlDatabase(t *testing.T) *database.Sql {
 	// Create SQL Database
 	db, err := database.NewSql("testdb", "tester", "tester123", "", "", false)
 	assert.Nil(t, err)
@@ -47,12 +59,7 @@ func NewSqlAuthenticator(t *testing.T) authgo.Authenticator {
 
 	// Migrate Up
 	assert.Nil(t, m.Up())
-
-	// Create Email Verifier
-	ev := authtest.NewEmailVerifier()
-
-	// Create an Authenticator
-	return authgo.NewAuthenticator(db, ev)
+	return db
 }
 
 func TestSqlAccount(t *testing.T) {
@@ -130,4 +137,66 @@ func TestSqlAccountRecoveryAccountPasswordAccount(t *testing.T) {
 		t.Skip("skipping SQL database test in short mode.")
 	}
 	handler.SignUpSignOutSignInAccount(t, NewSqlAuthenticator)
+}
+
+func assertBalance(t *testing.T, db *database.Sql, user, balance int64) {
+	t.Helper()
+	charges, err := db.LookupCharges(user)
+	assert.Nil(t, err)
+	yields, err := db.LookupYields(user)
+	assert.Nil(t, err)
+	purchases, err := db.LookupPurchases(user)
+	assert.Nil(t, err)
+	assert.Equal(t, balance, purchases+yields-charges)
+}
+
+func TestSql_LookupAccountBalance(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping SQL database test in short mode.")
+	}
+
+	db := NewSqlDatabase(t)
+
+	created := time.Now()
+
+	// Add User
+	hash, err := authgo.GeneratePasswordHash([]byte(authtest.TEST_PASSWORD))
+	assert.Nil(t, err)
+	user, err := db.CreateUser(authtest.TEST_EMAIL, authtest.TEST_USERNAME, hash, created)
+	assert.Nil(t, err)
+
+	assertBalance(t, db, user, 0)
+
+	// Add Purchase
+	purchase, err := db.CreatePurchase(user, "sessionID", "customerID", "paymentIntentID", "currency", 100, 2000, created)
+	assert.Nil(t, err)
+	assert.NotEqual(t, 0, purchase)
+
+	assertBalance(t, db, user, 2000)
+
+	// Add Conversation, Message, and Charge
+	conversation, err := db.CreateConversation(user, "topic", created)
+	assert.Nil(t, err)
+	assert.NotEqual(t, 0, conversation)
+	message, err := db.CreateMessage(user, conversation, 0, created)
+	assert.Nil(t, err)
+	assert.NotEqual(t, 0, message)
+	charge, err := db.CreateCharge(user, conversation, message, 500, created)
+	assert.Nil(t, err)
+	assert.NotEqual(t, 0, charge)
+
+	assertBalance(t, db, user, 1500)
+
+	// Create Reply, Charge and Yield
+	reply, err := db.CreateMessage(user, conversation, message, created)
+	assert.Nil(t, err)
+	assert.NotEqual(t, 0, reply)
+	charge2, err := db.CreateCharge(user, conversation, reply, 1000, created)
+	assert.Nil(t, err)
+	assert.NotEqual(t, 0, charge2)
+	yield, err := db.CreateYield(user, conversation, reply, message, 500, created)
+	assert.Nil(t, err)
+	assert.NotEqual(t, 0, yield)
+
+	assertBalance(t, db, user, 1000)
 }
