@@ -64,8 +64,7 @@ func TestMentions(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			mentions := conveyearthgo.Mentions(tt.input)
-			assert.Equal(t, len(tt.expected), len(mentions))
-			assert.Equal(t, tt.expected, mentions)
+			assert.ElementsMatch(t, tt.expected, mentions)
 		})
 	}
 }
