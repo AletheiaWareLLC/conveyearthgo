@@ -11,10 +11,26 @@ var ErrInsufficientBalance = errors.New("Insufficient Balance")
 
 type AccountDatabase interface {
 	SelectUser(string) (int64, string, []byte, time.Time, error)
-	LookupCharges(int64) (int64, error)
-	LookupYields(int64) (int64, error)
-	LookupPurchases(int64) (int64, error)
+	SelectCharges(int64) (int64, error)
+	SelectYields(int64) (int64, error)
+	SelectPurchases(int64) (int64, error)
 	CreatePurchase(int64, string, string, string, string, int64, int64, time.Time) (int64, error)
+}
+
+func AccountBalance(db AccountDatabase, user int64) (int64, error) {
+	charges, err := db.SelectCharges(user)
+	if err != nil {
+		return 0, err
+	}
+	yields, err := db.SelectYields(user)
+	if err != nil {
+		return 0, err
+	}
+	purchases, err := db.SelectPurchases(user)
+	if err != nil {
+		return 0, err
+	}
+	return purchases + yields - charges, nil
 }
 
 type AccountManager interface {
@@ -47,19 +63,7 @@ func (m *accountManager) Account(username string) (*authgo.Account, error) {
 }
 
 func (m *accountManager) AccountBalance(user int64) (int64, error) {
-	charges, err := m.database.LookupCharges(user)
-	if err != nil {
-		return 0, err
-	}
-	yields, err := m.database.LookupYields(user)
-	if err != nil {
-		return 0, err
-	}
-	purchases, err := m.database.LookupPurchases(user)
-	if err != nil {
-		return 0, err
-	}
-	return purchases + yields - charges, nil
+	return AccountBalance(m.database, user)
 }
 
 func (m *accountManager) NewPurchase(user int64, sessionID, customerID, paymentIntentID, currency string, amount, size int64) error {

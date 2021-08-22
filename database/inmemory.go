@@ -130,7 +130,7 @@ func (db *InMemory) SelectConversation(id int64) (*authgo.Account, string, time.
 	}, topic, created, nil
 }
 
-func (db *InMemory) LookupBestConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
+func (db *InMemory) SelectBestConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
 	db.Lock()
 	defer db.Unlock()
 	costs := make(map[int64]int64)
@@ -173,7 +173,7 @@ func (db *InMemory) LookupBestConversations(callback func(int64, *authgo.Account
 	return nil
 }
 
-func (db *InMemory) LookupRecentConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, limit int64) error {
+func (db *InMemory) SelectRecentConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, limit int64) error {
 	db.Lock()
 	defer db.Unlock()
 	costs := make(map[int64]int64)
@@ -246,7 +246,7 @@ func (db *InMemory) SelectMessage(id int64) (*authgo.Account, int64, int64, time
 	}, conversation, parent, created, cost, yield, nil
 }
 
-func (db *InMemory) LookupMessages(conversation int64, callback func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error {
+func (db *InMemory) SelectMessages(conversation int64, callback func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error {
 	db.Lock()
 	defer db.Unlock()
 	for id := range db.MessageId {
@@ -271,7 +271,7 @@ func (db *InMemory) LookupMessages(conversation int64, callback func(int64, *aut
 	return nil
 }
 
-func (db *InMemory) LookupMessageParent(id int64) (int64, error) {
+func (db *InMemory) SelectMessageParent(id int64) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
 	if _, ok := db.MessageId[id]; !ok {
@@ -305,7 +305,7 @@ func (db *InMemory) SelectFile(id int64) (int64, string, string, time.Time, erro
 	return message, hash, mime, created, nil
 }
 
-func (db *InMemory) LookupFiles(message int64, callback func(int64, string, string, time.Time) error) error {
+func (db *InMemory) SelectFiles(message int64, callback func(int64, string, string, time.Time) error) error {
 	db.Lock()
 	defer db.Unlock()
 	for id := range db.FileId {
@@ -335,7 +335,7 @@ func (db *InMemory) CreateCharge(user, conversation, message, amount int64, crea
 	return id, nil
 }
 
-func (db *InMemory) LookupCharges(user int64) (int64, error) {
+func (db *InMemory) SelectCharges(user int64) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
 	var charges int64
@@ -362,7 +362,7 @@ func (db *InMemory) CreateYield(user, conversation, message, parent, amount int6
 	return id, nil
 }
 
-func (db *InMemory) LookupYields(user int64) (int64, error) {
+func (db *InMemory) SelectYields(user int64) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
 	var yields int64
@@ -391,7 +391,7 @@ func (db *InMemory) CreatePurchase(user int64, stripeSession, stripeCustomer, st
 	return id, nil
 }
 
-func (db *InMemory) LookupPurchases(user int64) (int64, error) {
+func (db *InMemory) SelectPurchases(user int64) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
 	var purchases int64

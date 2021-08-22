@@ -167,7 +167,7 @@ func (db *Sql) SelectUser(username string) (int64, string, []byte, time.Time, er
 	return id, email, password, time.Unix(created, 0), nil
 }
 
-func (db *Sql) LookupUsername(email string) (string, error) {
+func (db *Sql) SelectUsernameByEmail(email string) (string, error) {
 	row := db.QueryRow(`
 		SELECT username
 		FROM tbl_users
@@ -500,7 +500,7 @@ func (db *Sql) SelectConversation(id int64) (*authgo.Account, string, time.Time,
 	}, topic, time.Unix(created, 0), nil
 }
 
-func (db *Sql) LookupBestConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
+func (db *Sql) SelectBestConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
 	rows, err := db.Query(`
 		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield,0)
 		FROM tbl_conversations
@@ -543,7 +543,7 @@ func (db *Sql) LookupBestConversations(callback func(int64, *authgo.Account, str
 	return rows.Err()
 }
 
-func (db *Sql) LookupRecentConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, limit int64) error {
+func (db *Sql) SelectRecentConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, limit int64) error {
 	rows, err := db.Query(`
 		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_conversations
@@ -648,7 +648,7 @@ func (db *Sql) SelectMessage(id int64) (*authgo.Account, int64, int64, time.Time
 	}, conversation, parent, time.Unix(created, 0), cost, yield, nil
 }
 
-func (db *Sql) LookupMessages(conversation int64, callback func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error {
+func (db *Sql) SelectMessages(conversation int64, callback func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error {
 	rows, err := db.Query(`
 		SELECT tbl_messages.id, tbl_messages.user, tbl_users.username, tbl_users.email, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_messages
@@ -688,7 +688,7 @@ func (db *Sql) LookupMessages(conversation int64, callback func(int64, *authgo.A
 	return rows.Err()
 }
 
-func (db *Sql) LookupMessageParent(id int64) (int64, error) {
+func (db *Sql) SelectMessageParent(id int64) (int64, error) {
 	row := db.QueryRow(`
 			SELECT IFNULL(parent, 0)
 			FROM tbl_messages
@@ -720,7 +720,7 @@ func (db *Sql) SelectFile(id int64) (int64, string, string, time.Time, error) {
 	return message, hash, mime, time.Unix(created, 0), nil
 }
 
-func (db *Sql) LookupFiles(message int64, callback func(int64, string, string, time.Time) error) error {
+func (db *Sql) SelectFiles(message int64, callback func(int64, string, string, time.Time) error) error {
 	rows, err := db.Query(`
 		SELECT tbl_files.id, tbl_files.hash, tbl_files.mime, tbl_files.created_unix
 		FROM tbl_files
@@ -755,7 +755,7 @@ func (db *Sql) CreateCharge(user, conversation, message, amount int64, created t
 	return result.LastInsertId()
 }
 
-func (db *Sql) LookupCharges(user int64) (int64, error) {
+func (db *Sql) SelectCharges(user int64) (int64, error) {
 	row := db.QueryRow(`
 		SELECT SUM(IFNULL(total_charges,0))
 		FROM tbl_users
@@ -788,7 +788,7 @@ func (db *Sql) CreateYield(user, conversation, message, parent, amount int64, cr
 	return result.LastInsertId()
 }
 
-func (db *Sql) LookupYields(user int64) (int64, error) {
+func (db *Sql) SelectYields(user int64) (int64, error) {
 	row := db.QueryRow(`
 		SELECT SUM(IFNULL(total_yields,0))
 		FROM tbl_users
@@ -821,7 +821,7 @@ func (db *Sql) CreatePurchase(user int64, sessionID, customerID, paymentIntentID
 	return result.LastInsertId()
 }
 
-func (db *Sql) LookupPurchases(user int64) (int64, error) {
+func (db *Sql) SelectPurchases(user int64) (int64, error) {
 	row := db.QueryRow(`
 		SELECT IFNULL(SUM(IFNULL(bundle_size,0)),0)
 		FROM tbl_purchases

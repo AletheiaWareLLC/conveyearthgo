@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
 	"aletheiaware.com/authgo/authtest/handler"
+	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/conveyearthgo/database"
 	"embed"
 	"github.com/golang-migrate/migrate/v4"
@@ -141,16 +142,12 @@ func TestSqlAccountRecoveryAccountPasswordAccount(t *testing.T) {
 
 func assertBalance(t *testing.T, db *database.Sql, user, balance int64) {
 	t.Helper()
-	charges, err := db.LookupCharges(user)
+	b, err := conveyearthgo.AccountBalance(db, user)
 	assert.Nil(t, err)
-	yields, err := db.LookupYields(user)
-	assert.Nil(t, err)
-	purchases, err := db.LookupPurchases(user)
-	assert.Nil(t, err)
-	assert.Equal(t, balance, purchases+yields-charges)
+	assert.Equal(t, balance, b)
 }
 
-func TestSql_LookupAccountBalance(t *testing.T) {
+func TestSql_AccountBalance(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping SQL database test in short mode.")
 	}
