@@ -1,0 +1,61 @@
+@font-face {
+    font-family: "Noto Serif Regular";
+    font-style: normal;
+    font-weight: normal;
+    src: local("NotoSerif-Regular.ttf"), url("/static/NotoSerif-Regular.ttf") format("truetype");
+}
+body {
+    background-color: white;
+    font-family: "Noto Serif Regular", serif;
+}
+a {
+    color: {{.Primary}};
+}
+a:hover {
+    color: {{.Secondary}};
+}
+a.more {
+    display:inline-block;
+    text-align: center;
+    width: 100%;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: {{.Primary}};
+}
+h1.title {
+    text-align: center;
+}
+p.author {
+    break-after: avoid;
+    break-inside: avoid;
+    color: {{.Secondary}};
+    font-size: x-small;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+h1.ucc, h2.ucc, h3.ucc, h4.ucc, h5.ucc, h6.ucc {
+    max-width: 100%;
+}
+img.ucc {
+    margin: 0 auto;
+    max-width: 100%;
+}
+object.ucc {
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 600px;
+}
+p.ucc {
+    margin: 8px 0;
+    max-width: 100%;
+}
+pre.ucc, code.ucc {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+video.ucc {
+    margin: 0 auto;
+    max-width: 100%;
+}

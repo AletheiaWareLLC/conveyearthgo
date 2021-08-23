@@ -13,6 +13,7 @@ var (
 )
 
 func ValidateTopic(topic string) error {
+	// TODO ensure topic has no newline characters
 	length := len(topic)
 	if length < MINIMUM_TOPIC_LENGTH {
 		return ErrTopicTooShort

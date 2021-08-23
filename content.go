@@ -23,8 +23,8 @@ import (
 const (
 	MIME_APPLICATION_PDF = "application/pdf"
 	MIME_IMAGE_JPEG      = "image/jpeg"
-	MIME_IMAGE_GIF       = "image/gif"
 	MIME_IMAGE_JPG       = "image/jpg"
+	MIME_IMAGE_GIF       = "image/gif"
 	MIME_IMAGE_PNG       = "image/png"
 	MIME_IMAGE_SVG       = "image/svg+xml"
 	MIME_IMAGE_WEBP      = "image/webp"
@@ -61,8 +61,8 @@ func ValidateMime(mime string) error {
 	switch mime {
 	case MIME_APPLICATION_PDF,
 		MIME_IMAGE_JPEG,
-		MIME_IMAGE_GIF,
 		MIME_IMAGE_JPG,
+		MIME_IMAGE_GIF,
 		MIME_IMAGE_PNG,
 		MIME_IMAGE_SVG,
 		MIME_IMAGE_WEBP,
