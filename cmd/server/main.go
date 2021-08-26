@@ -178,11 +178,8 @@ func main() {
 	}
 	log.Println("Digests Directory:", digests)
 
-	// Create a Digest Manager
-	dm := conveyearthgo.NewDigestManager(filesystem.NewOnDisk(digests))
-
 	// Handle Digest
-	handler.AttachDigestHandler(mux, auth, dm, templates)
+	mux.Handle("/digest/", nethandler.Log(http.StripPrefix("/digest/", http.FileServer(http.Dir(digests)))))
 
 	// Handle Account
 	handler.AttachAccountHandler(mux, auth, am, nm, templates)
