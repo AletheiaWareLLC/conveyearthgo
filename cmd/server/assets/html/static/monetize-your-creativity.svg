@@ -1,0 +1,35 @@
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" width="480" height="480" viewBox="0 0 480 480" preserveAspectRatio="xMidYMid meet">
+    <g fill="deepskyblue" stroke="none">
+        <circle cx="240" cy="240" r="220" />
+    </g>
+    <!-- Guide
+    <g fill="none" stroke="grey" stroke-width="1">
+        <polyline points="240,0 240,480" />
+        <polyline points="0,240 480,240" />
+    </g>
+    -->
+    <g stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
+        <!-- Pen -->
+        <g fill="white" stroke="black">
+            <!-- Tip -->
+            <path d="M 300,310 L 320,280 L 330,290 Z" />
+            <!-- Barrel -->
+            <path d="M 320,280 L 420,180 L 430,190 L 330,290 Z" />
+            <!-- Cap -->
+            <path d="M 422,182 L 432,172 L 438,178 L 428,188 Z" />
+            <!-- Clip -->
+            <path d="M 416,192 L 386,222 L 388,224 L 418,194 Z" />
+        </g>
+        <!-- Content -->
+        <path fill="none" stroke="black" d="M 60,310 Q 80,280 100,310 Q 120,340 140,310 Q 160,280 180,310 Q 200,340 220,310 Q 240,280 260,310 Q 280,340 300,310" />
+        <!-- Rewards -->
+        <g fill="white" stroke="none" text-anchor="middle">
+            <text x="290" y="300" font-size="0.5em">$</text>
+            <text x="275" y="285" font-size="1.0em">$</text>
+            <text x="245" y="255" font-size="2.0em">$</text>
+            <text x="200" y="210" font-size="4.0em">$</text>
+            <text x="140" y="150" font-size="8.0em">$</text>
+        </g>
+    </g>
+</svg>
