@@ -52,6 +52,9 @@ func NewInMemory() *InMemory {
 		NotificationPreferencesResponses: make(map[int64]bool),
 		NotificationPreferencesMentions:  make(map[int64]bool),
 		NotificationPreferencesDigests:   make(map[int64]bool),
+		AwardId:                          make(map[int64]bool),
+		AwardUser:                        make(map[int64]int64),
+		AwardAmount:                      make(map[int64]int64),
 	}
 }
 
@@ -99,6 +102,9 @@ type InMemory struct {
 	NotificationPreferencesResponses map[int64]bool
 	NotificationPreferencesMentions  map[int64]bool
 	NotificationPreferencesDigests   map[int64]bool
+	AwardId                          map[int64]bool
+	AwardUser                        map[int64]int64
+	AwardAmount                      map[int64]int64
 }
 
 func (db *InMemory) CreateConversation(user int64, topic string, created time.Time) (int64, error) {
@@ -427,6 +433,19 @@ func (db *InMemory) SelectNotificationPreferences(user int64) (int64, bool, bool
 		}
 	}
 	return id, responses, mentions, digests, nil
+}
+
+func (db *InMemory) SelectAwards(user int64) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
+	var awards int64
+	for pid := range db.AwardId {
+		if db.AwardUser[pid] != user {
+			continue
+		}
+		awards += db.AwardAmount[pid]
+	}
+	return awards, nil
 }
 
 func (db *InMemory) username(id int64) string {

@@ -74,6 +74,10 @@ FROM tbl_yields;
 SELECT *
 FROM tbl_purchases;
 
+// Show all awards
+SELECT *
+FROM tbl_awards;
+
 // Show best content
 SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 FROM tbl_conversations
@@ -876,4 +880,18 @@ func (db *Sql) UpdateNotificationPreferences(id, user int64, responses, mentions
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+func (db *Sql) SelectAwards(user int64) (int64, error) {
+	row := db.QueryRow(`
+		SELECT IFNULL(SUM(IFNULL(amount,0)),0)
+		FROM tbl_awards
+		WHERE tbl_awards.user=?`, user)
+	var (
+		awards int64
+	)
+	if err := row.Scan(&awards); err != nil {
+		return 0, err
+	}
+	return awards, nil
 }

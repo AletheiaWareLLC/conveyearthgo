@@ -14,6 +14,7 @@ type AccountDatabase interface {
 	SelectCharges(int64) (int64, error)
 	SelectYields(int64) (int64, error)
 	SelectPurchases(int64) (int64, error)
+	SelectAwards(int64) (int64, error)
 	CreatePurchase(int64, string, string, string, string, int64, int64, time.Time) (int64, error)
 }
 
@@ -30,7 +31,11 @@ func AccountBalance(db AccountDatabase, user int64) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return purchases + yields - charges, nil
+	awards, err := db.SelectAwards(user)
+	if err != nil {
+		return 0, err
+	}
+	return awards + purchases + yields - charges, nil
 }
 
 type AccountManager interface {
