@@ -241,7 +241,8 @@ func main() {
 
 		// Serve HTTPS Requests
 		config := &tls.Config{MinVersion: tls.VersionTLS12}
-		server := &http.Server{Addr: ":443",
+		server := &http.Server{
+			Addr:              ":443",
 			Handler:           mux,
 			TLSConfig:         config,
 			ReadTimeout:       5 * time.Second,
