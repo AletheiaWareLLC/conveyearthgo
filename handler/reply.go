@@ -96,7 +96,12 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 		case "GET":
 			executeReplyTemplate(w, ts, data)
 		case "POST":
-			r.ParseMultipartForm(MAXIMUM_PARSE_MEMORY)
+			if err := r.ParseMultipartForm(MAXIMUM_PARSE_MEMORY); err != nil {
+				log.Println(err)
+				data.Error = err.Error()
+				executeReplyTemplate(w, ts, data)
+				return
+			}
 
 			reply := strings.TrimSpace(r.FormValue("reply"))
 

@@ -46,7 +46,12 @@ func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveye
 		case "GET":
 			executePublishTemplate(w, ts, data)
 		case "POST":
-			r.ParseMultipartForm(MAXIMUM_PARSE_MEMORY)
+			if err := r.ParseMultipartForm(MAXIMUM_PARSE_MEMORY); err != nil {
+				log.Println(err)
+				data.Error = err.Error()
+				executePublishTemplate(w, ts, data)
+				return
+			}
 
 			topic := strings.TrimSpace(r.FormValue("topic"))
 			content := strings.TrimSpace(r.FormValue("content"))
