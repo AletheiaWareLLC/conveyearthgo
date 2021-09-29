@@ -20,7 +20,6 @@ Disallow: /conversation
 Disallow: /digest
 Disallow: /message
 Disallow: /publish
-Disallow: /recent
 Disallow: /reply
 
 # Stripe

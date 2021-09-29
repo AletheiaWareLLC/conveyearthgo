@@ -15,6 +15,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestRecent(t *testing.T) {
@@ -22,44 +23,40 @@ func TestRecent(t *testing.T) {
 	assert.Nil(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
-	tmpl, err := template.New("recent.go.html").Parse(`{{with .Account}}{{.Username}}{{end}}`)
+	tmpl, err := template.New("recent.go.html").Parse(`{{range .Conversations}}{{.Topic}}{{end}}`)
 	assert.Nil(t, err)
-	t.Run("Returns 200 When Signed In", func(t *testing.T) {
+	t.Run("Returns 200 With No Conversations", func(t *testing.T) {
 		db := database.NewInMemory()
-		ev := authtest.NewEmailVerifier()
-		auth := authgo.NewAuthenticator(db, ev)
-		authtest.NewTestAccount(t, auth)
-		token, _ := authtest.SignIn(t, auth)
 		cm := conveyearthgo.NewContentManager(db, fs)
 		mux := http.NewServeMux()
-		handler.AttachRecentHandler(mux, auth, cm, tmpl)
+		handler.AttachRecentHandler(mux, cm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/recent", nil)
-		request.AddCookie(auth.NewSignInSessionCookie(token))
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)
 		result := response.Result()
 		assert.Equal(t, http.StatusOK, result.StatusCode)
 		body, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
-		assert.Equal(t, authtest.TEST_USERNAME, string(body))
+		assert.Equal(t, "", string(body))
 	})
-	t.Run("Redirects When Not Signed In", func(t *testing.T) {
+	t.Run("Returns 200 With One Conversation", func(t *testing.T) {
 		db := database.NewInMemory()
 		ev := authtest.NewEmailVerifier()
 		auth := authgo.NewAuthenticator(db, ev)
-		authtest.NewTestAccount(t, auth)
+		acc := authtest.NewTestAccount(t, auth)
+		_, err := db.CreateConversation(acc.ID, "FooBar", time.Now())
+		assert.Nil(t, err)
 		cm := conveyearthgo.NewContentManager(db, fs)
 		mux := http.NewServeMux()
-		handler.AttachRecentHandler(mux, auth, cm, tmpl)
+		handler.AttachRecentHandler(mux, cm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, "/recent", nil)
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)
 		result := response.Result()
-		assert.Equal(t, http.StatusFound, result.StatusCode)
-		u, err := result.Location()
+		assert.Equal(t, http.StatusOK, result.StatusCode)
+		body, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
-		assert.Equal(t, "/sign-in", u.String())
+		assert.Equal(t, "FooBar", string(body))
 	})
-	// TODO No Conversations
 	// TODO Many Conversations (Limit/More button)
 }

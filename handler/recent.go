@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"aletheiaware.com/authgo"
-	"aletheiaware.com/authgo/redirect"
 	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
@@ -13,25 +11,18 @@ import (
 	"strings"
 )
 
-func AttachRecentHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) {
-	m.Handle("/recent", handler.Log(Recent(a, cm, ts)))
+func AttachRecentHandler(m *http.ServeMux, cm conveyearthgo.ContentManager, ts *template.Template) {
+	m.Handle("/recent", handler.Log(Recent(cm, ts)))
 }
 
-func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
+func Recent(cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		account := a.CurrentAccount(w, r)
-		if account == nil {
-			redirect.SignIn(w, r)
-			return
-		}
 		data := struct {
 			Live          bool
-			Account       *authgo.Account
 			Conversations []*conveyearthgo.Conversation
 			Limit         int64
 		}{
-			Live:    netgo.IsLive(),
-			Account: account,
+			Live: netgo.IsLive(),
 		}
 		limit := int64(8)
 		if l := strings.TrimSpace(r.FormValue("limit")); l != "" {
