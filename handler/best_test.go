@@ -58,7 +58,7 @@ func TestBest(t *testing.T) {
 		assert.Equal(t, http.StatusFound, result.StatusCode)
 		u, err := result.Location()
 		assert.Nil(t, err)
-		assert.Equal(t, "/sign-in", u.String())
+		assert.Equal(t, "/sign-in?next=%2Fbest", u.String())
 	})
 	// TODO No Conversations
 	// TODO Many Conversations (Limit/More button)

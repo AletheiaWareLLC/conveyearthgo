@@ -63,7 +63,7 @@ func TestPublish(t *testing.T) {
 		assert.Equal(t, http.StatusFound, result.StatusCode)
 		u, err := result.Location()
 		assert.Nil(t, err)
-		assert.Equal(t, "/sign-in", u.String())
+		assert.Equal(t, "/sign-in?next=%2Fpublish", u.String())
 	})
 	// TODO Publish Success
 	// TODO Publish Topic Too Short

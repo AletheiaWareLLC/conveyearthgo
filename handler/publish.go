@@ -27,7 +27,7 @@ func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveye
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {
-			authredirect.SignIn(w, r)
+			authredirect.SignIn(w, r, r.URL.String())
 			return
 		}
 		data := &PublishData{

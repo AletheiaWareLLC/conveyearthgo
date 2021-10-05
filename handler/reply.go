@@ -24,7 +24,7 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {
-			authredirect.SignIn(w, r)
+			authredirect.SignIn(w, r, r.URL.String())
 			return
 		}
 		var conversation int64

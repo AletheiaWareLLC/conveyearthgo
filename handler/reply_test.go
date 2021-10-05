@@ -84,14 +84,14 @@ func TestReply(t *testing.T) {
 		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
 		mux := http.NewServeMux()
 		handler.AttachReplyHandler(mux, auth, am, cm, nm, tmpl)
-		request := httptest.NewRequest(http.MethodGet, "/reply", nil)
+		request := httptest.NewRequest(http.MethodGet, "/reply?conversation=10&message=10", nil)
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)
 		result := response.Result()
 		assert.Equal(t, http.StatusFound, result.StatusCode)
 		u, err := result.Location()
 		assert.Nil(t, err)
-		assert.Equal(t, "/sign-in", u.String())
+		assert.Equal(t, "/sign-in?next=%2Freply%3Fconversation%3D10%26message%3D10", u.String())
 	})
 	// TODO Reply Success
 	// TODO Reply Conversation Doesn't Exist

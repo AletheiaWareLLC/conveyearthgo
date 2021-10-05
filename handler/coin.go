@@ -27,7 +27,7 @@ func CoinBuy(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *templa
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {
-			redirect.SignIn(w, r)
+			redirect.SignIn(w, r, r.URL.String())
 			return
 		}
 		data := &CoinBuyData{
