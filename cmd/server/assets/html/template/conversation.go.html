@@ -25,6 +25,15 @@
 
             {{template "message" .}}
 
+            <p>
+                <small>
+                    Sort:
+                    {{if eq .Sort "cost"}}Cost{{else}}<a href="/conversation?id={{.ConversationID}}&sort=cost">Cost</a>{{end}}
+                    {{if eq .Sort "yield"}}Yield{{else}}<a href="/conversation?id={{.ConversationID}}&sort=yield">Yield</a>{{end}}
+                    {{if eq .Sort "time"}}Time{{else}}<a href="/conversation?id={{.ConversationID}}&sort=time">Time</a>{{end}}
+                </small>
+            </p>
+
             {{if gt (len .Replies) 0 -}}
             <ul class="reply">
                 {{template "reply" .}}

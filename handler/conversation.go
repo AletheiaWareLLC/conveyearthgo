@@ -49,11 +49,13 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			Live    bool
 			Account *authgo.Account
 			Topic   string
+			Sort    string
 		}{
 			Live:    netgo.IsLive(),
 			Account: account,
 		}
 		data.ConversationID = id
+		data.Sort = strings.TrimSpace(r.FormValue("sort"))
 		c, err := cm.LookupConversation(id)
 		if err != nil {
 			log.Println(err)
@@ -69,6 +71,7 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			if m.ParentID == 0 {
 				data.ConversationID = m.ConversationID
 				data.MessageID = m.ID
+				data.Created = m.Created
 				data.ParentID = m.ParentID
 				data.Author = m.Author
 				data.Cost = m.Cost
@@ -124,13 +127,32 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 				p.Replies = append(p.Replies, m)
 			}
 		}
+
+		var sorter func(*MessageData, *MessageData) bool
+		switch data.Sort {
+		case "time":
+			sorter = func(a, b *MessageData) bool {
+				return a.Created.Before(b.Created)
+			}
+		case "cost":
+			sorter = func(a, b *MessageData) bool {
+				return a.Cost > b.Cost
+			}
+		default:
+			data.Sort = "yield"
+			fallthrough
+		case "yield":
+			sorter = func(a, b *MessageData) bool {
+				return a.Yield > b.Yield
+			}
+		}
 		// Sort Replies
 		sort.Slice(data.Replies, func(i, j int) bool {
-			return data.Replies[i].Yield > data.Replies[j].Yield
+			return sorter(data.Replies[i], data.Replies[j])
 		})
 		for _, m := range messages {
 			sort.Slice(m.Replies, func(i, j int) bool {
-				return m.Replies[i].Yield > m.Replies[j].Yield
+				return sorter(m.Replies[i], m.Replies[j])
 			})
 		}
 		if err := ts.ExecuteTemplate(w, "conversation.go.html", data); err != nil {
