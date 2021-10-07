@@ -25,6 +25,7 @@
 
             {{template "message" .}}
 
+            {{if gt (len .Replies) 0 -}}
             <p>
                 <small>
                     Sort:
@@ -33,8 +34,6 @@
                     {{if eq .Sort "time"}}Time{{else}}<a href="/conversation?id={{.ConversationID}}&sort=time">Time</a>{{end}}
                 </small>
             </p>
-
-            {{if gt (len .Replies) 0 -}}
             <ul class="reply">
                 {{template "reply" .}}
             </ul>
