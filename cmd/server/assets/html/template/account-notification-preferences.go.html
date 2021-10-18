@@ -41,7 +41,7 @@
                         <td>
                             <label for="responses">
                                 <h5>Responses</h5>
-                                <p>Do you wish to be notified when someone responds to one of your messages?</p>
+                                <p>Do you wish to be notified when you receive a response?</p>
                             </label>
                         </td>
                         <td class="notifications">
@@ -53,9 +53,23 @@
                     </tr>
                     <tr>
                         <td>
+                            <label for="gifts">
+                                <h5>Gifts</h5>
+                                <p>Do you wish to be notified when you receive a gift?</p>
+                            </label>
+                        </td>
+                        <td class="notifications">
+                            <input type="radio" id="yes" name="gifts" value="yes" {{if .NotificationGifts}}checked{{end}}/>
+                        </td>
+                        <td class="notifications">
+                            <input type="radio" id="no" name="gifts" value="no" {{if not .NotificationGifts}}checked{{end}}/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
                             <label for="mentions">
                                 <h5>Mentions</h5>
-                                <p>Do you wish to be notified when someone mentions you (@{{.Account.Username}})?</p>
+                                <p>Do you wish to be notified when you are mentioned (@{{.Account.Username}})?</p>
                             </label>
                         </td>
                         <td class="notifications">

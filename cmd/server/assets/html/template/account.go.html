@@ -72,11 +72,15 @@
                     <table style="margin: 0 auto;">
                         <tr>
                             <th style="text-align: right; color: deepskyblue;">Responses</th>
-                            <td style="text-align: left;">You {{if .NotificationResponses}}will{{else}}will not{{end}} be notified when someone responds to one of your messages.</td>
+                            <td style="text-align: left;">You {{if .NotificationResponses}}will{{else}}will not{{end}} be notified when you receive a response.</td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: right; color: deepskyblue;">Gifts</th>
+                            <td style="text-align: left;">You {{if .NotificationGifts}}will{{else}}will not{{end}} be notified when you receive a gift.</td>
                         </tr>
                         <tr>
                             <th style="text-align: right; color: deepskyblue;">Mentions</th>
-                            <td style="text-align: left;">You {{if .NotificationMentions}}will{{else}}will not{{end}} be notified when someone mentions you.</td>
+                            <td style="text-align: left;">You {{if .NotificationMentions}}will{{else}}will not{{end}} be notified when you are mentioned.</td>
                         </tr>
                         <tr>
                             <th style="text-align: right; color: deepskyblue;">Digests</th>

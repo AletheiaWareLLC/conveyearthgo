@@ -18,6 +18,7 @@ Disallow: /best
 Disallow: /content
 Disallow: /conversation
 Disallow: /digest
+Disallow: /gift
 Disallow: /message
 Disallow: /publish
 Disallow: /reply

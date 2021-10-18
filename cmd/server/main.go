@@ -208,6 +208,9 @@ func main() {
 	// Handle Reply
 	handler.AttachReplyHandler(mux, auth, am, cm, nm, templates)
 
+	// Handle Gift
+	handler.AttachGiftHandler(mux, auth, am, cm, nm, templates)
+
 	// Handle Best
 	handler.AttachBestHandler(mux, auth, cm, templates)
 

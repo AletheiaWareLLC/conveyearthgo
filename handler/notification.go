@@ -27,7 +27,7 @@ func NotificationPreferences(a authgo.Authenticator, nm conveyearthgo.Notificati
 			Account: account,
 			Live:    netgo.IsLive(),
 		}
-		id, responses, mentions, digests, err := nm.NotificationPreferences(account.ID)
+		id, responses, mentions, gifts, digests, err := nm.NotificationPreferences(account.ID)
 		if err != nil {
 			log.Println(err)
 			data.Error = err.Error()
@@ -36,6 +36,7 @@ func NotificationPreferences(a authgo.Authenticator, nm conveyearthgo.Notificati
 		}
 		data.NotificationResponses = responses
 		data.NotificationMentions = mentions
+		data.NotificationGifts = gifts
 		data.NotificationDigests = digests
 		switch r.Method {
 		case "GET":
@@ -43,16 +44,19 @@ func NotificationPreferences(a authgo.Authenticator, nm conveyearthgo.Notificati
 		case "POST":
 			responses := strings.TrimSpace(r.FormValue("responses")) == "yes"
 			mentions := strings.TrimSpace(r.FormValue("mentions")) == "yes"
+			gifts := strings.TrimSpace(r.FormValue("gifts")) == "yes"
 			digests := strings.TrimSpace(r.FormValue("digests")) == "yes"
 
 			data.NotificationResponses = responses
 			data.NotificationMentions = mentions
+			data.NotificationGifts = gifts
 			data.NotificationDigests = digests
 
-			if err := nm.SetNotificationPreferences(id, account.ID, responses, mentions, digests); err != nil {
+			if err := nm.SetNotificationPreferences(id, account.ID, responses, mentions, gifts, digests); err != nil {
 				log.Println(err)
 				data.Error = err.Error()
 				executeNotificationPreferencesTemplate(w, ts, data)
+				return
 			}
 			redirect.Account(w, r)
 		}
@@ -71,5 +75,6 @@ type NotificationPreferencesData struct {
 	Account               *authgo.Account
 	NotificationResponses bool
 	NotificationMentions  bool
+	NotificationGifts     bool
 	NotificationDigests   bool
 }

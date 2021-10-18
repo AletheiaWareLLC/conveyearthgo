@@ -11,31 +11,41 @@ var ErrInsufficientBalance = errors.New("Insufficient Balance")
 
 type AccountDatabase interface {
 	SelectUser(string) (int64, string, []byte, time.Time, error)
-	SelectCharges(int64) (int64, error)
-	SelectYields(int64) (int64, error)
-	SelectPurchases(int64) (int64, error)
-	SelectAwards(int64) (int64, error)
+	SelectChargesForUser(int64) (int64, error)
+	SelectYieldsForUser(int64) (int64, error)
+	SelectPurchasesForUser(int64) (int64, error)
+	SelectAwardsForUser(int64) (int64, error)
+	SelectGiftsForUser(int64) (int64, error)
+	SelectGiftsFromUser(int64) (int64, error)
 	CreatePurchase(int64, string, string, string, string, int64, int64, time.Time) (int64, error)
 }
 
 func AccountBalance(db AccountDatabase, user int64) (int64, error) {
-	charges, err := db.SelectCharges(user)
+	charges, err := db.SelectChargesForUser(user)
 	if err != nil {
 		return 0, err
 	}
-	yields, err := db.SelectYields(user)
+	yields, err := db.SelectYieldsForUser(user)
 	if err != nil {
 		return 0, err
 	}
-	purchases, err := db.SelectPurchases(user)
+	purchases, err := db.SelectPurchasesForUser(user)
 	if err != nil {
 		return 0, err
 	}
-	awards, err := db.SelectAwards(user)
+	awards, err := db.SelectAwardsForUser(user)
 	if err != nil {
 		return 0, err
 	}
-	return awards + purchases + yields - charges, nil
+	received, err := db.SelectGiftsForUser(user)
+	if err != nil {
+		return 0, err
+	}
+	given, err := db.SelectGiftsFromUser(user)
+	if err != nil {
+		return 0, err
+	}
+	return received + awards + purchases + yields - charges - given, nil
 }
 
 type AccountManager interface {

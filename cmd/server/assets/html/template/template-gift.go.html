@@ -1,0 +1,11 @@
+{{define "gift" -}}
+{{if gt (len .) 0 -}}
+<ul class="gift">
+    {{range . -}}
+    <li class="gift">
+        <p class="meta">{{template "date-time" .Created}} {{.Author.Username}} {{template "cost" .Amount}} 🎁</p>
+    </li>
+    {{- end}}
+</ul>
+{{- end}}
+{{- end}}

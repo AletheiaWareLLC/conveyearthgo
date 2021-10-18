@@ -51,6 +51,7 @@ func NewInMemory() *InMemory {
 		NotificationPreferencesUser:      make(map[int64]int64),
 		NotificationPreferencesResponses: make(map[int64]bool),
 		NotificationPreferencesMentions:  make(map[int64]bool),
+		NotificationPreferencesGifts:     make(map[int64]bool),
 		NotificationPreferencesDigests:   make(map[int64]bool),
 		AwardId:                          make(map[int64]bool),
 		AwardUser:                        make(map[int64]int64),
@@ -59,6 +60,12 @@ func NewInMemory() *InMemory {
 		StripeAccountUser:                make(map[int64]int64),
 		StripeAccountIdentity:            make(map[int64]string),
 		StripeAccountCreated:             make(map[int64]time.Time),
+		GiftId:                           make(map[int64]bool),
+		GiftUser:                         make(map[int64]int64),
+		GiftConversation:                 make(map[int64]int64),
+		GiftMessage:                      make(map[int64]int64),
+		GiftAmount:                       make(map[int64]int64),
+		GiftCreated:                      make(map[int64]time.Time),
 	}
 }
 
@@ -105,6 +112,7 @@ type InMemory struct {
 	NotificationPreferencesUser      map[int64]int64
 	NotificationPreferencesResponses map[int64]bool
 	NotificationPreferencesMentions  map[int64]bool
+	NotificationPreferencesGifts     map[int64]bool
 	NotificationPreferencesDigests   map[int64]bool
 	AwardId                          map[int64]bool
 	AwardUser                        map[int64]int64
@@ -113,6 +121,12 @@ type InMemory struct {
 	StripeAccountUser                map[int64]int64
 	StripeAccountIdentity            map[int64]string
 	StripeAccountCreated             map[int64]time.Time
+	GiftId                           map[int64]bool
+	GiftUser                         map[int64]int64
+	GiftConversation                 map[int64]int64
+	GiftMessage                      map[int64]int64
+	GiftAmount                       map[int64]int64
+	GiftCreated                      map[int64]time.Time
 }
 
 func (db *InMemory) CreateConversation(user int64, topic string, created time.Time) (int64, error) {
@@ -361,7 +375,7 @@ func (db *InMemory) CreateCharge(user, conversation, message, amount int64, crea
 	return id, nil
 }
 
-func (db *InMemory) SelectCharges(user int64) (int64, error) {
+func (db *InMemory) SelectChargesForUser(user int64) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
 	var charges int64
@@ -388,15 +402,20 @@ func (db *InMemory) CreateYield(user, conversation, message, parent, amount int6
 	return id, nil
 }
 
-func (db *InMemory) SelectYields(user int64) (int64, error) {
+func (db *InMemory) SelectYieldsForUser(user int64) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
 	var yields int64
-	for yid := range db.YieldId {
-		if db.YieldUser[yid] != user {
+	for mid := range db.MessageId {
+		if db.MessageUser[mid] != user {
 			continue
 		}
-		yields += db.YieldAmount[yid]
+		for yid := range db.YieldId {
+			if db.YieldParent[yid] != mid {
+				continue
+			}
+			yields += db.YieldAmount[yid]
+		}
 	}
 	return yields, nil
 }
@@ -417,7 +436,7 @@ func (db *InMemory) CreatePurchase(user int64, stripeSession, stripeCustomer, st
 	return id, nil
 }
 
-func (db *InMemory) SelectPurchases(user int64) (int64, error) {
+func (db *InMemory) SelectPurchasesForUser(user int64) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
 	var purchases int64
@@ -430,32 +449,35 @@ func (db *InMemory) SelectPurchases(user int64) (int64, error) {
 	return purchases, nil
 }
 
-func (db *InMemory) UpdateNotificationPreferences(id, user int64, responses, mentions, digests bool) (int64, error) {
+func (db *InMemory) UpdateNotificationPreferences(id, user int64, responses, mentions, gifts, digests bool) (int64, error) {
 	db.NotificationPreferencesId[id] = true
 	db.NotificationPreferencesUser[id] = user
 	db.NotificationPreferencesResponses[id] = responses
 	db.NotificationPreferencesMentions[id] = mentions
+	db.NotificationPreferencesGifts[id] = gifts
 	db.NotificationPreferencesDigests[id] = digests
 	return 1, nil
 }
 
-func (db *InMemory) SelectNotificationPreferences(user int64) (int64, bool, bool, bool, error) {
+func (db *InMemory) SelectNotificationPreferences(user int64) (int64, bool, bool, bool, bool, error) {
 	var id int64
 	responses := true
 	mentions := true
+	gifts := true
 	digests := true
 	for i := range db.NotificationPreferencesId {
 		if db.NotificationPreferencesUser[i] == user {
 			id = i
 			responses = db.NotificationPreferencesResponses[i]
 			mentions = db.NotificationPreferencesMentions[i]
+			gifts = db.NotificationPreferencesGifts[i]
 			digests = db.NotificationPreferencesDigests[i]
 		}
 	}
-	return id, responses, mentions, digests, nil
+	return id, responses, mentions, gifts, digests, nil
 }
 
-func (db *InMemory) SelectAwards(user int64) (int64, error) {
+func (db *InMemory) SelectAwardsForUser(user int64) (int64, error) {
 	db.Lock()
 	defer db.Unlock()
 	var awards int64
@@ -488,6 +510,78 @@ func (db *InMemory) SelectStripeAccount(user int64) (string, time.Time, error) {
 		}
 	}
 	return "", time.Time{}, nil
+}
+
+func (db *InMemory) CreateGift(user, conversation, message, amount int64, created time.Time) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
+	id := database.NextId()
+	db.GiftId[id] = true
+	db.GiftUser[id] = user
+	db.GiftConversation[id] = conversation
+	db.GiftMessage[id] = message
+	db.GiftAmount[id] = amount
+	db.GiftCreated[id] = created
+	return id, nil
+}
+
+func (db *InMemory) SelectGifts(conversation, message int64, callback func(int64, int64, int64, *authgo.Account, int64, time.Time) error) error {
+	db.Lock()
+	defer db.Unlock()
+	for id := range db.GiftId {
+		if conversation > 0 && db.GiftConversation[id] != conversation {
+			continue
+		}
+		if message > 0 && db.GiftMessage[id] != message {
+			continue
+		}
+		conversation = db.GiftConversation[id]
+		message = db.GiftMessage[id]
+		user := db.GiftUser[id]
+		username := db.username(user)
+		email := db.AccountEmail[username]
+		amount := db.GiftAmount[id]
+		created := db.GiftCreated[id]
+		if err := callback(id, conversation, message, &authgo.Account{
+			ID:       user,
+			Username: username,
+			Email:    email,
+		}, amount, created); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (db *InMemory) SelectGiftsForUser(user int64) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
+	var gifts int64
+	for mid := range db.MessageId {
+		if db.MessageUser[mid] != user {
+			continue
+		}
+		for gid := range db.GiftId {
+			if db.GiftMessage[gid] != mid {
+				continue
+			}
+			gifts += db.GiftAmount[gid]
+		}
+	}
+	return gifts, nil
+}
+
+func (db *InMemory) SelectGiftsFromUser(user int64) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
+	var gifts int64
+	for yid := range db.GiftId {
+		if db.GiftUser[yid] != user {
+			continue
+		}
+		gifts += db.GiftAmount[yid]
+	}
+	return gifts, nil
 }
 
 func (db *InMemory) username(id int64) string {

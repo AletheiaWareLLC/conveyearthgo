@@ -62,3 +62,7 @@ func TestInMemoryAccountPasswordSignOutSignInAccount(t *testing.T) {
 func TestInMemoryAccountRecoveryAccountPasswordAccount(t *testing.T) {
 	handler.SignUpSignOutSignInAccount(t, NewInMemoryAuthenticator)
 }
+
+func TestInMemory_AccountBalance(t *testing.T) {
+	AccountBalance(t, database.NewInMemory())
+}

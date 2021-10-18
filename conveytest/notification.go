@@ -21,3 +21,8 @@ func (s *notificationSender) SendMentionNotification(account *authgo.Account, me
 	log.Println("Mention Notification", account.Email, account.Username, mentioner, topic, conversation, message)
 	return nil
 }
+
+func (s *notificationSender) SendGiftNotification(account *authgo.Account, gifter, topic string, conversation, message, amount int64) error {
+	log.Println("Gift Notification", account.Email, account.Username, gifter, topic, conversation, message, amount)
+	return nil
+}

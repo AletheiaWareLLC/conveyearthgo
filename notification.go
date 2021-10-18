@@ -9,20 +9,22 @@ import (
 )
 
 type NotificationDatabase interface {
-	SelectNotificationPreferences(int64) (int64, bool, bool, bool, error)
-	UpdateNotificationPreferences(int64, int64, bool, bool, bool) (int64, error)
+	SelectNotificationPreferences(int64) (int64, bool, bool, bool, bool, error)
+	UpdateNotificationPreferences(int64, int64, bool, bool, bool, bool) (int64, error)
 }
 
 type NotificationManager interface {
-	NotificationPreferences(int64) (int64, bool, bool, bool, error)
-	SetNotificationPreferences(int64, int64, bool, bool, bool) error
+	NotificationPreferences(int64) (int64, bool, bool, bool, bool, error)
+	SetNotificationPreferences(int64, int64, bool, bool, bool, bool) error
 	NotifyResponse(*authgo.Account, *authgo.Account, int64, string, int64) error
 	NotifyMention(*authgo.Account, *authgo.Account, int64, string, int64) error
+	NotifyGift(*authgo.Account, *authgo.Account, int64, string, int64, int64) error
 }
 
 type NotificationSender interface {
 	SendResponseNotification(*authgo.Account, string, string, int64, int64) error
 	SendMentionNotification(*authgo.Account, string, string, int64, int64) error
+	SendGiftNotification(*authgo.Account, string, string, int64, int64, int64) error
 }
 
 func NewNotificationManager(db NotificationDatabase, sender NotificationSender) NotificationManager {
@@ -37,17 +39,17 @@ type notificationManager struct {
 	sender   NotificationSender
 }
 
-func (m *notificationManager) NotificationPreferences(user int64) (int64, bool, bool, bool, error) {
+func (m *notificationManager) NotificationPreferences(user int64) (int64, bool, bool, bool, bool, error) {
 	return m.database.SelectNotificationPreferences(user)
 }
 
-func (m *notificationManager) SetNotificationPreferences(id, user int64, responses, mentions, digests bool) error {
-	_, err := m.database.UpdateNotificationPreferences(id, user, responses, mentions, digests)
+func (m *notificationManager) SetNotificationPreferences(id, user int64, responses, mentions, gifts, digests bool) error {
+	_, err := m.database.UpdateNotificationPreferences(id, user, responses, mentions, gifts, digests)
 	return err
 }
 
 func (m *notificationManager) NotifyResponse(author, responder *authgo.Account, conversation int64, topic string, message int64) error {
-	_, responses, _, _, err := m.database.SelectNotificationPreferences(author.ID)
+	_, responses, _, _, _, err := m.database.SelectNotificationPreferences(author.ID)
 	if err != nil {
 		return err
 	}
@@ -59,7 +61,7 @@ func (m *notificationManager) NotifyResponse(author, responder *authgo.Account, 
 }
 
 func (m *notificationManager) NotifyMention(author, mentioner *authgo.Account, conversation int64, topic string, message int64) error {
-	_, _, mentions, _, err := m.database.SelectNotificationPreferences(author.ID)
+	_, _, mentions, _, _, err := m.database.SelectNotificationPreferences(author.ID)
 	if err != nil {
 		return err
 	}
@@ -68,6 +70,18 @@ func (m *notificationManager) NotifyMention(author, mentioner *authgo.Account, c
 		return nil
 	}
 	return m.sender.SendMentionNotification(author, mentioner.Username, topic, conversation, message)
+}
+
+func (m *notificationManager) NotifyGift(author, mentioner *authgo.Account, conversation int64, topic string, message, amount int64) error {
+	_, _, _, gifts, _, err := m.database.SelectNotificationPreferences(author.ID)
+	if err != nil {
+		return err
+	}
+	if !gifts {
+		// User disabled gift notifications
+		return nil
+	}
+	return m.sender.SendGiftNotification(author, mentioner.Username, topic, conversation, message, amount)
 }
 
 func NewSmtpNotificationSender(scheme, host, server, identity, sender string, templates *template.Template) NotificationSender {
@@ -128,6 +142,28 @@ func (s *smtpNotificationSender) SendMentionNotification(account *authgo.Account
 		Link:      createLink(s.scheme, s.host, conversation, message),
 	}
 	return authemail.SendEmail(s.server, s.identity, s.sender, account.Email, s.templates.Lookup("email-notification-mention.go.html"), data)
+}
+
+func (s *smtpNotificationSender) SendGiftNotification(account *authgo.Account, gifter, topic string, conversation, message, amount int64) error {
+	log.Println("Notifying", account.Email, "of gift")
+	data := struct {
+		From     string
+		To       string
+		Topic    string
+		Username string
+		Gifter   string
+		Amount   int64
+		Link     string
+	}{
+		From:     s.sender,
+		To:       account.Email,
+		Topic:    topic,
+		Username: account.Username,
+		Gifter:   gifter,
+		Amount:   amount,
+		Link:     createLink(s.scheme, s.host, conversation, message),
+	}
+	return authemail.SendEmail(s.server, s.identity, s.sender, account.Email, s.templates.Lookup("email-notification-gift.go.html"), data)
 }
 
 func createLink(scheme, host string, conversation, message int64) string {

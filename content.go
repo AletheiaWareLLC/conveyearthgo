@@ -113,6 +113,9 @@ type ContentDatabase interface {
 
 	CreateCharge(int64, int64, int64, int64, time.Time) (int64, error)
 	CreateYield(int64, int64, int64, int64, int64, time.Time) (int64, error)
+
+	CreateGift(int64, int64, int64, int64, time.Time) (int64, error)
+	SelectGifts(int64, int64, func(int64, int64, int64, *authgo.Account, int64, time.Time) error) error
 }
 
 type ContentManager interface {
@@ -129,6 +132,8 @@ type ContentManager interface {
 	LookupMessages(int64, func(*Message) error) error
 	LookupFile(int64) (*File, error)
 	LookupFiles(int64, func(*File) error) error
+	NewGift(*authgo.Account, int64, int64, int64) (*Gift, error)
+	LookupGifts(int64, int64, func(*Gift) error) error
 }
 
 func NewContentManager(db ContentDatabase, fs Filesystem) ContentManager {
@@ -449,6 +454,36 @@ func (m *contentManager) LookupFiles(message int64, callback func(*File) error) 
 			Hash:    hash,
 			Mime:    mime,
 			Created: created,
+		})
+	})
+}
+
+func (m *contentManager) NewGift(account *authgo.Account, conversation, message int64, amount int64) (*Gift, error) {
+	created := time.Now()
+	gift, err := m.database.CreateGift(account.ID, conversation, message, amount, created)
+	if err != nil {
+		return nil, err
+	}
+	log.Println("Created Gift", gift)
+	return &Gift{
+		ID:             gift,
+		Author:         account,
+		ConversationID: conversation,
+		MessageID:      message,
+		Amount:         amount,
+		Created:        created,
+	}, nil
+}
+
+func (m *contentManager) LookupGifts(conversation, message int64, callback func(*Gift) error) error {
+	return m.database.SelectGifts(conversation, message, func(id, conversation, message int64, author *authgo.Account, amount int64, created time.Time) error {
+		return callback(&Gift{
+			ID:             id,
+			Author:         author,
+			ConversationID: conversation,
+			MessageID:      message,
+			Amount:         amount,
+			Created:        created,
 		})
 	})
 }

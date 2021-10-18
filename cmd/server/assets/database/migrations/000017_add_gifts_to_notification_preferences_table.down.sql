@@ -1,0 +1,2 @@
+ALTER TABLE tbl_notification_preferences
+DROP COLUMN gifts;

@@ -195,10 +195,10 @@ ol {
 .nav li {
     display: inline;
 }
-ul.reply {
+ul.reply, ul.gift {
     list-style-type: none;
 }
-li.reply {
+li.reply, li.gift {
     border-left: thin solid rgba(135,206,250,0.25); /*semi-transparent lightskyblue*/
     margin: 8px;
     padding-left: 8px;

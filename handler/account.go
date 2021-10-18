@@ -36,7 +36,7 @@ func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveye
 			return
 		}
 		data.Balance = balance
-		_, responses, mentions, digests, err := nm.NotificationPreferences(account.ID)
+		_, responses, mentions, gifts, digests, err := nm.NotificationPreferences(account.ID)
 		if err != nil {
 			log.Println(err)
 			data.Error = err.Error()
@@ -45,6 +45,7 @@ func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveye
 		}
 		data.NotificationResponses = responses
 		data.NotificationMentions = mentions
+		data.NotificationGifts = gifts
 		data.NotificationDigests = digests
 		executeAccountTemplate(w, ts, data)
 	})
@@ -63,6 +64,7 @@ type AccountData struct {
 	Balance               int64
 	NotificationResponses bool
 	NotificationMentions  bool
+	NotificationGifts     bool
 	NotificationDigests   bool
 	Scheme                string
 	Domain                string

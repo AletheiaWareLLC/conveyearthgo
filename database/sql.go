@@ -85,7 +85,7 @@ INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
 INNER JOIN tbl_messages ON tbl_conversations.id=tbl_messages.conversation AND tbl_messages.parent IS NULL
 INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
 LEFT JOIN (
-	SELECT parent, SUM(IFNULL(amount,0)) AS yield
+	SELECT parent, SUM(IFNULL(amount, 0)) AS yield
 	FROM tbl_yields
 	GROUP BY parent
 ) AS yields ON tbl_messages.id=yields.parent
@@ -527,13 +527,13 @@ func (db *Sql) SelectConversation(id int64) (*authgo.Account, string, time.Time,
 
 func (db *Sql) SelectBestConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
 	rows, err := db.Query(`
-		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield,0)
+		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_conversations
 		INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
 		INNER JOIN tbl_messages ON tbl_conversations.id=tbl_messages.conversation AND tbl_messages.parent IS NULL
 		INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
 		LEFT JOIN (
-			SELECT parent, SUM(IFNULL(amount,0)) AS yield
+			SELECT parent, SUM(IFNULL(amount, 0)) AS yield
 			FROM tbl_yields
 			GROUP BY parent
 		) AS yields ON tbl_messages.id=yields.parent
@@ -578,7 +578,7 @@ func (db *Sql) SelectRecentConversations(callback func(int64, *authgo.Account, s
 		INNER JOIN tbl_messages ON tbl_conversations.id=tbl_messages.conversation AND tbl_messages.parent IS NULL
 		INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
 		LEFT JOIN (
-			SELECT parent, SUM(IFNULL(amount,0)) AS yield
+			SELECT parent, SUM(IFNULL(amount, 0)) AS yield
 			FROM tbl_yields
 			GROUP BY parent
 		) AS yields ON tbl_messages.id=yields.parent
@@ -651,7 +651,7 @@ func (db *Sql) SelectMessage(id int64) (*authgo.Account, int64, int64, time.Time
 		INNER JOIN tbl_users ON tbl_messages.user=tbl_users.id
 		INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
 		LEFT JOIN (
-			SELECT parent, SUM(IFNULL(amount,0)) AS yield
+			SELECT parent, SUM(IFNULL(amount, 0)) AS yield
 			FROM tbl_yields
 			GROUP BY parent
 		) AS yields ON tbl_messages.id=yields.parent
@@ -788,16 +788,16 @@ func (db *Sql) CreateCharge(user, conversation, message, amount int64, created t
 	return result.LastInsertId()
 }
 
-func (db *Sql) SelectCharges(user int64) (int64, error) {
+func (db *Sql) SelectChargesForUser(user int64) (int64, error) {
 	row := db.QueryRow(`
-		SELECT SUM(IFNULL(total_charges,0))
+		SELECT SUM(IFNULL(total_charges, 0))
 		FROM tbl_users
 		LEFT JOIN (
 			SELECT id, user
 			FROM tbl_messages
 		) AS ms ON ms.user=tbl_users.id
 		LEFT JOIN (
-			SELECT message, SUM(IFNULL(amount,0)) AS total_charges
+			SELECT message, SUM(IFNULL(amount, 0)) AS total_charges
 			FROM tbl_charges
 			GROUP BY message
 		) AS cs ON cs.message=ms.id
@@ -821,16 +821,16 @@ func (db *Sql) CreateYield(user, conversation, message, parent, amount int64, cr
 	return result.LastInsertId()
 }
 
-func (db *Sql) SelectYields(user int64) (int64, error) {
+func (db *Sql) SelectYieldsForUser(user int64) (int64, error) {
 	row := db.QueryRow(`
-		SELECT SUM(IFNULL(total_yields,0))
+		SELECT SUM(IFNULL(total_yields, 0))
 		FROM tbl_users
 		LEFT JOIN (
 			SELECT id, user
 			FROM tbl_messages
 		) AS ms ON ms.user=tbl_users.id
 		LEFT JOIN (
-			SELECT parent, SUM(IFNULL(amount,0)) AS total_yields
+			SELECT parent, SUM(IFNULL(amount, 0)) AS total_yields
 			FROM tbl_yields
 			GROUP BY parent
 		) AS ys ON ys.parent=ms.id
@@ -854,9 +854,9 @@ func (db *Sql) CreatePurchase(user int64, sessionID, customerID, paymentIntentID
 	return result.LastInsertId()
 }
 
-func (db *Sql) SelectPurchases(user int64) (int64, error) {
+func (db *Sql) SelectPurchasesForUser(user int64) (int64, error) {
 	row := db.QueryRow(`
-		SELECT IFNULL(SUM(IFNULL(bundle_size,0)),0)
+		SELECT IFNULL(SUM(IFNULL(bundle_size, 0)), 0)
 		FROM tbl_purchases
 		WHERE tbl_purchases.user=?`, user)
 	var (
@@ -868,9 +868,9 @@ func (db *Sql) SelectPurchases(user int64) (int64, error) {
 	return purchases, nil
 }
 
-func (db *Sql) SelectNotificationPreferences(user int64) (int64, bool, bool, bool, error) {
+func (db *Sql) SelectNotificationPreferences(user int64) (int64, bool, bool, bool, bool, error) {
 	row := db.QueryRow(`
-		SELECT id, responses, mentions, digests
+		SELECT id, responses, mentions, gifts, digests
 		FROM tbl_notification_preferences
 		WHERE user=?`, user)
 
@@ -878,32 +878,33 @@ func (db *Sql) SelectNotificationPreferences(user int64) (int64, bool, bool, boo
 		id        int64
 		responses bool
 		mentions  bool
+		gifts     bool
 		digests   bool
 	)
-	if err := row.Scan(&id, &responses, &mentions, &digests); err != nil {
+	if err := row.Scan(&id, &responses, &mentions, &gifts, &digests); err != nil {
 		if err == sql.ErrNoRows {
 			// Notification preferences default to enabled
-			return 0, true, true, true, nil
+			return 0, true, true, true, true, nil
 		}
-		return 0, false, false, false, err
+		return 0, false, false, false, false, err
 	}
-	return id, responses, mentions, digests, nil
+	return id, responses, mentions, gifts, digests, nil
 }
 
-func (db *Sql) UpdateNotificationPreferences(id, user int64, responses, mentions, digests bool) (int64, error) {
+func (db *Sql) UpdateNotificationPreferences(id, user int64, responses, mentions, gifts, digests bool) (int64, error) {
 	var (
 		result sql.Result
 		err    error
 	)
 	if id == 0 {
 		result, err = db.Exec(`
-		INSERT INTO tbl_notification_preferences (user, responses, mentions, digests)
-		VALUES (?, ?, ?, ?)`, user, responses, mentions, digests)
+		INSERT INTO tbl_notification_preferences (user, responses, mentions, gifts, digests)
+		VALUES (?, ?, ?, ?, ?)`, user, responses, mentions, gifts, digests)
 	} else {
 		result, err = db.Exec(`
 		UPDATE tbl_notification_preferences
-		SET user=?, responses=?, mentions=?, digests=?
-		WHERE id=?`, user, responses, mentions, digests, id)
+		SET user=?, responses=?, mentions=?, gifts=?, digests=?
+		WHERE id=?`, user, responses, mentions, gifts, digests, id)
 	}
 	if err != nil {
 		return 0, err
@@ -911,9 +912,9 @@ func (db *Sql) UpdateNotificationPreferences(id, user int64, responses, mentions
 	return result.LastInsertId()
 }
 
-func (db *Sql) SelectAwards(user int64) (int64, error) {
+func (db *Sql) SelectAwardsForUser(user int64) (int64, error) {
 	row := db.QueryRow(`
-		SELECT IFNULL(SUM(IFNULL(amount,0)),0)
+		SELECT IFNULL(SUM(IFNULL(amount, 0)), 0)
 		FROM tbl_awards
 		WHERE tbl_awards.user=?`, user)
 	var (
@@ -948,4 +949,99 @@ func (db *Sql) SelectStripeAccount(user int64) (string, time.Time, error) {
 		return "", time.Time{}, err
 	}
 	return identity, time.Unix(created, 0), nil
+}
+
+func (db *Sql) CreateGift(user, conversation, message, amount int64, created time.Time) (int64, error) {
+	result, err := db.Exec(`
+		INSERT INTO tbl_gifts
+		SET user=?, conversation=?, message=?, amount=?, created_unix=?`, user, conversation, message, amount, created.Unix())
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+func (db *Sql) SelectGifts(conversation, message int64, callback func(int64, int64, int64, *authgo.Account, int64, time.Time) error) error {
+	var (
+		rows *sql.Rows
+		err  error
+	)
+	if message <= 0 {
+		rows, err = db.Query(`
+		SELECT tbl_gifts.id, tbl_gifts.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_gifts.conversation, tbl_gifts.message, tbl_gifts.amount, tbl_gifts.created_unix
+		FROM tbl_gifts
+		INNER JOIN tbl_users ON tbl_gifts.user=tbl_users.id
+		WHERE tbl_gifts.conversation=?`, conversation)
+	} else {
+		rows, err = db.Query(`
+		SELECT tbl_gifts.id, tbl_gifts.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_gifts.conversation, tbl_gifts.message, tbl_gifts.amount, tbl_gifts.created_unix
+		FROM tbl_gifts
+		INNER JOIN tbl_users ON tbl_gifts.user=tbl_users.id
+		WHERE tbl_gifts.conversation=? AND tbl_gifts.message=?`, conversation, message)
+	}
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var (
+			id           int64
+			user         int64
+			username     string
+			email        string
+			joined       int64
+			conversation int64
+			message      int64
+			amount       int64
+			created      int64
+		)
+		if err := rows.Scan(&id, &user, &username, &email, &joined, &conversation, &message, &amount, &created); err != nil {
+			return err
+		}
+		if err := callback(id, conversation, message, &authgo.Account{
+			ID:       user,
+			Username: username,
+			Email:    email,
+			Created:  time.Unix(joined, 0),
+		}, amount, time.Unix(created, 0)); err != nil {
+			return err
+		}
+	}
+	return rows.Err()
+}
+
+func (db *Sql) SelectGiftsForUser(user int64) (int64, error) {
+	row := db.QueryRow(`
+		SELECT SUM(IFNULL(total_amounts, 0))
+		FROM tbl_users
+		LEFT JOIN (
+			SELECT id, user
+			FROM tbl_messages
+		) AS ms ON ms.user=tbl_users.id
+		LEFT JOIN (
+			SELECT message, SUM(IFNULL(amount, 0)) AS total_amounts
+			FROM tbl_gifts
+			GROUP BY message
+		) AS ys ON ys.message=ms.id
+		WHERE tbl_users.id=?`, user)
+	var (
+		gifts int64
+	)
+	if err := row.Scan(&gifts); err != nil {
+		return 0, err
+	}
+	return gifts, nil
+}
+
+func (db *Sql) SelectGiftsFromUser(user int64) (int64, error) {
+	row := db.QueryRow(`
+		SELECT IFNULL(SUM(IFNULL(amount, 0)), 0)
+		FROM tbl_gifts
+		WHERE tbl_gifts.user=?`, user)
+	var (
+		gifts int64
+	)
+	if err := row.Scan(&gifts); err != nil {
+		return 0, err
+	}
+	return gifts, nil
 }

@@ -33,6 +33,13 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
+		type GiftData struct {
+			ConversationID int64
+			MessageID      int64
+			Author         *authgo.Account
+			Amount         int64
+			Created        time.Time
+		}
 		type MessageData struct {
 			ConversationID int64
 			MessageID      int64
@@ -42,6 +49,7 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			Yield          int64
 			Content        template.HTML
 			Replies        []*MessageData
+			Gifts          []*GiftData
 			Created        time.Time
 		}
 		data := struct {
@@ -93,6 +101,27 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
+		// Lookup Gifts
+		if err := cm.LookupGifts(id, 0, func(g *conveyearthgo.Gift) error {
+			gd := &GiftData{
+				ConversationID: g.ConversationID,
+				MessageID:      g.MessageID,
+				Created:        g.Created,
+				Author:         g.Author,
+				Amount:         g.Amount,
+			}
+			if g.MessageID == data.MessageID {
+				data.Gifts = append(data.Gifts, gd)
+			} else {
+				p := messages[g.MessageID]
+				p.Gifts = append(p.Gifts, gd)
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
 		// Set Content
 		if err := cm.LookupFiles(data.MessageID, func(f *conveyearthgo.File) error {
 			c, err := cm.ToHTML(f.Hash, f.Mime)
@@ -127,7 +156,6 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 				p.Replies = append(p.Replies, m)
 			}
 		}
-
 		var sorter func(*MessageData, *MessageData) bool
 		switch data.Sort {
 		case "time":

@@ -21,23 +21,38 @@
                 {{- end}}
             </div>
 
-            <h1 class="center">{{.Topic}}</h1>
+            <h1 class="center">Gift</h1>
 
-            {{template "message" .}}
+            <h2 class="center">{{.Topic}}</h2>
 
-            {{template "gift" .Gifts}}
+            <div class="message">
+                <p class="meta">{{template "date-time" .Created}} {{.Author.Username}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
 
-            {{if gt (len .Replies) 0 -}}
-            <p>
-                <small>
-                    Sort:
-                    {{if eq .Sort "cost"}}Cost{{else}}<a href="/conversation?id={{.ConversationID}}&sort=cost">Cost</a>{{end}}
-                    {{if eq .Sort "yield"}}Yield{{else}}<a href="/conversation?id={{.ConversationID}}&sort=yield">Yield</a>{{end}}
-                    {{if eq .Sort "time"}}Time{{else}}<a href="/conversation?id={{.ConversationID}}&sort=time">Time</a>{{end}}
-                </small>
-            </p>
-            {{template "reply" .Replies}}
+                {{.Content}}
+            </div>
+
+            {{if ne .Error "" -}}
+            <p class="error">{{.Error}}</p>
             {{- end}}
+
+            <form action="/gift" enctype="multipart/form-data" method="post" id="gift-form">
+                <!-- TODO(v2) add CSRF token
+                <input type="hidden" id="token" name="token" value="{ { .Token } }" />
+                -->
+                <input type="hidden" id="conversation" name="conversation" value="{{.ConversationID}}" />
+                <input type="hidden" id="message" name="message" value="{{.MessageID}}" />
+
+                <input type="number" id="gift" name="gift" min="1" max="{{.Balance}}" step="1" value="{{.Gift}}">
+
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="text-align: right; width: 50%">Balance</td>
+                        <td style="text-align: left; width: 50%;">{{.Balance}}{{template "currency"}}</td>
+                    </tr>
+                </table>
+
+                <input type="submit" id="submit" value="Gift" />
+            </form>
 
             <div class="footer">
                 <ul class="nav">
@@ -49,7 +64,6 @@
                 </ul>
                 <ul class="nav">
                     <li><a href="/">Home</a></li>
-                    <li><a href="/about">About</a></li>
                     <li><a href="mailto:support@aletheiaware.com">Support</a></li>
                 </ul>
                 <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
