@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <title>Convey</title>
+        <style type="text/css">
+            .edition {
+                margin: 0px auto;
+                width: 30%;
+                text-align: center;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="static/logo.svg" />
+                </a>
+                {{if not .Live -}}
+                <div class="beta">BETA</div>
+                {{- end}}
+            </div>
+
+            <h1>Digest</h1>
+
+            {{range .Editions -}}
+            <div class="edition">
+                <a href="/digest?edition={{.}}">
+                    <h2>{{.}}</h2>
+                    <img src="/digest/Convey-Digest-{{.}}.png" width="100%" />
+                </a>
+                <small><a href="/digest/Convey-Digest-{{.}}.epub" download>download</a></small>
+            </div>
+            {{- end}}
+
+            <div class="footer">
+                <ul class="nav">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/publish">Publish</a></li>
+                    <li><a href="/best">Best</a></li>
+                    <li><a href="/recent">Recent</a></li>
+                </ul>
+                <ul class="nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="mailto:support@aletheiaware.com">Support</a></li>
+                </ul>
+                <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>
