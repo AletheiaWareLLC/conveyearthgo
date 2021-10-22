@@ -56,6 +56,8 @@ func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveye
 			topic := strings.TrimSpace(r.FormValue("topic"))
 			content := strings.TrimSpace(r.FormValue("content"))
 
+			// TODO replace \r\n with \n
+
 			data.Topic = topic
 			data.Content = content
 

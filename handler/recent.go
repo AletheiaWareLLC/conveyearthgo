@@ -25,6 +25,7 @@ func Recent(cm conveyearthgo.ContentManager, ts *template.Template) http.Handler
 			Live: netgo.IsLive(),
 		}
 		limit := int64(8)
+		// TODO limit may only be greater than 8 if user is signed in
 		if l := strings.TrimSpace(r.FormValue("limit")); l != "" {
 			if i, err := strconv.ParseInt(l, 10, 64); err != nil {
 				log.Println(err)

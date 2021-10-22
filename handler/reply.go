@@ -105,6 +105,8 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 
 			reply := strings.TrimSpace(r.FormValue("reply"))
 
+			// TODO replace \r\n with \n
+
 			data.Reply = reply
 
 			bytes := []byte(reply)
