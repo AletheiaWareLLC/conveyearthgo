@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <link rel="stylesheet" href="/static/digest-styles.css"/>
+        <title>Convey</title>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="static/logo.svg" />
+                </a>
+                {{if not .Live -}}
+                <div class="beta">BETA</div>
+                {{- end}}
+            </div>
+
+            <noscript>
+                <p class="error">The digest reader needs javascript to be enabled.</p>
+            </noscript>
+
+            <div id="area"></div>
+
+            <a id="prev" class="arrow">‹</a>
+            <a id="next" class="arrow">›</a>
+
+            <script src="/static/jszip.min.js"></script>
+            <script src="/static/epub.min.js"></script>
+            <script>
+                var book = ePub("/digest/Convey-Digest-{{.Edition}}.epub");
+                var rendition = book.renderTo("area", {
+                    manager: "continuous",
+                    flow: "paginated",
+                    snap: true,
+                    width: "100%",
+                    height: "100%",
+                });
+                rendition.display();
+
+                book.ready.then(function() {
+                    var next = document.getElementById("next");
+                    next.addEventListener("click", function(e){
+                        rendition.next();
+                        e.preventDefault();
+                    }, false);
+
+                    var prev = document.getElementById("prev");
+                    prev.addEventListener("click", function(e){
+                        rendition.prev();
+                        e.preventDefault();
+                    }, false);
+
+                    var keyListener = function(e){
+                        if ((e.keyCode || e.which) == 37) {
+                            rendition.prev();
+                        }
+                        if ((e.keyCode || e.which) == 39) {
+                            rendition.next();
+                        }
+                    };
+
+                    rendition.on("keyup", keyListener);
+                    document.addEventListener("keyup", keyListener, false);
+                });
+                rendition.on("relocated", function(location){
+                    if (location.atEnd) {
+                        next.style.visibility = "hidden";
+                    } else {
+                        next.style.visibility = "visible";
+                    }
+
+                    if (location.atStart) {
+                        prev.style.visibility = "hidden";
+                    } else {
+                        prev.style.visibility = "visible";
+                    }
+                });
+            </script>
+
+            <div class="footer">
+                <ul class="nav">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/publish">Publish</a></li>
+                    <li><a href="/best">Best</a></li>
+                    <li><a href="/recent">Recent</a></li>
+                </ul>
+                <ul class="nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="mailto:support@aletheiaware.com">Support</a></li>
+                </ul>
+                <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>

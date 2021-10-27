@@ -1,0 +1,50 @@
+body {
+    background-color: white;
+    font-family: Helvetica, sans-serif;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: deepskyblue;
+    text-align: center;
+}
+p.author {
+    color: lightskyblue;
+    font-size: x-small;
+}
+#area {
+    height: 100vh;
+}
+#prev {
+  left: 50px;
+}
+#next {
+  right: 50px;
+}
+.arrow {
+    position: absolute;
+    top: 50%;
+    margin-top: -50px;
+    font-size: 100px;
+    color: #E2E2E2;
+    font-family: arial, sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    text-decoration: none;
+    visibility: hidden;
+}
+.arrow:hover, .navlink:hover {
+    color: #777;
+}
+.arrow:active, .navlink:hover {
+    color: #000;
+}
+@media screen and (max-width: 600px) {
+    #prev {
+      left: 5px;
+    }
+    #next {
+      right: 5px;
+    }
+}

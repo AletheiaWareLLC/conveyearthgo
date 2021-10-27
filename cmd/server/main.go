@@ -179,7 +179,7 @@ func main() {
 	log.Println("Digests Directory:", digests)
 
 	// Handle Digest
-	mux.Handle("/digest/", nethandler.Log(http.StripPrefix("/digest/", http.FileServer(http.Dir(digests)))))
+	handler.AttachDigestHandler(mux, templates, digests)
 
 	// Handle Account
 	handler.AttachAccountHandler(mux, auth, am, nm, templates)
