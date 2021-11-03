@@ -18,12 +18,13 @@ p.author {
 }
 #area {
     height: 100vh;
+    background: white url('loading.svg') center center no-repeat;
 }
 #prev {
-  left: 50px;
+    left: 50px;
 }
 #next {
-  right: 50px;
+    right: 50px;
 }
 .arrow {
     position: absolute;
@@ -45,6 +46,9 @@ p.author {
 }
 .arrow:active, .navlink:hover {
     color: #000;
+}
+.epub-container {
+    background: white;
 }
 @media screen and (max-width: 600px) {
     #prev {
