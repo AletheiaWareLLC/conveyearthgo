@@ -2,7 +2,13 @@ body {
     background-color: white;
     font-family: Helvetica, sans-serif;
 }
-h1, h2, h3, h4, h5, h6 {
+a {
+    color: deepskyblue;
+}
+a:hover {
+    color: lightskyblue;
+}
+h1.title {
     color: deepskyblue;
     text-align: center;
 }
