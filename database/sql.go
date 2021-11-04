@@ -288,20 +288,10 @@ func (db *Sql) UpdateSignUpSessionChallenge(token, challenge string) (int64, err
 	return result.RowsAffected()
 }
 
-func (db *Sql) CreateSignInSession(token, username string, created time.Time) (int64, error) {
-	var (
-		result sql.Result
-		err    error
-	)
-	if username == "" {
-		result, err = db.Exec(`
+func (db *Sql) CreateSignInSession(token, username string, authenticated bool, created time.Time) (int64, error) {
+	result, err := db.Exec(`
 			INSERT INTO tbl_signins
-			SET token=?, created_unix=?`, token, created.Unix())
-	} else {
-		result, err = db.Exec(`
-			INSERT INTO tbl_signins
-			SET token=?, username=?, created_unix=?, authenticated=TRUE`, token, username, created.Unix())
-	}
+			SET token=?, username=?, authenticated=?, created_unix=?`, token, username, authenticated, created.Unix())
 	if err != nil {
 		return 0, err
 	}

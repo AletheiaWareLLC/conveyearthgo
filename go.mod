@@ -3,7 +3,7 @@ module aletheiaware.com/conveyearthgo
 go 1.16
 
 require (
-	aletheiaware.com/authgo v0.0.11
+	aletheiaware.com/authgo v0.0.12
 	aletheiaware.com/cryptogo v1.2.2
 	aletheiaware.com/netgo v1.2.7
 	github.com/go-sql-driver/mysql v1.6.0
