@@ -18,10 +18,10 @@ a.call-to-action {
     font-weight: bold;
     margin: 16px auto 16px auto;
     min-width: 96px;
-    padding: 16px 32px;
+    padding: 16px;
     text-align: center;
     text-decoration: none;
-    width: 10%;
+    width: 25%;
 }
 a.call-to-action:hover {
     background-color: deepskyblue;
@@ -60,6 +60,9 @@ form {
     margin-right: auto;
 }
 @media screen and (max-width: 600px) {
+    a.call-to-action {
+        width: 50%;
+    }
     form {
         width: 100%;
     }
