@@ -21,15 +21,17 @@
                 {{- end}}
             </div>
 
-            {{if eq .Period "day" -}}
-            <h1>Best of the Day</h1>
+            <h1 class="center">
+            {{- if eq .Period "day" -}}
+            Best of the Day
             {{- else if eq .Period "week" -}}
-            <h1>Best of the Week</h1>
+            Best of the Week
             {{- else if eq .Period "year" -}}
-            <h1>Best of the Year</h1>
+            Best of the Year
             {{- else if eq .Period "all" -}}
-            <h1>Best of All</h1>
-            {{- end}}
+            Best of All
+            {{- end -}}
+            </h1>
 
             <p class="center">
                 {{if ne .Period "day"}}<a href="/best?period=day">Day</a>{{end}}

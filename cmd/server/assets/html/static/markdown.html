@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <style type="text/css">
+            table.markdown-features {
+                margin: 0 auto;
+                table-layout: fixed;
+                width: 80%;
+            }
+            td.markdown-features {
+                width: 40%;
+            }
+        </style>
+        <title>Convey - Aletheia Ware</title>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="logo.svg" />
+                </a>
+            </div>
+
+            <h1 class="center">Markdown</h1>
+
+            <p>Convey supports markdown, specifically a subset of <a href="https://commonmark.org/">CommonMark</a>, so authors can describe the structure of their contributions and thus influence how they are displayed. This page gives a brief overview of the options available, for more information please see the <a href="https://spec.commonmark.org/0.30">CommonMark Specification</a></p>
+
+            <h2>Thematic Breaks</h2>
+
+            <p>Thematic Breaks are formed by three matching <kbd>-</kbd>, <kbd>_</kbd>, or <kbd>*</kbd> symbols.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>abc<br />---<br />def</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>abc<hr />def</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>abc<br />___<br />def</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>abc<hr />def</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>abc<br />***<br />def</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>abc<hr />def</p>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Headings</h2>
+
+            <p>Headings are formed by up to 6 <kbd>#</kbd> symbols, followed by a space, followed by a string of characters.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd># Heading 1</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <h1>Heading 1</h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>## Heading 2</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <h2>Heading 2</h2>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>### Heading 3</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <h3>Heading 3</h3>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>#### Heading 4</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <h4>Heading 4</h4>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>##### Heading 5</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <h5>Heading 5</h5>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>###### Heading 6</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <h6>Heading 6</h6>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Lists</h2>
+
+            <h3>Ordered</h3>
+
+            <p>Ordered lists are formed by a starting number, followed by either a <kbd>.</kbd> or <kbd>)</kbd> symbol, followed by a space, and finally followed by the first item. Subsequent items are added after a newline, and also start with a number, a matching <kbd>.</kbd> or <kbd>)</kbd>, a space and a string of characters. New lists can be started by switching from <kbd>.</kbd> to <kbd>)</kbd> or visa versa.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>1. Item 1<br />2. Item 2<br />3. Item 3</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <ol>
+                            <li>Item 1</li>
+                            <li>Item 2</li>
+                            <li>Item 3</li>
+                        </ol>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>1) Item 1<br />2) Item 2<br />3) Item 3</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <ol>
+                            <li>Item 1</li>
+                            <li>Item 2</li>
+                            <li>Item 3</li>
+                        </ol>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>10) Count From 10<br />10) And Don't Worry<br />10) Numbers Auto-Increment</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <ol start="10">
+                            <li>Count From 10</li>
+                            <li>And Don't Worry</li>
+                            <li>Numbers Auto-Increment</li>
+                        </ol>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>1) Item A1<br />2) Item A2<br />1. Item B1<br />2. Item B2</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <ol>
+                            <li>Item A1</li>
+                            <li>Item A2</li>
+                        </ol>
+                        <ol>
+                            <li>Item B1</li>
+                            <li>Item B2</li>
+                        </ol>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>Unordered</h3>
+
+            <p>Unordered or bulleted lists are formed by either a <kbd>-</kbd>, <kbd>+</kbd>, or <kbd>*</kbd> symbol, followed by a space, and finally followed by the first item. Subsequent items are added after a newline, and start with a matching <kbd>-</kbd>, <kbd>+</kbd>, or <kbd>*</kbd>, a space and a string of characters. New lists can be started by alternating between <kbd>-</kbd>, <kbd>+</kbd>, and <kbd>*</kbd>.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>- Item 1<br />- Item 2<br />- Item 3</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <ul>
+                            <li>Item 1</li>
+                            <li>Item 2</li>
+                            <li>Item 3</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>+ Item 1<br />+ Item 2<br />+ Item 3</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <ul>
+                            <li>Item 1</li>
+                            <li>Item 2</li>
+                            <li>Item 3</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>* Item 1<br />* Item 2<br />* Item 3</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <ul>
+                            <li>Item 1</li>
+                            <li>Item 2</li>
+                            <li>Item 3</li>
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>- Item A1<br />- Item A2<br />+ Item B1<br />+ Item B2<br />* Item C1<br />* Item C2</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <ul>
+                            <li>Item A1</li>
+                            <li>Item A2</li>
+                        </ul>
+                        <ul>
+                            <li>Item B1</li>
+                            <li>Item B2</li>
+                        </ul>
+                        <ul>
+                            <li>Item C1</li>
+                            <li>Item C2</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Paragraphs</h2>
+
+            <p>Paragraphs are blocks of text separated by a blank line.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam commodo tempor iaculis. Proin nec malesuada nibh. Duis tortor mauris, laoreet ac eros nec, porta molestie ex. Praesent pharetra lacinia mi vel facilisis. Vivamus in suscipit orci. Quisque et feugiat elit, at pharetra mi. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis commodo ex ultrices velit venenatis, ac porta risus suscipit.<br />Cras aliquam eu lectus tempus molestie. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla imperdiet, dolor nec tempor tincidunt, dui ligula pharetra mi, quis condimentum metus ante eu nisi. Vestibulum bibendum magna mi, vitae euismod lectus convallis eget. Aenean hendrerit elit eu tortor blandit lacinia. Phasellus id erat et sapien consectetur lobortis. Aliquam aliquet ac ante rutrum faucibus. Donec consectetur ligula ac dapibus semper. Etiam sit amet venenatis diam. Morbi sapien quam, semper id est eget, lobortis posuere libero. Praesent at orci egestas, pulvinar massa malesuada, euismod neque. Nunc porta, enim eu suscipit imperdiet, tortor diam tempus lorem, et venenatis sem est non lacus. Pellentesque aliquet magna eu velit dictum, eget rhoncus ante molestie. Cras ut vulputate diam.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam commodo tempor iaculis. Proin nec malesuada nibh. Duis tortor mauris, laoreet ac eros nec, porta molestie ex. Praesent pharetra lacinia mi vel facilisis. Vivamus in suscipit orci. Quisque et feugiat elit, at pharetra mi. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Duis commodo ex ultrices velit venenatis, ac porta risus suscipit.</p>
+                        <p>Cras aliquam eu lectus tempus molestie. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla imperdiet, dolor nec tempor tincidunt, dui ligula pharetra mi, quis condimentum metus ante eu nisi. Vestibulum bibendum magna mi, vitae euismod lectus convallis eget. Aenean hendrerit elit eu tortor blandit lacinia. Phasellus id erat et sapien consectetur lobortis. Aliquam aliquet ac ante rutrum faucibus. Donec consectetur ligula ac dapibus semper. Etiam sit amet venenatis diam. Morbi sapien quam, semper id est eget, lobortis posuere libero. Praesent at orci egestas, pulvinar massa malesuada, euismod neque. Nunc porta, enim eu suscipit imperdiet, tortor diam tempus lorem, et venenatis sem est non lacus. Pellentesque aliquet magna eu velit dictum, eget rhoncus ante molestie. Cras ut vulputate diam.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Line Breaks</h2>
+
+            <h3>Soft Line Breaks</h3>
+
+            <p>Sentences separated by a single newline are combined into one paragraph.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br />Nulla a scelerisque neque.<br />Cras viverra dui a tellus vestibulum, nec semper neque tincidunt.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla a scelerisque neque. Cras viverra dui a tellus vestibulum, nec semper neque tincidunt.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>Hard Line Breaks</h3>
+
+            <p>Hard line breaks are used to separate two sentences with a newline. They are formed by either a <kbd>\</kbd> symbol or two spaces.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>Lorem ipsum dolor sit amet, consectetur adipiscing elit.\<br />Nulla a scelerisque neque.\<br />Cras viverra dui a tellus vestibulum, nec semper neque tincidunt.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br />Nulla a scelerisque neque.<br />Cras viverra dui a tellus vestibulum, nec semper neque tincidunt.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>Lorem ipsum dolor sit amet, consectetur adipiscing elit.  <br />Nulla a scelerisque neque.  <br />Cras viverra dui a tellus vestibulum, nec semper neque tincidunt.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br />Nulla a scelerisque neque.<br />Cras viverra dui a tellus vestibulum, nec semper neque tincidunt.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Emphasis</h2>
+
+            <p>Emphasis can be placed on text by surrounding it with <kbd>*</kbd> or <kbd>_</kbd> symbols.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>Lorem *ipsum* dolor sit amet, consectetur adipiscing elit.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>Lorem <em>ipsum</em> dolor sit amet, consectetur adipiscing elit.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>Lorem _ipsum_ dolor sit amet, consectetur adipiscing elit.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>Lorem <em>ipsum</em> dolor sit amet, consectetur adipiscing elit.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>Strong Emphasis</h3>
+
+            <p>Strong emphasis can be placed on text by surrounding it with two <kbd>*</kbd> or <kbd>_</kbd> symbols.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>Lorem **ipsum** dolor sit amet, consectetur adipiscing elit.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>Lorem <strong>ipsum</strong> dolor sit amet, consectetur adipiscing elit.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>Lorem __ipsum__ dolor sit amet, consectetur adipiscing elit.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>Lorem <strong>ipsum</strong> dolor sit amet, consectetur adipiscing elit.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Links</h2>
+
+            <p>Links consist of three parts; the text that will be displayed, the destination URI of the link, and an optional title displayed in a tooltip. Links are formed of a pair of <kbd>[]</kbd> symbols enclosing the text, and a pair of <kbd>()</kbd> symbols enclosing the destination and optional title.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>[Aletheia Ware](https://aletheiaware.com)</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <a href="https://aletheiaware.com">Aletheia Ware</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>[Aletheia Ware](https://aletheiaware.com "Aletheia Ware Website")</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <a href="https://aletheiaware.com" title="Aletheia Ware Website">Aletheia Ware</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>[Contact Support](support@aletheiaware.com)</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <a href="mailto:support@aletheiaware.com">Contact Support</a>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>Autolinks</h3>
+
+            <p>Simple links without a text and title can be automatically created by enclosing the URI in a pair of <kbd>&lt;&gt;</kbd> symbols, in which case the URI will be displayed as the link text.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>&lt;https://aletheiaware.com&gt;</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <a href="https://aletheiaware.com">https://aletheiaware.com</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>&lt;support@aletheiaware.com&gt;</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <a href="mailto:support@aletheiaware.com">support@aletheiaware.com</a>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Block Quotes</h2>
+
+            <p>Block Quotes are formed by a <kbd>&gt;</kbd> symbol, followed by a space, and finally followed by the quote.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>This first sentence of Lorem Ipsum is;<br />&gt; Lorem ipsum dolor sit amet, consectetur adipiscing elit.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>This first sentence of Lorem Ipsum is;</p>
+                        <blockquote>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                        </blockquote>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>This first three sentences of Lorem Ipsum are;<br />&gt; Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br />&gt; Nulla a scelerisque neque.<br />&gt; Cras viverra dui a tellus vestibulum, nec semper neque tincidunt.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>This first three sentences of Lorem Ipsum are;</p>
+                        <blockquote>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla a scelerisque neque. Cras viverra dui a tellus vestibulum, nec semper neque tincidunt.</p>
+                        </blockquote>
+                    </td>
+                </tr>
+            </table>
+
+            <h2>Code</h2>
+
+            <h3>Code Span</h3>
+
+            <p>Code Spans are formed by enclosing text in <kbd>`</kbd> symbols.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>To print "Hello World" in Go use `log.Println("Hello World")`.</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>To print "Hello World" in Go use <code>log.Println("Hello World")</code>.</p>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>Indented Code Block</h3>
+
+            <p>Indented Code Blocks are formed by indenting the code by at least 4 spaces.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>This is how you can print "Hello World" in Go;<br /><br />&nbsp;&nbsp;&nbsp;&nbsp;log.Println("Hello World")</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>This is how you can print "Hello World" in Go;</p>
+                        <pre><code>log.Println("Hello World")</code></pre>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>Fenced Code Blocks</h3>
+
+            <p>Fenced Code Blocks are formed by surrounding the code with 3 <kbd>`</kbd> or <kbd>~</kbd> symbols.</p>
+
+            <table class="markdown-features">
+                <tr>
+                    <th class="markdown-features">
+                        <h6>Markdown</h6>
+                    </th>
+                    <th class="markdown-features">
+                        <h6>Result</h6>
+                    </th>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>This is how you can print "Hello World" in Go;<br />```<br />log.Println("Hello World")<br />```</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>This is how you can print "Hello World" in Go;</p>
+                        <pre><code>log.Println("Hello World")</code></pre>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="markdown-features">
+                        <kbd>This is how you can print "Hello World" in Go;<br />~~~<br />log.Println("Hello World")<br />~~~</kbd>
+                    </td>
+                    <td class="markdown-features">
+                        <p>This is how you can print "Hello World" in Go;</p>
+                        <pre><code>log.Println("Hello World")</code></pre>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="footer">
+                <ul class="nav">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/publish">Publish</a></li>
+                    <li><a href="/best">Best</a></li>
+                    <li><a href="/recent">Recent</a></li>
+                    <li><a href="/digest">Digest</a></li>
+                </ul>
+                <ul class="nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="mailto:support@aletheiaware.com">Support</a></li>
+                </ul>
+                <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>

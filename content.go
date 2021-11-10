@@ -2,6 +2,8 @@ package conveyearthgo
 
 import (
 	"aletheiaware.com/authgo"
+	"aletheiaware.com/conveyearthgo/content/markdown"
+	"aletheiaware.com/conveyearthgo/content/plaintext"
 	"aletheiaware.com/cryptogo"
 	"crypto/sha512"
 	"encoding/base64"
@@ -9,7 +11,6 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"mime"
 	"mime/multipart"
@@ -31,6 +32,7 @@ const (
 	MIME_MODEL_MTL       = "model/mtl"
 	MIME_MODEL_STL       = "model/stl"
 	MIME_TEXT_PLAIN      = "text/plain"
+	MIME_TEXT_MARKDOWN   = "text/markdown"
 
 	MINIMUM_CONTENT_LENGTH = 1
 )
@@ -56,7 +58,8 @@ func ValidateMime(mime string) error {
 		MIME_IMAGE_PNG,
 		MIME_IMAGE_SVG,
 		MIME_IMAGE_WEBP,
-		MIME_TEXT_PLAIN:
+		MIME_TEXT_PLAIN,
+		MIME_TEXT_MARKDOWN:
 		return nil
 	default:
 		return ErrMimeUnrecognized
@@ -79,11 +82,7 @@ func MimeTypeFromHeader(header *multipart.FileHeader) (string, error) {
 	return mediaType, nil
 }
 
-var (
-	newlines = regexp.MustCompile(`\r?\n\r?\n`)
-	anchors  = regexp.MustCompile(`\b(file|ftp|https?):\/\/\S+[\/\w]`)
-	mentions = regexp.MustCompile(`(^|\s)@[[:alnum:]]{3,}`)
-)
+var mentions = regexp.MustCompile(`(^|\s)@[[:alnum:]]{3,}`)
 
 func Mentions(input string) []string {
 	usernames := make(map[string]struct{})
@@ -229,27 +228,26 @@ func (m *contentManager) ToHTML(hash, mime string) (template.HTML, error) {
 		MIME_MODEL_OBJ,
 		MIME_MODEL_MTL,
 		MIME_MODEL_STL:
-		return template.HTML("<object class=\"user-content\" data=\"/content/" + hash + "?mime=" + url.QueryEscape(mime) + "\" type=\"" + mime + "\"><p><small><a href=\"/content/" + hash + "?mime=" + url.QueryEscape(mime) + "\" download>download</a></small></p></object>"), nil
-	case MIME_IMAGE_JPEG,
-		MIME_IMAGE_GIF,
+		return template.HTML(`<object class="ucc" data="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" type="` + mime + `"><p><small><a href="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" download>download</a></small></p></object>`), nil
+	case MIME_IMAGE_GIF,
 		MIME_IMAGE_JPG,
+		MIME_IMAGE_JPEG,
 		MIME_IMAGE_PNG,
 		MIME_IMAGE_SVG,
 		MIME_IMAGE_WEBP:
-		return template.HTML("<img class=\"user-content\" src=\"/content/" + hash + "?mime=" + url.QueryEscape(mime) + "\" />"), nil
+		return template.HTML(`<img class="ucc" src="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" />`), nil
 	case MIME_TEXT_PLAIN:
 		file, err := m.Open(hash)
 		if err != nil {
 			return "", err
 		}
-		data, err := ioutil.ReadAll(file)
+		return plaintext.ToHTML(file)
+	case MIME_TEXT_MARKDOWN:
+		file, err := m.Open(hash)
 		if err != nil {
 			return "", err
 		}
-		safe := template.HTMLEscapeString(string(data))
-		safe = anchors.ReplaceAllString(safe, `<a href="$0">$0</a>`)
-		safe = newlines.ReplaceAllString(safe, `</p><p>`)
-		return template.HTML(`<p>` + safe + `</p>`), nil
+		return markdown.ToHTML(file)
 	default:
 		return "", ErrMimeUnrecognized
 	}

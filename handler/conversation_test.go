@@ -50,7 +50,7 @@ func TestConversation(t *testing.T) {
 		assert.Equal(t, http.StatusOK, result.StatusCode)
 		body, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
-		assert.Equal(t, topic+authtest.TEST_USERNAME+cost+yield+"<p>"+content+"</p>", string(body))
+		assert.Equal(t, topic+authtest.TEST_USERNAME+cost+yield+`<p class="ucc">`+content+`</p>`, string(body))
 	})
 	t.Run("Returns 200 When Signed In And Conversation Exists", func(t *testing.T) {
 		db := database.NewInMemory()
@@ -78,7 +78,7 @@ func TestConversation(t *testing.T) {
 		assert.Equal(t, http.StatusOK, result.StatusCode)
 		body, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
-		assert.Equal(t, authtest.TEST_USERNAME+topic+authtest.TEST_USERNAME+cost+yield+"<p>"+content+"</p>", string(body))
+		assert.Equal(t, authtest.TEST_USERNAME+topic+authtest.TEST_USERNAME+cost+yield+`<p class="ucc">`+content+`</p>`, string(body))
 	})
 	t.Run("Returns 404 When Conversation Does Not Exist", func(t *testing.T) {
 		db := database.NewInMemory()

@@ -136,7 +136,7 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			}
 
 			hashes = append(hashes, textHash)
-			mimes = append(mimes, conveyearthgo.MIME_TEXT_PLAIN)
+			mimes = append(mimes, conveyearthgo.MIME_TEXT_MARKDOWN)
 			sizes = append(sizes, textSize)
 			cost += textSize
 

@@ -7,6 +7,7 @@
     <head>
         <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
         <link rel="stylesheet" href="/static/styles.css"/>
+        <link rel="stylesheet" href="/static/editor-styles.css"/>
         <title>Convey</title>
     </head>
 
@@ -21,9 +22,9 @@
                 {{- end}}
             </div>
 
-            <h1>Reply</h1>
+            <h1 class="center">Reply</h1>
 
-            <h2>{{.Topic}}</h2>
+            <h2 class="center">{{.Topic}}</h2>
 
             <div class="message">
                 <p class="meta">{{template "date-time" .Created}} {{.Author.Username}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
@@ -35,6 +36,10 @@
             <p class="error">{{.Error}}</p>
             {{- end}}
 
+            <noscript>
+                <p class="error">The publishing tools need javascript to be enabled.</p>
+            </noscript>
+
             <form action="/reply" enctype="multipart/form-data" method="post" id="reply-form">
                 <!-- TODO(v2) add CSRF token
                 <input type="hidden" id="token" name="token" value="{ { .Token } }" />
@@ -42,7 +47,17 @@
                 <input type="hidden" id="conversation" name="conversation" value="{{.ConversationID}}" />
                 <input type="hidden" id="message" name="message" value="{{.MessageID}}" />
 
-                <textarea rows="5" cols="50" id="reply" name="reply">{{.Reply}}</textarea>
+                <div class="markdown-tool">
+                    <div class="markdown-tabbar">
+                        <button type="button" id="markdown-editor-button">Edit</button>
+                        <button type="button" id="markdown-preview-button">Preview</button>
+                    </div>
+                    <div id="markdown-editor" class="markdown-tab">
+                        <textarea rows="5" cols="50" id="reply" name="reply">{{.Reply}}</textarea>
+                    </div>
+                    <div id="markdown-preview" class="markdown-tab"></div>
+                </div>
+                <p style="font-size: x-small; margin: 0; text-align: center;"><a href="/static/markdown.html">Formatting Guide</a></p>
 
                 <input type="file" id="attachment" name="attachment" />
 
@@ -60,15 +75,20 @@
                 <input type="submit" id="submit" value="Reply" />
             </form>
 
-            <script type="text/javascript" src="/static/count-bytes.js"></script>
+            <script type="text/javascript" src="/static/commonmark.min.js"></script>
+            <script type="text/javascript" src="/static/editor.js"></script>
             <script type="text/javascript">
+                const editorTabButton = document.getElementById("markdown-editor-button");
+                const previewTabButton = document.getElementById("markdown-preview-button");
+                const editorTab = document.getElementById("markdown-editor");
+                const previewTab = document.getElementById("markdown-preview");
                 const content = document.getElementById('reply');
                 const attachment = document.getElementById('attachment');
                 const cost = document.getElementById('cost');
                 const limit = {{.Balance}};
                 const submit = document.getElementById('submit');
                 const suffix = `{{template "currency"}}`;
-                AttachByteCount(content, attachment, cost, limit, submit, suffix)
+                SetupEditor(editorTabButton, previewTabButton, editorTab, previewTab, content, attachment, cost, limit, submit, suffix);
             </script>
 
             <div class="footer">

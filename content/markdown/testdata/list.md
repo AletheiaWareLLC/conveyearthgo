@@ -1,0 +1,51 @@
+- This
+- is
+- a
+- loose
+- unordered
+
+- list
++ This
++ is
++ also
++ a
++ loose
++ unordered
+
++ list
+- This
+- is
+- a
+- tight
+- unordered
+- list
+1. This
+2. is
+3. a
+4. loose
+5. ordered
+
+6. list
+1) This
+2) is
+3) also
+4) a
+5) loose
+6) ordered
+
+7) list
+1. This
+2. is
+3. a
+4. tight
+5. ordered
+6. list
+10) This
+10) is
+10) a
+10) tight
+10) ordered
+10) list
+10) starting
+10) at
+10) ten

@@ -21,21 +21,21 @@
                 {{- end}}
             </div>
 
-            <h1>Account</h1>
+            <h1 class="center">Account</h1>
 
             {{if ne .Error "" -}}
             <p class="error">{{.Error}}</p>
             {{- end}}
 
-            <h4>Email</h4>
+            <h4 class="center">Email</h4>
 
             <p class="center">{{.Account.Email}}</p>
 
-            <h4>Username</h4>
+            <h4 class="center">Username</h4>
 
             <p class="center">{{.Account.Username}}</p>
 
-            <h4>Password</h4>
+            <h4 class="center">Password</h4>
 
             <p class="center">************</p>
 
@@ -43,11 +43,11 @@
                 <a href="/account-password">Change Password</a>
             </p>
 
-            <h4>Joined</h4>
+            <h4 class="center">Joined</h4>
 
             <p class="center">{{template "date" .Account.Created}}</p>
 
-            <h4>Balance</h4>
+            <h4 class="center">Balance</h4>
 
             <p class="center">{{.Balance}}{{template "currency"}}</p>
 
@@ -55,17 +55,17 @@
                 <a href="/coin-buy">Buy Coins</a>
             </p>
 
-            <h4>Notifications</h4>
+            <h4 class="center">Notifications</h4>
 
-            <h5>Responses</h5>
+            <h5 class="center">Responses</h5>
 
             <p class="center">You {{if .NotificationResponses}}will{{else}}will not{{end}} be notified when someone responds to one of your messages.</p>
 
-            <h5>Mentions</h5>
+            <h5 class="center">Mentions</h5>
 
             <p class="center">You {{if .NotificationMentions}}will{{else}}will not{{end}} be notified when someone mentions you.</p>
 
-            <h5>Digests</h5>
+            <h5 class="center">Digests</h5>
 
             <p class="center">You {{if .NotificationDigests}}will{{else}}will not{{end}} be notified when a new digest is published.</p>
 

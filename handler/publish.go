@@ -96,7 +96,7 @@ func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveye
 			}
 
 			hashes = append(hashes, textHash)
-			mimes = append(mimes, conveyearthgo.MIME_TEXT_PLAIN)
+			mimes = append(mimes, conveyearthgo.MIME_TEXT_MARKDOWN)
 			sizes = append(sizes, textSize)
 			cost += textSize
 

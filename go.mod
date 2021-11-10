@@ -10,4 +10,5 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.14.2-0.20210706174543-31cedbb9613a
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.63.0
+	github.com/yuin/goldmark v1.2.1
 )

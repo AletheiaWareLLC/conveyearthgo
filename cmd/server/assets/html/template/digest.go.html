@@ -28,12 +28,12 @@
                 {{- end}}
             </div>
 
-            <h1>Digest</h1>
+            <h1 class="center">Digest</h1>
 
             {{range .Editions -}}
             <div class="edition">
                 <a href="/digest?edition={{.}}">
-                    <h2>{{.}}</h2>
+                    <h2 class="center">{{.}}</h2>
                     <img src="/digest/Convey-Digest-{{.}}.png" width="100%" />
                 </a>
                 <small><a href="/digest/Convey-Digest-{{.}}.epub" download>download</a></small>
