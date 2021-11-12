@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
+	"strings"
 )
 
 func ToHTML(reader io.Reader) (template.HTML, error) {
@@ -19,36 +18,24 @@ func ToHTML(reader io.Reader) (template.HTML, error) {
 	if err != nil {
 		return "", err
 	}
-	p := goldmark.DefaultParser()
-	p.AddOptions(
-		parser.WithInlineParsers(
-			util.Prioritized(extension.NewLinkifyParser(extension.WithLinkifyAllowedProtocols([][]byte{
-				[]byte("file:"),
-				[]byte("ftp:"),
-				[]byte("http:"),
-				[]byte("https:"),
-			})), 999),
-		),
-	)
-	r := p.Parse(text.NewReader(s))
+	root := goldmark.DefaultParser().Parse(text.NewReader(s))
 	var result string
-	if err := ast.Walk(r, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+	if err := ast.Walk(root, func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if entering {
 			switch n.Kind().String() {
 			case "Document":
-				// Do nothing
+				// Do Nothing
 			case "Paragraph":
 				result += `<p class="ucc">`
 			case "Text":
-				text := string(n.Text(s))
-				result += template.HTMLEscapeString(text)
+				result += template.HTMLEscapeString(string(n.Text(s)))
 				if t := n.(*ast.Text); t.HardLineBreak() {
 					result += `<br />`
 				} else if t.SoftLineBreak() {
 					result += ` `
 				}
 			case "TextBlock":
-				// Do nothing
+				// Do Nothing
 			case "ThematicBreak":
 				result += `<hr class="ucc" />
 `
@@ -74,7 +61,7 @@ func ToHTML(reader io.Reader) (template.HTML, error) {
 				lines := n.Lines()
 				for i := 0; i < lines.Len(); i++ {
 					line := lines.At(i)
-					result += string(line.Value(s))
+					result += template.HTMLEscapeString(string(line.Value(s)))
 				}
 			case "List":
 				l := n.(*ast.List)
@@ -92,38 +79,48 @@ func ToHTML(reader io.Reader) (template.HTML, error) {
 				}
 			case "ListItem":
 				result += `<li class="ucc">`
-				if p := n.Parent().(*ast.List); !p.IsTight {
+				if p, ok := n.Parent().(*ast.List); ok && !p.IsTight {
 					result += `
 `
 				}
 			case "Link":
 				l := n.(*ast.Link)
-				result += fmt.Sprintf(`<a class="ucc" href="%s" title="%s">`, l.Destination, l.Title)
+				u := string(util.EscapeHTML(util.URLEscape(l.Destination, true)))
+				result += `<a class="ucc" href="`
+				result += u
+				if t := template.HTMLEscapeString(string(l.Title)); t != "" {
+					result += `" title="`
+					result += t
+				}
+				result += `">`
 			case "AutoLink":
 				l := n.(*ast.AutoLink)
-				switch l.AutoLinkType {
-				case ast.AutoLinkEmail:
-					result += fmt.Sprintf(`<a class="ucc" href="mailto:%s">`, string(l.URL(s)))
-				case ast.AutoLinkURL:
-					result += fmt.Sprintf(`<a class="ucc" href="%s">`, string(l.URL(s)))
+				u := string(util.EscapeHTML(util.URLEscape(l.URL(s), true)))
+				result += `<a class="ucc" href="`
+				if l.AutoLinkType == ast.AutoLinkEmail && !strings.HasPrefix(strings.ToLower(u), `mailto:`) {
+					result += `mailto:`
 				}
-				result += string(l.Label(s))
+				result += u
+				result += `">`
+				result += template.HTMLEscapeString(string(l.Label(s)))
+			case "RawHTML":
+				// Not Supported
 			default:
 				log.Println("Entering Unhandled Node:", n.Kind().String())
 			}
 		} else {
 			switch n.Kind().String() {
 			case "Document":
-				// Do nothing
+				// Do Nothing
 			case "Paragraph":
 				result += `</p>
 `
 			case "Text":
-				// Do nothing
+				// Do Nothing
 			case "TextBlock":
-				// Do nothing
+				// Do Nothing
 			case "ThematicBreak":
-				// Do nothing
+				// Do Nothing
 			case "Heading":
 				result += fmt.Sprintf(`</h%d>
 `, n.(*ast.Heading).Level)
@@ -158,6 +155,8 @@ func ToHTML(reader io.Reader) (template.HTML, error) {
 `
 			case "Link", "AutoLink":
 				result += `</a>`
+			case "RawHTML":
+				// Not Supported
 			default:
 				log.Println("Exiting Unhandled Node:", n.Kind().String())
 			}

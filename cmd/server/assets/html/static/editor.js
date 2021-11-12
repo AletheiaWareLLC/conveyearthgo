@@ -51,13 +51,19 @@ function markdownToHTML(parser, markdown) {
     if (event.entering) {
       switch (node.type) {
         case "document":
-          // Do nothing
+          // Do Nothing
           break;
         case "paragraph":
+          const grandparent = node.parent.parent;
+          if (grandparent !== null && grandparent.type === "list") {
+            if (grandparent.listTight) {
+              break;
+            }
+          }
           result += '<p class="ucc">';
           break;
         case "text":
-          result += node.literal;
+          result += escape(node.literal);
           break;
         case "thematic_break":
           result += '<hr class="ucc" />\n';
@@ -82,12 +88,13 @@ function markdownToHTML(parser, markdown) {
           break;
         case "code":
           result += '<code class="ucc">';
-          result += node.literal;
+          result += escape(node.literal);
           result += '</code>';
           break;
         case "code_block":
           result += '<pre class="ucc"><code class="ucc">\n';
-          result += node.literal;
+          result += escape(node.literal);
+          result += '</code></pre>\n';
           break;
         case "list":
           switch (node.listType) {
@@ -105,23 +112,36 @@ function markdownToHTML(parser, markdown) {
           break;
         case "item":
           result += '<li class="ucc">';
-          if (!node.parent.IsTight) {
+          if (!node.parent.listTight) {
             result += '\n';
           }
           break;
         case "link":
-          result += '<a class="ucc" href="' + node.destination + '" title="' + node.title + '">';
+          result += '<a class="ucc" href="' + node.destination + '"';
+          if (node.title) {
+            result += ' title="' + escape(node.title) + '"';
+          }
+          result += '>';
+          break;
+        case "html_inline":
+          // Not Supported
           break;
         default:
-          console.log("Entering Unhandled Node:", node.type);
+          console.log("Entering Unhandled Node: " + node.type);
           break;
       }
     } else {
       switch (node.type) {
         case "document":
-          // Do nothing
+          // Do Nothing
           break;
         case "paragraph":
+          const grandparent = node.parent.parent;
+          if (grandparent !== null && grandparent.type === "list") {
+            if (grandparent.listTight) {
+              break;
+            }
+          }
           result += '</p>\n';
           break;
         case "heading":
@@ -135,9 +155,6 @@ function markdownToHTML(parser, markdown) {
           break;
         case "block_quote":
           result += '</blockquote>\n';
-          break;
-        case "code_block":
-          result += '</code></pre>\n';
           break;
         case "list":
           switch (node.listType) {
@@ -155,11 +172,23 @@ function markdownToHTML(parser, markdown) {
         case "link":
           result += '</a>';
           break;
+        case "html_inline":
+          // Not Supported
+          break;
         default:
-          console.log("Exiting Unhandled Node:", node.type);
+          console.log("Exiting Unhandled Node: " + node.type);
           break;
       }
     }
   }
   return result;
 }
+
+function escape(unsafe) {
+  return unsafe
+     .replace(/&/g, "&amp;")
+     .replace(/</g, "&lt;")
+     .replace(/>/g, "&gt;")
+     .replace(/"/g, "&#34;")
+     .replace(/'/g, "&#39;");
+ }

@@ -11,4 +11,5 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/stripe/stripe-go/v72 v72.63.0
 	github.com/yuin/goldmark v1.2.1
+	rogchap.com/v8go v0.6.0
 )
