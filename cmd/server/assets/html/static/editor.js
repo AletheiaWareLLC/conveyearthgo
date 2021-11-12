@@ -81,7 +81,9 @@ function markdownToHTML(parser, markdown) {
           result += '<blockquote class="ucc">\n';
           break;
         case "code":
-          result += '<pre class="ucc"><code class="ucc">';
+          result += '<code class="ucc">';
+          result += node.literal;
+          result += '</code>';
           break;
         case "code_block":
           result += '<pre class="ucc"><code class="ucc">\n';
@@ -122,12 +124,6 @@ function markdownToHTML(parser, markdown) {
         case "paragraph":
           result += '</p>\n';
           break;
-        case "text":
-          // Do nothing
-          break;
-        case "thematic_break":
-          // Do nothing
-          break;
         case "heading":
           result += '</h' + node.level + '>\n';
           break;
@@ -139,9 +135,6 @@ function markdownToHTML(parser, markdown) {
           break;
         case "block_quote":
           result += '</blockquote>\n';
-          break;
-        case "code":
-          result += '</code></pre>';
           break;
         case "code_block":
           result += '</code></pre>\n';

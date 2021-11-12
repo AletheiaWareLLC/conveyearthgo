@@ -67,7 +67,7 @@ func ToHTML(reader io.Reader) (template.HTML, error) {
 				result += `<blockquote class="ucc">
 `
 			case "CodeSpan":
-				result += `<pre class="ucc"><code class="ucc">`
+				result += `<code class="ucc">`
 			case "CodeBlock", "FencedCodeBlock":
 				result += `<pre class="ucc"><code class="ucc">
 `
@@ -140,7 +140,7 @@ func ToHTML(reader io.Reader) (template.HTML, error) {
 				result += `</blockquote>
 `
 			case "CodeSpan":
-				result += `</code></pre>`
+				result += `</code>`
 			case "CodeBlock", "FencedCodeBlock":
 				result += `</code></pre>
 `

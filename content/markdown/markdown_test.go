@@ -4,7 +4,6 @@ import (
 	"aletheiaware.com/conveyearthgo/content/markdown"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -52,7 +51,6 @@ func TestMarkdownToHTML(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			log.Println("********", name, "********")
 			given, err := os.Open(filepath.Join(directory, tt.given))
 			assert.NoError(t, err)
 			html, err := markdown.ToHTML(given)
