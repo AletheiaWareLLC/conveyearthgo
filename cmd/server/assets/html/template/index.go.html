@@ -83,22 +83,22 @@
 
             <div class="tiles">
                 <div class="tile">
-                    <h2 class="center">Recent</h2>
-
-                    {{template "conversations" .Recent}}
-
-                    {{if gt (len .Recent) 0 -}}
-                    <p class="center"><a href="/recent?limit={{.Limit}}">More</a></p>
-                    {{- end}}
-                </div>
-
-                <div class="tile">
                     <h2 class="center">Best</h2>
 
                     {{template "conversations" .Best}}
 
                     {{if gt (len .Best) 0 -}}
                     <p class="center"><a href="/best?period=week&limit={{.Limit}}">More</a></p>
+                    {{- end}}
+                </div>
+
+                <div class="tile">
+                    <h2 class="center">Recent</h2>
+
+                    {{template "conversations" .Recent}}
+
+                    {{if gt (len .Recent) 0 -}}
+                    <p class="center"><a href="/recent?limit={{.Limit}}">More</a></p>
                     {{- end}}
                 </div>
 

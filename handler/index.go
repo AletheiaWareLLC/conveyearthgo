@@ -28,8 +28,8 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 		data := struct {
 			Live     bool
 			Account  *authgo.Account
-			Recent   []*conveyearthgo.Conversation
 			Best     []*conveyearthgo.Conversation
+			Recent   []*conveyearthgo.Conversation
 			Editions []string
 			Limit    int64
 		}{
@@ -39,15 +39,6 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 		if account := a.CurrentAccount(w, r); account != nil {
 			data.Account = account
 		}
-		// Query most recent posts
-		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation) error {
-			data.Recent = append(data.Recent, c)
-			return nil
-		}, limit); err != nil {
-			log.Println(err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
 		// Query best of the week posts
 		now := time.Now()
 		since := now.Truncate(PERIOD_YEARLY)
@@ -55,6 +46,15 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 			data.Best = append(data.Best, c)
 			return nil
 		}, since, limit); err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+		// Query most recent posts
+		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation) error {
+			data.Recent = append(data.Recent, c)
+			return nil
+		}, limit); err != nil {
 			log.Println(err)
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
