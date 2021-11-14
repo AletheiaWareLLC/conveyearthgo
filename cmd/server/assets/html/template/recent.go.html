@@ -23,7 +23,7 @@
 
             <h1 class="center">Recent</h1>
 
-            {{template "conversations" .}}
+            {{template "conversations" .Conversations}}
 
             {{if gt (len .Conversations) 0 -}}
             <p class="center"><a href="/recent?limit={{.Limit}}">More</a></p>
@@ -38,6 +38,7 @@
                 </ul>
                 <ul class="nav">
                     <li><a href="/">Home</a></li>
+                    <li><a href="/about">About</a></li>
                     <li><a href="mailto:support@aletheiaware.com">Support</a></li>
                 </ul>
                 <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>

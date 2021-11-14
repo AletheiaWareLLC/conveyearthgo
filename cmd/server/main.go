@@ -208,6 +208,9 @@ func main() {
 	// Handle Recent
 	handler.AttachRecentHandler(mux, cm, templates)
 
+	// Handle About
+	handler.AttachAboutHandler(mux, auth, templates)
+
 	// Handle Demo
 	handler.AttachDemoHandler(mux, auth, templates)
 
@@ -217,7 +220,7 @@ func main() {
 	})
 
 	// Handle Index
-	handler.AttachIndexHandler(mux, auth, templates)
+	handler.AttachIndexHandler(mux, auth, cm, templates, digests)
 
 	// Start Server
 	if secure {

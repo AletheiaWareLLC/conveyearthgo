@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"sort"
@@ -26,22 +26,17 @@ func Digest(ts *template.Template, dir string) http.Handler {
 		case "GET":
 			data.Edition = strings.TrimSpace(r.FormValue("edition"))
 			if data.Edition == "" {
-				// Scan dir for epubs
-				files, err := ioutil.ReadDir(dir)
+				editions, err := conveyearthgo.ReadDigests(dir)
 				if err != nil {
 					log.Println(err)
 					http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 					return
 				}
 
-				for _, f := range files {
-					if n := f.Name(); strings.HasSuffix(n, ".epub") {
-						data.Editions = append(data.Editions, strings.TrimSuffix(strings.TrimPrefix(n, "Convey-Digest-"), ".epub"))
-					}
-				}
-
 				// Sort Editions Reverse-Chronologically (Newest First)
-				sort.Sort(sort.Reverse(sort.StringSlice(data.Editions)))
+				sort.Sort(sort.Reverse(sort.StringSlice(editions)))
+
+				data.Editions = editions
 
 				// Render template
 				executeDigestTemplate(w, ts, data)

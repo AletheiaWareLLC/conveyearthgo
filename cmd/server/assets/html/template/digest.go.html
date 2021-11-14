@@ -30,15 +30,7 @@
 
             <h1 class="center">Digest</h1>
 
-            {{range .Editions -}}
-            <div class="edition">
-                <a href="/digest?edition={{.}}">
-                    <h2 class="center">{{.}}</h2>
-                    <img src="/digest/Convey-Digest-{{.}}.png" width="100%" />
-                </a>
-                <small><a href="/digest/Convey-Digest-{{.}}.epub" download>download</a></small>
-            </div>
-            {{- end}}
+            {{template "editions" .Editions}}
 
             <a class="call-to-action" href="/static/subscribe-digest.html">Send Me the Digest!</a>
 
@@ -51,6 +43,7 @@
                 </ul>
                 <ul class="nav">
                     <li><a href="/">Home</a></li>
+                    <li><a href="/about">About</a></li>
                     <li><a href="mailto:support@aletheiaware.com">Support</a></li>
                 </ul>
                 <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>

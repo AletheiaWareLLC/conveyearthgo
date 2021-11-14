@@ -1,0 +1,12 @@
+{{define "editions" -}}
+{{range . -}}
+<div class="edition">
+    <a href="/digest?edition={{.}}">
+        <h3 class="center">{{.}}</h3>
+        <!-- TODO use thumbnail -->
+        <img src="/digest/Convey-Digest-{{.}}.png" width="100%" />
+    </a>
+    <small><a href="/digest/Convey-Digest-{{.}}.epub" download>download</a></small>
+</div>
+{{- end}}
+{{- end}}

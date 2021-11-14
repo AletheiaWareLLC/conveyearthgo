@@ -45,14 +45,15 @@
                     </tr>
                 </table>
 
-                <p class="center">Powered by <a href="https://stripe.com">Stripe</a></p>
-
                 {{if not .Live -}}
                 <div class="beta">Convey is in BETA so coins are free!<br />Simply complete your purchase using the credit card number 4242 4242 4242 4242 <a style="color: white;" href="https://stripe.com/docs/testing#cards">more info</a></div>
                 {{- end}}
 
                 <input type="submit" value="Buy Coins" />
             </form>
+
+            <p class="meta center">Powered by <a href="https://stripe.com">Stripe</a></p>
+
             {{- else -}}
             <p class="error">Out of Stock</p>
             {{- end}}
@@ -67,6 +68,7 @@
                 </ul>
                 <ul class="nav">
                     <li><a href="/">Home</a></li>
+                    <li><a href="/about">About</a></li>
                     <li><a href="mailto:support@aletheiaware.com">Support</a></li>
                 </ul>
                 <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>

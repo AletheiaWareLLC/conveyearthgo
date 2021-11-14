@@ -1,13 +1,13 @@
 {{define "reply" -}}
-{{range .Replies -}}
-<li>
-    {{template "message" .}}
+{{if gt (len .) 0 -}}
+<ul class="reply">
+    {{range . -}}
+    <li>
+        {{template "message" .}}
 
-    {{if gt (len .Replies) 0 -}}
-    <ul class="reply">
-        {{template "reply" .}}
-    </ul>
+        {{template "reply" .Replies}}
+        {{- end}}
+    </li>
     {{- end}}
-</li>
-{{- end}}
+</ul>
 {{- end}}

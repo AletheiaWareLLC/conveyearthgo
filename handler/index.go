@@ -2,18 +2,21 @@ package handler
 
 import (
 	"aletheiaware.com/authgo"
+	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/netgo"
 	"html/template"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
+	"time"
 )
 
-func AttachIndexHandler(m *http.ServeMux, a authgo.Authenticator, ts *template.Template) {
-	m.Handle("/", Index(a, ts))
+func AttachIndexHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, dir string) {
+	m.Handle("/", Index(a, cm, ts, dir))
 }
 
-func Index(a authgo.Authenticator, ts *template.Template) http.Handler {
+func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, dir string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if p := strings.TrimSuffix(r.URL.Path, "index.html"); p != "/" {
 			log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL, r.Header, "not found")
@@ -21,15 +24,56 @@ func Index(a authgo.Authenticator, ts *template.Template) http.Handler {
 			return
 		}
 		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL, r.Header)
+		limit := int64(8)
 		data := struct {
-			Live    bool
-			Account *authgo.Account
+			Live     bool
+			Account  *authgo.Account
+			Recent   []*conveyearthgo.Conversation
+			Best     []*conveyearthgo.Conversation
+			Editions []string
+			Limit    int64
 		}{
-			Live: netgo.IsLive(),
+			Live:  netgo.IsLive(),
+			Limit: limit * 2,
 		}
 		if account := a.CurrentAccount(w, r); account != nil {
 			data.Account = account
 		}
+		// Query most recent posts
+		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation) error {
+			data.Recent = append(data.Recent, c)
+			return nil
+		}, limit); err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+		// Query best of the week posts
+		now := time.Now()
+		since := now.Truncate(PERIOD_YEARLY)
+		if err := cm.LookupBestConversations(func(c *conveyearthgo.Conversation) error {
+			data.Best = append(data.Best, c)
+			return nil
+		}, since, limit); err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+		// Query most recent editions
+		editions, err := conveyearthgo.ReadDigests(dir)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+
+		// Sort Editions Reverse-Chronologically (Newest First)
+		sort.Sort(sort.Reverse(sort.StringSlice(editions)))
+		if int64(len(editions)) > limit {
+			editions = editions[:limit]
+		}
+		data.Editions = editions
+
 		if err := ts.ExecuteTemplate(w, "index.go.html", data); err != nil {
 			log.Println(err)
 			return

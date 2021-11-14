@@ -7,6 +7,33 @@
     <head>
         <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
         <link rel="stylesheet" href="/static/styles.css"/>
+        <style type="text/css">
+            .conversation {
+                text-align: left;
+            }
+            .edition {
+                width: 25%;
+                text-align: center;
+                display: inline-block;
+            }
+            .tile {
+                flex: auto;
+                text-align: center;
+                max-width: 100%;
+                min-width: 50%;
+            }
+            .tiles {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+                width: 100%;
+            }
+            @media screen and (max-width: 600px) {
+                .tile {
+                    min-width: 100%;
+                }
+            }
+        </style>
         <title>Convey - Aletheia Ware</title>
     </head>
 
@@ -44,77 +71,47 @@
 
             {{- else -}}
 
+            <p class="center">Convey is a Communication Platform that Incentivizes Quality Content, Collaboration, and Discussion.</p>
+
             <p class="center">
                 <a href="/sign-in">Sign In</a> - <a href="/sign-up">Sign Up</a>
             </p>
-
-            <p class="center" style="color: deepskyblue;">
-                Sick of Spam?
-                <br /><br />
-                Tired of Trolls?
-                <br /><br />
-                Done with Doomscrolling?
-                <br /><br />
-                Exhausted by Echo Chambers?
-                <br /><br />
-                Turned Off by Targeted Advertising?
-                <br /><br />
-                Had Enough Harassment, Heckling, and Hate?
-                <br /><br />
-            </p>
-
-            <h2 style="text-align: center;">Ready for Something New?</h2>
-
-            <p class="center">Convey is a Communication Platform that Incentivizes Quality Content, Collaboration, and Discussion.</p>
 
             <a class="call-to-action" href="/static/subscribe-digest.html">Send Me the Digest!</a>
 
             {{- end}}
 
-            <table class="features">
-                <tr>
-                    <td class="features">
-                        <img class="feature" src="/static/value-quality-not-quantity.svg" />
-                    </td>
-                    <td class="features">
-                        <h2 style="text-align: right;">Value Quality, not Quantity</h2>
-                        <p style="text-align: right;">Contributions are charged by size to incentivize brevity and allow people to "put their money where their mouth is."</p>
-                        <p style="text-align: right;">Authors are rewarded when other people respond to their content; higher quality, more responses, deeper discussions, bigger yields.</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="features">
-                        <h2 style="text-align: left;">Reward the Authors</h2>
-                        <p style="text-align: left;">Each month the best content is published in a digest and those authors earn a reward propotional to their content's yield.</p>
-                        <p style="text-align: left;">Which makes Convey one of the few platforms to reward contributors for high-quality content!</p>
-                    </td>
-                    <td class="features">
-                        <img class="feature" src="/static/reward-the-authors.svg" />
-                    </td>
-                </tr>
-                <tr>
-                    <td class="features">
-                        <img class="feature" src="/static/starve-the-trolls.svg" />
-                    </td>
-                    <td class="features">
-                        <h2 style="text-align: right;">Starve the Trolls</h2>
-                        <p style="text-align: right;">The community incentivize good content by only engaging with messages that are of value. Bad content doesn't generate responses and will therefore never appear in the digest.</p>
-                        <p style="text-align: right;">If a troll replies to your content, ignore them and enjoy the coins you received from them!</p>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="features">
-                        <h2 style="text-align: left;">Move the World</h2>
-                        <p style="text-align: left;">Convey your message to a global audience.</p>
-                        <p style="text-align: left;">Enjoy high-quality content from authors around the world, covering a wide range of topics.</p>
-                    </td>
-                    <td class="features">
-                        <img class="feature" src="/static/world.svg" />
-                    </td>
-                </tr>
-            </table>
+            <div class="tiles">
+                <div class="tile">
+                    <h2 class="center">Recent</h2>
 
-            <a class="call-to-action" href="/demo">Show Me a Demo!</a>
+                    {{template "conversations" .Recent}}
+
+                    {{if gt (len .Recent) 0 -}}
+                    <p class="center"><a href="/recent?limit={{.Limit}}">More</a></p>
+                    {{- end}}
+                </div>
+
+                <div class="tile">
+                    <h2 class="center">Best</h2>
+
+                    {{template "conversations" .Best}}
+
+                    {{if gt (len .Best) 0 -}}
+                    <p class="center"><a href="/best?period=week&limit={{.Limit}}">More</a></p>
+                    {{- end}}
+                </div>
+
+                <div class="tile">
+                    <h2 class="center">Editions</h2>
+
+                    {{template "editions" .Editions}}
+
+                    {{if gt (len .Editions) 0 -}}
+                    <p class="center"><a href="/digest">More</a></p>
+                    {{- end}}
+                </div>
+            </div>
 
             <div class="footer">
                 <ul class="nav">
@@ -125,6 +122,7 @@
                     <li><a href="/digest">Digest</a></li>
                 </ul>
                 <ul class="nav">
+                    <li><a href="/about">About</a></li>
                     <li><a href="mailto:support@aletheiaware.com">Support</a></li>
                 </ul>
                 <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
