@@ -1,41 +1,63 @@
-function SetupEditor(editorTabButton, previewTabButton, editorTab, previewTab, content, attachment, cost, limit, submit, suffix) {
+function SetupEditor(form, editorTabButton, previewTabButton, editorTab, previewTab, content, attachment, cost, limit, submit, action, suffix) {
+  // Cost Estimate
+  const encoder = new TextEncoder();
+  const updateCost = function() {
+    var c = encoder.encode(content.value).length;
+    if (attachment.files[0]) {
+      c = c + attachment.files[0].size;
+    }
+    cost.innerHTML = c+suffix;
+    submit.disabled = c > limit;
+  };
+
   // Markdown Preview
   const parser = new commonmark.Parser();
   const updatePreview = function() {
     previewTab.innerHTML = markdownToHTML(parser, content.value);
   };
 
-  // Tab Handling
-  const openEditor = function() {
-    editorTab.style.display = "block";
-    previewTab.style.display = "none";
-    editorTabButton.className = "active";
-    previewTabButton.className = "";
-  }
+  // Tab Switching
   const openPreview = function() {
+    updateCost();
     updatePreview();
     editorTab.style.display = "none";
     previewTab.style.display = "block";
     editorTabButton.className = "";
     previewTabButton.className = "active";
+    submit.value = action;
+  }
+  const openEditor = function() {
+    editorTab.style.display = "block";
+    previewTab.style.display = "none";
+    editorTabButton.className = "active";
+    previewTabButton.className = "";
+    submit.value = "Preview";
   }
 
-  // Cost Estimate
-  const encoder = new TextEncoder();
-  const updateCost = function() {
-  var c = encoder.encode(content.value).length;
-  if (attachment.files[0]) {
-    c = c + attachment.files[0].size;
+  // Submit Button
+  const submitPost = function() {
+    const action = submit.value;
+    switch (action) {
+      case "Preview":
+        openPreview();
+        break;
+      case action:
+        submit.disabled = true;
+        form.submit();
+        form.reset();
+        break;
+      default:
+        console.log("Unrecognized Submit Action: " + action);
+        break;
+    }
   }
-  cost.innerHTML = c+suffix;
-  submit.disabled = c > limit;
-  };
 
   // Attach Handlers
   editorTabButton.onclick = openEditor;
   previewTabButton.onclick = openPreview;
   content.onkeyup = updateCost;
   attachment.onchange = updateCost;
+  submit.onclick = submitPost;
 
   // Initialization
   openEditor();

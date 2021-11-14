@@ -67,12 +67,13 @@
                     </tr>
                 </table>
 
-                <input type="submit" id="submit" value="Publish" />
+                <input type="button" id="publish-button" />
             </form>
 
             <script type="text/javascript" src="/static/commonmark.min.js"></script>
             <script type="text/javascript" src="/static/editor.js"></script>
             <script type="text/javascript">
+                const form = document.getElementById("publish-form");
                 const editorTabButton = document.getElementById("markdown-editor-button");
                 const previewTabButton = document.getElementById("markdown-preview-button");
                 const editorTab = document.getElementById("markdown-editor");
@@ -81,9 +82,9 @@
                 const attachment = document.getElementById('attachment');
                 const cost = document.getElementById('cost');
                 const limit = {{.Balance}};
-                const submit = document.getElementById('submit');
+                const submit = document.getElementById('publish-button');
                 const suffix = `{{template "currency"}}`;
-                SetupEditor(editorTabButton, previewTabButton, editorTab, previewTab, content, attachment, cost, limit, submit, suffix);
+                SetupEditor(form, editorTabButton, previewTabButton, editorTab, previewTab, content, attachment, cost, limit, submit, "Publish", suffix);
             </script>
 
             <div class="footer">
