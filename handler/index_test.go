@@ -1,25 +1,38 @@
 package handler_test
 
 import (
+	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
+	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/conveyearthgo/database"
+	"aletheiaware.com/conveyearthgo/filesystem"
 	"aletheiaware.com/conveyearthgo/handler"
 	"github.com/stretchr/testify/assert"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 )
 
 func TestIndex(t *testing.T) {
+	dir, err := ioutil.TempDir("", "test")
+	assert.Nil(t, err)
+	fs := filesystem.NewOnDisk(dir)
+	defer os.RemoveAll(dir)
 	tmpl, err := template.New("index.go.html").Parse(`{{with .Account}}{{.Username}}{{end}}`)
 	assert.Nil(t, err)
 	t.Run("Returns 200 When Signed In", func(t *testing.T) {
-		auth := authtest.NewAuthenticator(t)
+		db := database.NewInMemory()
+		ev := authtest.NewEmailVerifier()
+		auth := authgo.NewAuthenticator(db, ev)
 		authtest.NewTestAccount(t, auth)
 		token, _ := authtest.SignIn(t, auth)
+		cm := conveyearthgo.NewContentManager(db, fs)
 		mux := http.NewServeMux()
-		handler.AttachIndexHandler(mux, auth, tmpl)
+		handler.AttachIndexHandler(mux, auth, cm, tmpl, dir)
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
 		request.AddCookie(auth.NewSignInSessionCookie(token))
 		response := httptest.NewRecorder()
@@ -31,9 +44,12 @@ func TestIndex(t *testing.T) {
 		assert.Equal(t, authtest.TEST_USERNAME, string(body))
 	})
 	t.Run("Returns 200 When Not Signed In", func(t *testing.T) {
-		auth := authtest.NewAuthenticator(t)
+		db := database.NewInMemory()
+		ev := authtest.NewEmailVerifier()
+		auth := authgo.NewAuthenticator(db, ev)
+		cm := conveyearthgo.NewContentManager(db, fs)
 		mux := http.NewServeMux()
-		handler.AttachIndexHandler(mux, auth, tmpl)
+		handler.AttachIndexHandler(mux, auth, cm, tmpl, dir)
 		request := httptest.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 		mux.ServeHTTP(response, request)
