@@ -120,11 +120,11 @@ type ContentManager interface {
 	AddText([]byte) (string, int64, error)
 	AddFile(io.Reader) (string, int64, error)
 	ToHTML(string, string) (template.HTML, error)
-	NewConversation(*authgo.Account, string, []string, []string, []int64) (*Conversation, *Message, error)
+	NewConversation(*authgo.Account, string, []string, []string, []int64) (*Conversation, *Message, []*File, error)
 	LookupConversation(int64) (*Conversation, error)
 	LookupBestConversations(func(*Conversation) error, time.Time, int64) error
 	LookupRecentConversations(func(*Conversation) error, int64) error
-	NewMessage(*authgo.Account, int64, int64, []string, []string, []int64) (*Message, error)
+	NewMessage(*authgo.Account, int64, int64, []string, []string, []int64) (*Message, []*File, error)
 	LookupMessage(int64) (*Message, error)
 	LookupMessages(int64, func(*Message) error) error
 	LookupFile(int64) (*File, error)
@@ -253,30 +253,40 @@ func (m *contentManager) ToHTML(hash, mime string) (template.HTML, error) {
 	}
 }
 
-func (m *contentManager) NewConversation(account *authgo.Account, topic string, hashes, mimes []string, sizes []int64) (*Conversation, *Message, error) {
+func (m *contentManager) NewConversation(account *authgo.Account, topic string, hashes, mimes []string, sizes []int64) (*Conversation, *Message, []*File, error) {
 	created := time.Now()
 	conversation, err := m.database.CreateConversation(account.ID, topic, created)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	log.Println("Created Conversation", conversation)
 	message, err := m.database.CreateMessage(account.ID, conversation, 0, created)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	log.Println("Created Message", message)
-	var cost int64
+	var (
+		files []*File
+		cost  int64
+	)
 	for i := 0; i < len(hashes); i++ {
 		cost += sizes[i]
 		file, err := m.database.CreateFile(message, hashes[i], mimes[i], created)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 		log.Println("Created File", file)
+		files = append(files, &File{
+			ID:      file,
+			Message: message,
+			Hash:    hashes[i],
+			Mime:    mimes[i],
+			Created: created,
+		})
 	}
 	charge, err := m.database.CreateCharge(account.ID, conversation, message, cost, created)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	log.Println("Created Charge", charge)
 	return &Conversation{
@@ -290,7 +300,7 @@ func (m *contentManager) NewConversation(account *authgo.Account, topic string, 
 			ConversationID: conversation,
 			Cost:           cost,
 			Created:        created,
-		}, nil
+		}, files, nil
 }
 
 func (m *contentManager) LookupConversation(id int64) (*Conversation, error) {
@@ -332,39 +342,49 @@ func (m *contentManager) LookupRecentConversations(callback func(*Conversation) 
 	}, limit)
 }
 
-func (m *contentManager) NewMessage(account *authgo.Account, conversation, parent int64, hashes, mimes []string, sizes []int64) (*Message, error) {
+func (m *contentManager) NewMessage(account *authgo.Account, conversation, parent int64, hashes, mimes []string, sizes []int64) (*Message, []*File, error) {
 	created := time.Now()
 	message, err := m.database.CreateMessage(account.ID, conversation, parent, created)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	log.Println("Created Message", message)
-	var cost int64
+	var (
+		files []*File
+		cost  int64
+	)
 	for i := 0; i < len(hashes); i++ {
 		cost += sizes[i]
 		file, err := m.database.CreateFile(message, hashes[i], mimes[i], created)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		log.Println("Created File", file)
+		files = append(files, &File{
+			ID:      file,
+			Message: message,
+			Hash:    hashes[i],
+			Mime:    mimes[i],
+			Created: created,
+		})
 	}
 	charge, err := m.database.CreateCharge(account.ID, conversation, message, cost, created)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	amount := cost
 	log.Println("Created Charge", charge)
-	for parent != 0 {
+	for p := parent; p != 0; {
 		half := amount / 2
-		yield, err := m.database.CreateYield(account.ID, conversation, message, parent, half, created)
+		yield, err := m.database.CreateYield(account.ID, conversation, message, p, half, created)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		log.Println("Created Yield", yield)
 		amount = amount - half
-		parent, err = m.database.SelectMessageParent(parent)
+		p, err = m.database.SelectMessageParent(p)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	return &Message{
@@ -374,7 +394,7 @@ func (m *contentManager) NewMessage(account *authgo.Account, conversation, paren
 		ParentID:       parent,
 		Cost:           cost,
 		Created:        created,
-	}, nil
+	}, files, nil
 }
 
 func (m *contentManager) LookupMessage(id int64) (*Message, error) {

@@ -206,7 +206,7 @@ func main() {
 	handler.AttachBestHandler(mux, auth, cm, templates)
 
 	// Handle Recent
-	handler.AttachRecentHandler(mux, cm, templates)
+	handler.AttachRecentHandler(mux, auth, cm, templates)
 
 	// Handle About
 	handler.AttachAboutHandler(mux, auth, templates)

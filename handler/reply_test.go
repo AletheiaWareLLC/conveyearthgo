@@ -40,7 +40,7 @@ func TestReply(t *testing.T) {
 		hash, size, err := cm.AddText([]byte(content))
 		assert.Nil(t, err)
 		mime := "text/plain"
-		c, m, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
+		c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
 		assert.Nil(t, err)
 		mux := http.NewServeMux()
 		handler.AttachReplyHandler(mux, auth, am, cm, nm, tmpl)

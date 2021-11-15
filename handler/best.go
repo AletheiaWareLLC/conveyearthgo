@@ -2,7 +2,6 @@ package handler
 
 import (
 	"aletheiaware.com/authgo"
-	"aletheiaware.com/authgo/redirect"
 	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
@@ -26,11 +25,6 @@ func AttachBestHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthg
 
 func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		account := a.CurrentAccount(w, r)
-		if account == nil {
-			redirect.SignIn(w, r, r.URL.String())
-			return
-		}
 		data := struct {
 			Live          bool
 			Account       *authgo.Account
@@ -38,8 +32,7 @@ func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.
 			Period        string
 			Limit         int64
 		}{
-			Live:    netgo.IsLive(),
-			Account: account,
+			Live: netgo.IsLive(),
 		}
 		now := time.Now()
 		var since time.Time
@@ -66,6 +59,14 @@ func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.
 			}
 		}
 		data.Limit = limit * 2
+		account := a.CurrentAccount(w, r)
+		if account == nil {
+			if limit > 100 {
+				limit = 100
+			}
+		} else {
+			data.Account = account
+		}
 		if err := cm.LookupBestConversations(func(c *conveyearthgo.Conversation) error {
 			data.Conversations = append(data.Conversations, c)
 			return nil

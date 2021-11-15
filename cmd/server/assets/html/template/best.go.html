@@ -42,8 +42,10 @@
 
             {{template "conversations" .Conversations}}
 
+            {{if .Account -}}
             {{if gt (len .Conversations) 0 -}}
             <p class="center"><a href="/best?period={{.Period}}&limit={{.Limit}}">More</a></p>
+            {{- end}}
             {{- end}}
 
             <div class="footer">

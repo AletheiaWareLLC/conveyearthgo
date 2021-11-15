@@ -191,7 +191,7 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			}
 
 			// Record message
-			response, err := cm.NewMessage(account, conversation, message, hashes, mimes, sizes)
+			response, _, err := cm.NewMessage(account, conversation, message, hashes, mimes, sizes)
 			if err != nil {
 				log.Println(err)
 				data.Error = err.Error()

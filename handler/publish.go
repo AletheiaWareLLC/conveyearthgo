@@ -151,7 +151,7 @@ func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveye
 			}
 
 			// Record conversation
-			conversation, _, err := cm.NewConversation(account, topic, hashes, mimes, sizes)
+			conversation, _, _, err := cm.NewConversation(account, topic, hashes, mimes, sizes)
 			if err != nil {
 				log.Println(err)
 				data.Error = err.Error()

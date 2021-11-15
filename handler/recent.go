@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"aletheiaware.com/authgo"
 	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
@@ -11,21 +12,21 @@ import (
 	"strings"
 )
 
-func AttachRecentHandler(m *http.ServeMux, cm conveyearthgo.ContentManager, ts *template.Template) {
-	m.Handle("/recent", handler.Log(Recent(cm, ts)))
+func AttachRecentHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) {
+	m.Handle("/recent", handler.Log(Recent(a, cm, ts)))
 }
 
-func Recent(cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
+func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data := struct {
 			Live          bool
+			Account       *authgo.Account
 			Conversations []*conveyearthgo.Conversation
 			Limit         int64
 		}{
 			Live: netgo.IsLive(),
 		}
 		limit := int64(8)
-		// TODO limit may only be greater than 8 if user is signed in
 		if l := strings.TrimSpace(r.FormValue("limit")); l != "" {
 			if i, err := strconv.ParseInt(l, 10, 64); err != nil {
 				log.Println(err)
@@ -34,6 +35,14 @@ func Recent(cm conveyearthgo.ContentManager, ts *template.Template) http.Handler
 			}
 		}
 		data.Limit = limit * 2
+		account := a.CurrentAccount(w, r)
+		if account == nil {
+			if limit > 100 {
+				limit = 100
+			}
+		} else {
+			data.Account = account
+		}
 		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation) error {
 			data.Conversations = append(data.Conversations, c)
 			return nil

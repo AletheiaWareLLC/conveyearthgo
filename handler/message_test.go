@@ -39,7 +39,7 @@ func TestMessage(t *testing.T) {
 		mime := "text/plain"
 		cost := strconv.FormatInt(size, 10)
 		yield := "0"
-		_, m, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
+		_, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
 		assert.Nil(t, err)
 		mux := http.NewServeMux()
 		handler.AttachMessageHandler(mux, auth, cm, tmpl)
@@ -66,7 +66,7 @@ func TestMessage(t *testing.T) {
 		mime := "text/plain"
 		cost := strconv.FormatInt(size, 10)
 		yield := "0"
-		_, m, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
+		_, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
 		assert.Nil(t, err)
 		mux := http.NewServeMux()
 		handler.AttachMessageHandler(mux, auth, cm, tmpl)
