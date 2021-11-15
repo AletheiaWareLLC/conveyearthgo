@@ -472,7 +472,7 @@ func (db *Sql) CreateConversation(user int64, topic string, created time.Time) (
 
 func (db *Sql) SelectConversation(id int64) (*authgo.Account, string, time.Time, error) {
 	row := db.QueryRow(`
-		SELECT tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_conversations.topic, tbl_conversations.created_unix
+		SELECT tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_conversations.topic, tbl_conversations.created_unix
 		FROM tbl_conversations
 		INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
 		WHERE tbl_conversations.id=?`, id)
@@ -481,22 +481,24 @@ func (db *Sql) SelectConversation(id int64) (*authgo.Account, string, time.Time,
 		user     int64
 		username string
 		email    string
+		joined   int64
 		topic    string
 		created  int64
 	)
-	if err := row.Scan(&user, &username, &email, &topic, &created); err != nil {
+	if err := row.Scan(&user, &username, &email, &joined, &topic, &created); err != nil {
 		return nil, "", time.Time{}, err
 	}
 	return &authgo.Account{
 		ID:       user,
 		Username: username,
 		Email:    email,
+		Created:  time.Unix(joined, 0),
 	}, topic, time.Unix(created, 0), nil
 }
 
 func (db *Sql) SelectBestConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, since time.Time, limit int64) error {
 	rows, err := db.Query(`
-		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield,0)
+		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield,0)
 		FROM tbl_conversations
 		INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
 		INNER JOIN tbl_messages ON tbl_conversations.id=tbl_messages.conversation AND tbl_messages.parent IS NULL
@@ -506,7 +508,7 @@ func (db *Sql) SelectBestConversations(callback func(int64, *authgo.Account, str
 			FROM tbl_yields
 			GROUP BY parent
 		) AS yields ON tbl_messages.id=yields.parent
-		WHERE tbl_conversations.created_unix>=?
+		WHERE tbl_conversations.created_unix>=? AND yields.yield>0
 		ORDER BY yields.yield DESC
 		LIMIT ?`, since.Unix(), limit)
 	if err != nil {
@@ -518,18 +520,20 @@ func (db *Sql) SelectBestConversations(callback func(int64, *authgo.Account, str
 			user     int64
 			username string
 			email    string
+			joined   int64
 			topic    string
 			created  int64
 			cost     int64
 			yield    int64
 		)
-		if err := rows.Scan(&id, &user, &username, &email, &topic, &created, &cost, &yield); err != nil {
+		if err := rows.Scan(&id, &user, &username, &email, &joined, &topic, &created, &cost, &yield); err != nil {
 			return err
 		}
 		if err := callback(id, &authgo.Account{
 			ID:       user,
 			Username: username,
 			Email:    email,
+			Created:  time.Unix(joined, 0),
 		}, topic, time.Unix(created, 0), cost, yield); err != nil {
 			return err
 		}
@@ -539,7 +543,7 @@ func (db *Sql) SelectBestConversations(callback func(int64, *authgo.Account, str
 
 func (db *Sql) SelectRecentConversations(callback func(int64, *authgo.Account, string, time.Time, int64, int64) error, limit int64) error {
 	rows, err := db.Query(`
-		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
+		SELECT tbl_conversations.id, tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_conversations.topic, tbl_conversations.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_conversations
 		INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
 		INNER JOIN tbl_messages ON tbl_conversations.id=tbl_messages.conversation AND tbl_messages.parent IS NULL
@@ -560,18 +564,20 @@ func (db *Sql) SelectRecentConversations(callback func(int64, *authgo.Account, s
 			user     int64
 			username string
 			email    string
+			joined   int64
 			topic    string
 			created  int64
 			cost     int64
 			yield    int64
 		)
-		if err := rows.Scan(&id, &user, &username, &email, &topic, &created, &cost, &yield); err != nil {
+		if err := rows.Scan(&id, &user, &username, &email, &joined, &topic, &created, &cost, &yield); err != nil {
 			return err
 		}
 		if err := callback(id, &authgo.Account{
 			ID:       user,
 			Username: username,
 			Email:    email,
+			Created:  time.Unix(joined, 0),
 		}, topic, time.Unix(created, 0), cost, yield); err != nil {
 			return err
 		}
@@ -611,7 +617,7 @@ func (db *Sql) CreateFile(message int64, hash, mime string, created time.Time) (
 
 func (db *Sql) SelectMessage(id int64) (*authgo.Account, int64, int64, time.Time, int64, int64, error) {
 	row := db.QueryRow(`
-		SELECT tbl_messages.user, tbl_users.username, tbl_users.email, tbl_messages.conversation, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
+		SELECT tbl_messages.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_messages.conversation, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_messages
 		INNER JOIN tbl_users ON tbl_messages.user=tbl_users.id
 		INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
@@ -626,25 +632,27 @@ func (db *Sql) SelectMessage(id int64) (*authgo.Account, int64, int64, time.Time
 		user         int64
 		username     string
 		email        string
+		joined       int64
 		conversation int64
 		parent       int64
 		created      int64
 		cost         int64
 		yield        int64
 	)
-	if err := row.Scan(&user, &username, &email, &conversation, &parent, &created, &cost, &yield); err != nil {
+	if err := row.Scan(&user, &username, &email, &joined, &conversation, &parent, &created, &cost, &yield); err != nil {
 		return nil, 0, 0, time.Time{}, 0, 0, err
 	}
 	return &authgo.Account{
 		ID:       user,
 		Username: username,
 		Email:    email,
+		Created:  time.Unix(joined, 0),
 	}, conversation, parent, time.Unix(created, 0), cost, yield, nil
 }
 
 func (db *Sql) SelectMessages(conversation int64, callback func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error {
 	rows, err := db.Query(`
-		SELECT tbl_messages.id, tbl_messages.user, tbl_users.username, tbl_users.email, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
+		SELECT tbl_messages.id, tbl_messages.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, IFNULL(tbl_messages.parent, 0), tbl_messages.created_unix, tbl_charges.amount, IFNULL(yields.yield, 0)
 		FROM tbl_messages
 		INNER JOIN tbl_users ON tbl_messages.user=tbl_users.id
 		INNER JOIN tbl_charges ON tbl_messages.id=tbl_charges.message
@@ -663,18 +671,20 @@ func (db *Sql) SelectMessages(conversation int64, callback func(int64, *authgo.A
 			user     int64
 			username string
 			email    string
+			joined   int64
 			parent   int64
 			created  int64
 			cost     int64
 			yield    int64
 		)
-		if err := rows.Scan(&id, &user, &username, &email, &parent, &created, &cost, &yield); err != nil {
+		if err := rows.Scan(&id, &user, &username, &email, &joined, &parent, &created, &cost, &yield); err != nil {
 			return err
 		}
 		if err := callback(id, &authgo.Account{
 			ID:       user,
 			Username: username,
 			Email:    email,
+			Created:  time.Unix(joined, 0),
 		}, parent, time.Unix(created, 0), cost, yield); err != nil {
 			return err
 		}
