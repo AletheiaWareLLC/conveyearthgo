@@ -127,12 +127,14 @@ func (db *InMemory) SelectConversation(id int64) (*authgo.Account, string, time.
 	user := db.ConversationUser[id]
 	username := db.username(user)
 	email := db.AccountEmail[username]
+	joined := db.AccountCreated[username]
 	topic := db.ConversationTopic[id]
 	created := db.ConversationCreated[id]
 	return &authgo.Account{
 		ID:       user,
 		Username: username,
 		Email:    email,
+		Created:  joined,
 	}, topic, created, nil
 }
 
@@ -146,13 +148,15 @@ func (db *InMemory) SelectBestConversations(callback func(int64, *authgo.Account
 		if db.ConversationCreated[cid].Before(since) {
 			continue
 		}
-		results = append(results, cid)
 		for mid := range db.MessageId {
-			if db.MessageConversation[mid] != cid {
+			if db.MessageConversation[mid] != cid || db.MessageParent[mid] != 0 {
 				continue
 			}
 			costs[cid] = db.cost(mid)
 			yields[cid] = db.yield(mid)
+		}
+		if y, ok := yields[cid]; ok && y > 0 {
+			results = append(results, cid)
 		}
 	}
 	sort.Slice(results, func(a, b int) bool {
@@ -164,6 +168,7 @@ func (db *InMemory) SelectBestConversations(callback func(int64, *authgo.Account
 		user := db.ConversationUser[cid]
 		username := db.username(user)
 		email := db.AccountEmail[username]
+		joined := db.AccountCreated[username]
 		topic := db.ConversationTopic[cid]
 		created := db.ConversationCreated[cid]
 		cost := costs[cid]
@@ -172,6 +177,7 @@ func (db *InMemory) SelectBestConversations(callback func(int64, *authgo.Account
 			ID:       user,
 			Username: username,
 			Email:    email,
+			Created:  joined,
 		}, topic, created, cost, yield); err != nil {
 			return err
 		}
@@ -188,7 +194,7 @@ func (db *InMemory) SelectRecentConversations(callback func(int64, *authgo.Accou
 	for cid := range db.ConversationId {
 		results = append(results, cid)
 		for mid := range db.MessageId {
-			if db.MessageConversation[mid] != cid {
+			if db.MessageConversation[mid] != cid || db.MessageParent[mid] != 0 {
 				continue
 			}
 			costs[cid] = db.cost(mid)
@@ -204,6 +210,7 @@ func (db *InMemory) SelectRecentConversations(callback func(int64, *authgo.Accou
 		user := db.ConversationUser[cid]
 		username := db.username(user)
 		email := db.AccountEmail[username]
+		joined := db.AccountCreated[username]
 		topic := db.ConversationTopic[cid]
 		created := db.ConversationCreated[cid]
 		cost := costs[cid]
@@ -212,6 +219,7 @@ func (db *InMemory) SelectRecentConversations(callback func(int64, *authgo.Accou
 			ID:       user,
 			Username: username,
 			Email:    email,
+			Created:  joined,
 		}, topic, created, cost, yield); err != nil {
 			return err
 		}
@@ -240,6 +248,7 @@ func (db *InMemory) SelectMessage(id int64) (*authgo.Account, int64, int64, time
 	user := db.MessageUser[id]
 	username := db.username(user)
 	email := db.AccountEmail[username]
+	joined := db.AccountCreated[username]
 	conversation := db.MessageConversation[id]
 	parent := db.MessageParent[id]
 	created := db.MessageCreated[id]
@@ -249,6 +258,7 @@ func (db *InMemory) SelectMessage(id int64) (*authgo.Account, int64, int64, time
 		ID:       user,
 		Username: username,
 		Email:    email,
+		Created:  joined,
 	}, conversation, parent, created, cost, yield, nil
 }
 
@@ -262,6 +272,7 @@ func (db *InMemory) SelectMessages(conversation int64, callback func(int64, *aut
 		user := db.MessageUser[id]
 		username := db.username(user)
 		email := db.AccountEmail[username]
+		joined := db.AccountCreated[username]
 		parent := db.MessageParent[id]
 		created := db.MessageCreated[id]
 		cost := db.cost(id)
@@ -270,6 +281,7 @@ func (db *InMemory) SelectMessages(conversation int64, callback func(int64, *aut
 			ID:       user,
 			Username: username,
 			Email:    email,
+			Created:  joined,
 		}, parent, created, cost, yield); err != nil {
 			return err
 		}
@@ -468,11 +480,11 @@ func (db *InMemory) cost(id int64) (cost int64) {
 }
 
 func (db *InMemory) yield(id int64) (yield int64) {
-	for cid := range db.YieldId {
-		if db.YieldMessage[cid] != id {
+	for yid := range db.YieldId {
+		if db.YieldParent[yid] != id {
 			continue
 		}
-		yield += db.YieldAmount[cid]
+		yield += db.YieldAmount[yid]
 	}
 	return
 }
