@@ -103,9 +103,7 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 				return
 			}
 
-			reply := strings.TrimSpace(r.FormValue("reply"))
-
-			// TODO replace \r\n with \n
+			reply := strings.ReplaceAll(strings.TrimSpace(r.FormValue("reply")), "\r\n", "\n")
 
 			data.Reply = reply
 
