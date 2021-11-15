@@ -55,35 +55,34 @@
             <p class="subtitle">Quality Public Dialogue.</p>
 
             {{if .Account -}}
-            <p class="center">
-                Hello {{.Account.Username}}!
-                <br />
-                <br />
-                What will you Convey today?
-                <br />
-                <br />
-                <a href="/account">Account</a>
-                <a href="/publish">Publish</a>
-                <a href="/best">Best</a>
-                <a href="/recent">Recent</a>
-                <a href="/digest">Digest</a>
-            </p>
+            <p class="center">Hello {{.Account.Username}}, what will you Convey today?</p>
+
+            <ul class="nav">
+                <li><a href="/account">Account</a></li>
+                <li><a href="/publish">Publish</a></li>
+                <li><a href="/best">Best</a></li>
+                <li><a href="/recent">Recent</a></li>
+                <li><a href="/digest">Digest</a></li>
+            </ul>
 
             {{- else -}}
 
             <p class="center">Convey is a Communication Platform that Incentivizes Quality Content, Collaboration, and Discussion.</p>
 
-            <p class="center">
-                <a href="/sign-in">Sign In</a> - <a href="/sign-up">Sign Up</a>
-            </p>
+            <a class="call-to-action" href="/static/subscribe-digest.html">Subscribe</a>
 
-            <a class="call-to-action" href="/static/subscribe-digest.html">Send Me the Digest!</a>
+            <ul class="nav">
+                <li><a href="/sign-in">Sign In</a></li>
+                <li><a href="/sign-up">Sign Up</a></li>
+            </ul>
 
             {{- end}}
 
             <div class="tiles">
                 <div class="tile">
-                    <h2 class="center">Best</h2>
+                    <a href="/best">
+                        <h2 class="center">Best</h2>
+                    </a>
 
                     {{template "conversations" .Best}}
 
@@ -93,7 +92,9 @@
                 </div>
 
                 <div class="tile">
-                    <h2 class="center">Recent</h2>
+                    <a href="/recent">
+                        <h2 class="center">Recent</h2>
+                    </a>
 
                     {{template "conversations" .Recent}}
 
@@ -103,13 +104,17 @@
                 </div>
 
                 <div class="tile">
-                    <h2 class="center">Editions</h2>
+                    <a href="/digest">
+                        <h2 class="center">Editions</h2>
+                    </a>
 
                     {{template "editions" .Editions}}
 
                     {{if gt (len .Editions) 0 -}}
                     <p class="center"><a href="/digest">More</a></p>
                     {{- end}}
+
+                    <a class="call-to-action" href="/static/subscribe-digest.html">Get Next Edition</a>
                 </div>
             </div>
 

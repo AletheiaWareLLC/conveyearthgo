@@ -39,7 +39,7 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 		if account := a.CurrentAccount(w, r); account != nil {
 			data.Account = account
 		}
-		// Query best of the week posts
+		// Query best of the year posts
 		now := time.Now()
 		since := now.Truncate(PERIOD_YEARLY)
 		if err := cm.LookupBestConversations(func(c *conveyearthgo.Conversation) error {
