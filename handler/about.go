@@ -6,9 +6,7 @@ import (
 	"aletheiaware.com/netgo/handler"
 	"html/template"
 	"log"
-	// "math"
 	"net/http"
-	// "time"
 )
 
 func AttachAboutHandler(m *http.ServeMux, a authgo.Authenticator, ts *template.Template) {

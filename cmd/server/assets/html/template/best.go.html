@@ -26,6 +26,8 @@
             Best of the Day
             {{- else if eq .Period "week" -}}
             Best of the Week
+            {{- else if eq .Period "month" -}}
+            Best of the Month
             {{- else if eq .Period "year" -}}
             Best of the Year
             {{- else if eq .Period "all" -}}
@@ -33,18 +35,21 @@
             {{- end -}}
             </h1>
 
-            <p class="center">
-                {{if ne .Period "day"}}<a href="/best?period=day">Day</a>{{end}}
-                {{if ne .Period "week"}}<a href="/best?period=week">Week</a>{{end}}
-                {{if ne .Period "year"}}<a href="/best?period=year">Year</a>{{end}}
-                {{if ne .Period "all"}}<a href="/best?period=all">All</a>{{end}}
-            </p>
+            <ul class="nav">
+                {{if ne .Period "day"}}<li><a href="/best?period=day">Day</a></li>{{end}}
+                {{if ne .Period "week"}}<li><a href="/best?period=week">Week</a></li>{{end}}
+                {{if ne .Period "month"}}<li><a href="/best?period=month">Month</a></li>{{end}}
+                {{if ne .Period "year"}}<li><a href="/best?period=year">Year</a></li>{{end}}
+                {{if ne .Period "all"}}<li><a href="/best?period=all">All</a></li>{{end}}
+            </ul>
 
             {{template "conversations" .Conversations}}
 
             {{if .Account -}}
             {{if gt (len .Conversations) 0 -}}
-            <p class="center"><a href="/best?period={{.Period}}&limit={{.Limit}}">More</a></p>
+            <ul class="nav">
+                <li><a href="/best?period={{.Period}}&limit={{.Limit}}">More</a></li>
+            </ul>
             {{- end}}
             {{- end}}
 

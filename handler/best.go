@@ -13,12 +13,6 @@ import (
 	"time"
 )
 
-const (
-	PERIOD_DAILY  = time.Hour * 24
-	PERIOD_WEEKLY = time.Hour * 168  // (24 * 7)
-	PERIOD_YEARLY = time.Hour * 8766 // (24 * 365.25)
-)
-
 func AttachBestHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) {
 	m.Handle("/best", handler.Log(Best(a, cm, ts)))
 }
@@ -40,14 +34,19 @@ func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.
 		switch period {
 		case "all":
 		case "year":
-			since = now.Truncate(PERIOD_YEARLY)
+			since = time.Date(now.Year(), 1, 1, 0, 0, 0, 0, time.UTC)
+		case "month":
+			since = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 		default:
 			period = "week"
 			fallthrough
 		case "week":
-			since = now.Truncate(PERIOD_WEEKLY)
+			since = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+			for since.Weekday() > time.Sunday {
+				since = since.AddDate(0, 0, -1)
+			}
 		case "day":
-			since = now.Truncate(PERIOD_DAILY)
+			since = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 		}
 		data.Period = period
 		limit := int64(8)

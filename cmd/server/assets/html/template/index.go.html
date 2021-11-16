@@ -87,7 +87,9 @@
                     {{template "conversations" .Best}}
 
                     {{if gt (len .Best) 0 -}}
-                    <p class="center"><a href="/best?period=year&limit={{.Limit}}">More</a></p>
+                    <ul class="nav">
+                        <li><a href="/best?period=year&limit={{.Limit}}">More</a></li>
+                    </ul>
                     {{- end}}
                 </div>
 
@@ -99,7 +101,9 @@
                     {{template "conversations" .Recent}}
 
                     {{if gt (len .Recent) 0 -}}
-                    <p class="center"><a href="/recent?limit={{.Limit}}">More</a></p>
+                    <ul class="nav">
+                        <li><a href="/recent?limit={{.Limit}}">More</a></li>
+                    </ul>
                     {{- end}}
                 </div>
 
@@ -111,7 +115,9 @@
                     {{template "editions" .Editions}}
 
                     {{if gt (len .Editions) 0 -}}
-                    <p class="center"><a href="/digest">More</a></p>
+                    <ul class="nav">
+                        <li><a href="/digest">More</a></li>
+                    </ul>
                     {{- end}}
 
                     {{if not .Account -}}

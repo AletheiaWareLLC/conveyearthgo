@@ -27,7 +27,9 @@
 
             {{if .Account -}}
             {{if gt (len .Conversations) 0 -}}
-            <p class="center"><a href="/recent?limit={{.Limit}}">More</a></p>
+            <ul class="nav">
+                <li><a href="/recent?limit={{.Limit}}">More</a></li>
+            </ul>
             {{- end}}
             {{- end}}
 
