@@ -114,7 +114,9 @@
                     <p class="center"><a href="/digest">More</a></p>
                     {{- end}}
 
+                    {{if not .Account -}}
                     <a class="call-to-action" href="/static/subscribe-digest.html">Get Next Edition</a>
+                    {{- end}}
                 </div>
             </div>
 
