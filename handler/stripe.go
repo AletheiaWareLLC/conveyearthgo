@@ -1,12 +1,20 @@
 package handler
 
 import (
+	"aletheiaware.com/authgo"
+	"aletheiaware.com/authgo/redirect"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
 	"encoding/json"
 	"fmt"
 	"github.com/stripe/stripe-go/v72"
+	"github.com/stripe/stripe-go/v72/account"
+	"github.com/stripe/stripe-go/v72/accountlink"
+	"github.com/stripe/stripe-go/v72/balance"
+	"github.com/stripe/stripe-go/v72/loginlink"
 	"github.com/stripe/stripe-go/v72/webhook"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,6 +23,138 @@ import (
 )
 
 const MaxBodyBytes = int64(65536)
+
+func AttachStripeHandler(m *http.ServeMux, a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template.Template, scheme, domain string) {
+	m.Handle("/stripe", handler.Log(Stripe(a, sm, ts, scheme, domain)))
+}
+
+func Stripe(a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template.Template, scheme, domain string) http.Handler {
+	url := fmt.Sprintf("%s://%s/stripe", scheme, domain)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		acc := a.CurrentAccount(w, r)
+		if acc == nil {
+			redirect.SignIn(w, r, r.URL.String())
+			return
+		}
+		data := &StripeData{
+			Live:    netgo.IsLive(),
+			Account: acc,
+		}
+		sa, err := sm.StripeAccount(acc)
+		if err != nil {
+			log.Println(err)
+		}
+		if sa != nil {
+			data.StripeAccount = sa
+
+			params := &stripe.BalanceParams{}
+			params.SetStripeAccount(sa.ID)
+			bal, err := balance.Get(params)
+			if err != nil {
+				log.Println(err)
+			} else {
+				for _, a := range bal.Available {
+					s := conveyearthgo.FormatStripeAmount(float64(a.Value), a.Currency)
+					if s != "" {
+						data.StripeAvailableBalance = append(data.StripeAvailableBalance, s)
+					}
+				}
+				for _, a := range bal.Pending {
+					s := conveyearthgo.FormatStripeAmount(float64(a.Value), a.Currency)
+					if s != "" {
+						data.StripePendingBalance = append(data.StripePendingBalance, s)
+					}
+				}
+			}
+
+			if sa.ChargesEnabled && sa.PayoutsEnabled {
+				ll, err := loginlink.New(&stripe.LoginLinkParams{
+					Account: stripe.String(sa.ID),
+				})
+				if err != nil {
+					log.Println(err)
+				} else {
+					data.StripeLoginLink = ll.URL
+				}
+			} else if !sa.DetailsSubmitted {
+				al, err := accountlink.New(&stripe.AccountLinkParams{
+					Account:    stripe.String(sa.ID),
+					RefreshURL: stripe.String(url),
+					ReturnURL:  stripe.String(url),
+					Type:       stripe.String("account_onboarding"),
+				})
+				if err != nil {
+					log.Println(err)
+				} else {
+					data.StripeOnboardingLink = al.URL
+				}
+			}
+		}
+		switch r.Method {
+		case "GET":
+			executeStripeTemplate(w, ts, data)
+		case "POST":
+			if sa != nil {
+				http.Redirect(w, r, "/stripe", http.StatusFound)
+				return
+			}
+			params := &stripe.AccountParams{
+				Capabilities: &stripe.AccountCapabilitiesParams{
+					CardPayments: &stripe.AccountCapabilitiesCardPaymentsParams{
+						Requested: stripe.Bool(true),
+					},
+					Transfers: &stripe.AccountCapabilitiesTransfersParams{
+						Requested: stripe.Bool(true),
+					},
+				},
+				Email: stripe.String(acc.Email),
+				Type:  stripe.String("express"),
+			}
+			params.AddMetadata("domain", domain)
+			params.AddMetadata("account_id", strconv.FormatInt(acc.ID, 10))
+			a, err := account.New(params)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+			if err := sm.NewStripeAccount(acc, a); err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+			al, err := accountlink.New(&stripe.AccountLinkParams{
+				Account:    stripe.String(a.ID),
+				RefreshURL: stripe.String(url),
+				ReturnURL:  stripe.String(url),
+				Type:       stripe.String("account_onboarding"),
+			})
+			if err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+			http.Redirect(w, r, al.URL, http.StatusFound)
+		}
+	})
+}
+
+func executeStripeTemplate(w http.ResponseWriter, ts *template.Template, data *StripeData) {
+	if err := ts.ExecuteTemplate(w, "stripe.go.html", data); err != nil {
+		log.Println(err)
+	}
+}
+
+type StripeData struct {
+	Live                   bool
+	Error                  string
+	Account                *authgo.Account
+	StripeAccount          *stripe.Account
+	StripeAvailableBalance []string
+	StripePendingBalance   []string
+	StripeOnboardingLink   string
+	StripeLoginLink        string
+}
 
 func AttachStripeWebhookHandler(m *http.ServeMux, am conveyearthgo.AccountManager, webhookSecretKey string, domain string) {
 	m.Handle("/stripe-webhook", handler.Log(StripeWebhook(am, webhookSecretKey, domain)))

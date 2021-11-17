@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <title>Convey</title>
+    </head>
+
+    <body>
+        <div class="content">
+            <div class="header">
+                <a href="https://aletheiaware.com">
+                    <img src="static/logo.svg" />
+                </a>
+                {{if not .Live -}}
+                <div class="beta">BETA</div>
+                {{- end}}
+            </div>
+
+            <h1 class="center">Stripe</h1>
+
+            {{if ne .Error "" -}}
+            <p class="error">{{.Error}}</p>
+            {{- end}}
+
+            {{if .StripeAccount -}}
+            <h4 class="center">Email</h4>
+
+            <p class="center">{{.StripeAccount.Email}}</p>
+
+            <h4 class="center">ID</h4>
+
+            <p class="center">{{.StripeAccount.ID}}</p>
+
+            <h4 class="center">Country</h4>
+
+            <p class="center">{{.StripeAccount.Country}}</p>
+
+            {{if .StripeOnboardingLink -}}
+            <a class="call-to-action" href="{{.StripeOnboardingLink}}">Complete Onboarding</a>
+            {{- else -}}
+            <h4 class="center">Balance</h4>
+
+            <h5 class="center">Available</h5>
+            {{range .StripeAvailableBalance -}}
+            <p class="center">{{.}}</p>
+            {{- end}}
+
+            <h5 class="center">Pending</h5>
+            {{range .StripePendingBalance -}}
+            <p class="center">{{.}}</p>
+            {{- end}}
+
+            {{if .StripeLoginLink -}}
+            <a class="call-to-action" href="{{.StripeLoginLink}}">Visit Dashboard</a>
+            {{- end}}
+            {{- end}}
+
+            {{- else -}}
+            <form action="/stripe" method="post" id="stripe-form">
+                <!-- TODO(v2) add CSRF token
+                <input type="hidden" id="token" name="token" value="{ { .Token } }" />
+                -->
+                <input type="submit" id="stripe-button" value="Connect Account" />
+            </form>
+            {{- end}}
+
+            <div class="footer">
+                <ul class="nav">
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/publish">Publish</a></li>
+                    <li><a href="/best">Best</a></li>
+                    <li><a href="/recent">Recent</a></li>
+                    <li><a href="/digest">Digest</a></li>
+                </ul>
+                <ul class="nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="mailto:support@aletheiaware.com">Support</a></li>
+                </ul>
+                <p class="meta">© 2021 Aletheia Ware LLC.  All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+</html>

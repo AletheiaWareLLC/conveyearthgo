@@ -68,17 +68,7 @@ func CoinBuy(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *templa
 					ProductID: product.ID,
 					Size:      size,
 				}
-				switch price.Currency {
-				case stripe.CurrencyUSD:
-					// Format as decimal with dollar size
-					b.Price = fmt.Sprintf("$%.2f", float64(price.UnitAmountDecimal)/100.0)
-					// Remove trailing zeros
-					b.Price = strings.TrimRight(b.Price, "0")
-					// Remove trailing point
-					b.Price = strings.TrimRight(b.Price, ".")
-				default:
-					log.Println("Unhandled currency:", price.Currency)
-				}
+				b.Price = conveyearthgo.FormatStripeAmount(price.UnitAmountDecimal, price.Currency)
 				bundles[price.ID] = b
 				data.Bundles = append(data.Bundles, b)
 			}

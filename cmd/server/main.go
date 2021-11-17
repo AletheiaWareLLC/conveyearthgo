@@ -187,6 +187,12 @@ func main() {
 	// Handle Buy Coins
 	handler.AttachCoinBuyHandler(mux, auth, am, templates, scheme, host)
 
+	// Create a Stripe Manager
+	sm := conveyearthgo.NewStripeManager(db)
+
+	// Handle Stripe
+	handler.AttachStripeHandler(mux, auth, sm, templates, scheme, host)
+
 	// Handle Stripe Webhook
 	handler.AttachStripeWebhookHandler(mux, am, os.Getenv("STRIPE_WEBHOOK_SECRET_KEY"), host)
 

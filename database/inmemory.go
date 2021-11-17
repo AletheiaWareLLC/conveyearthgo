@@ -55,6 +55,10 @@ func NewInMemory() *InMemory {
 		AwardId:                          make(map[int64]bool),
 		AwardUser:                        make(map[int64]int64),
 		AwardAmount:                      make(map[int64]int64),
+		StripeAccountId:                  make(map[int64]bool),
+		StripeAccountUser:                make(map[int64]int64),
+		StripeAccountIdentity:            make(map[int64]string),
+		StripeAccountCreated:             make(map[int64]time.Time),
 	}
 }
 
@@ -105,6 +109,10 @@ type InMemory struct {
 	AwardId                          map[int64]bool
 	AwardUser                        map[int64]int64
 	AwardAmount                      map[int64]int64
+	StripeAccountId                  map[int64]bool
+	StripeAccountUser                map[int64]int64
+	StripeAccountIdentity            map[int64]string
+	StripeAccountCreated             map[int64]time.Time
 }
 
 func (db *InMemory) CreateConversation(user int64, topic string, created time.Time) (int64, error) {
@@ -458,6 +466,28 @@ func (db *InMemory) SelectAwards(user int64) (int64, error) {
 		awards += db.AwardAmount[pid]
 	}
 	return awards, nil
+}
+
+func (db *InMemory) CreateStripeAccount(user int64, identity string, created time.Time) (int64, error) {
+	db.Lock()
+	defer db.Unlock()
+	id := database.NextId()
+	db.StripeAccountId[id] = true
+	db.StripeAccountUser[id] = user
+	db.StripeAccountIdentity[id] = identity
+	db.StripeAccountCreated[id] = created
+	return id, nil
+}
+
+func (db *InMemory) SelectStripeAccount(user int64) (string, time.Time, error) {
+	db.Lock()
+	defer db.Unlock()
+	for sid := range db.StripeAccountId {
+		if db.StripeAccountUser[sid] == user {
+			return db.StripeAccountIdentity[sid], db.StripeAccountCreated[sid], nil
+		}
+	}
+	return "", time.Time{}, nil
 }
 
 func (db *InMemory) username(id int64) string {

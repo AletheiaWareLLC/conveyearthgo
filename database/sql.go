@@ -895,3 +895,28 @@ func (db *Sql) SelectAwards(user int64) (int64, error) {
 	}
 	return awards, nil
 }
+
+func (db *Sql) CreateStripeAccount(user int64, identity string, created time.Time) (int64, error) {
+	result, err := db.Exec(`
+		INSERT INTO tbl_stripe_account
+		SET user=?, identity=?, created_unix=?`, user, identity, created.Unix())
+	if err != nil {
+		return 0, err
+	}
+	return result.LastInsertId()
+}
+
+func (db *Sql) SelectStripeAccount(user int64) (string, time.Time, error) {
+	row := db.QueryRow(`
+		SELECT identity, created_unix
+		FROM tbl_stripe_account
+		WHERE tbl_stripe_account.user=?`, user)
+	var (
+		identity string
+		created  int64
+	)
+	if err := row.Scan(&identity, &created); err != nil {
+		return "", time.Time{}, err
+	}
+	return identity, time.Unix(created, 0), nil
+}
