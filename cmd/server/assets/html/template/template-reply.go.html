@@ -2,7 +2,7 @@
 {{if gt (len .) 0 -}}
 <ul class="reply">
     {{range . -}}
-    <li>
+    <li class="reply">
         {{template "message" .}}
 
         {{template "reply" .Replies}}

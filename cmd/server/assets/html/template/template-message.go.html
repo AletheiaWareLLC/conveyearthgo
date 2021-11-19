@@ -5,7 +5,7 @@
     {{.Content}}
 
     {{if .ConversationID -}}
-    <p><small><a href="reply?conversation={{.ConversationID}}&message={{.MessageID}}">reply</a></small></p>
+    <p class="meta"><a href="reply?conversation={{.ConversationID}}&message={{.MessageID}}">reply</a></p>
     {{- end}}
 </div>
 {{- end}}
