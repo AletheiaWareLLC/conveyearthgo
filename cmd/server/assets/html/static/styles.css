@@ -222,11 +222,26 @@ p.ucc {
 .yield {
     color: limegreen;
 }
+.tile {
+    flex: auto;
+    text-align: center;
+    max-width: 100%;
+    min-width: 50%;
+}
+.tiles {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
 @media screen and (max-width: 600px) {
     a.call-to-action {
         width: 50%;
     }
     form {
         width: 100%;
+    }
+    .tile {
+        min-width: 100%;
     }
 }

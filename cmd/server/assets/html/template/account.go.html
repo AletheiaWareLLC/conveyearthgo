@@ -27,57 +27,77 @@
             <p class="error">{{.Error}}</p>
             {{- end}}
 
-            <h4 class="center">Email</h4>
+            <div class="tiles">
+                <div class="tile">
+                    <h2 class="center">Email</h2>
 
-            <p class="center">{{.Account.Email}}</p>
+                    <p class="center">{{.Account.Email}}</p>
+                </div>
 
-            <h4 class="center">Username</h4>
+                <div class="tile">
+                    <h2 class="center">Username</h2>
 
-            <p class="center">{{.Account.Username}}</p>
+                    <p class="center">{{.Account.Username}}</p>
+                </div>
 
-            <h4 class="center">Password</h4>
+                <div class="tile">
+                    <h2 class="center">Password</h2>
 
-            <p class="center">************</p>
+                    <p class="center">************</p>
 
-            <ul class="nav">
-                <li><a href="/account-password">Change Password</a></li>
-            </ul>
+                    <ul class="nav">
+                        <li><a href="/account-password">Change Password</a></li>
+                    </ul>
+                </div>
 
-            <h4 class="center">Joined</h4>
+                <div class="tile">
+                    <h2 class="center">Joined</h2>
 
-            <p class="center">{{template "date" .Account.Created}}</p>
+                    <p class="center">{{template "date" .Account.Created}}</p>
+                </div>
 
-            <h4 class="center">Balance</h4>
+                <div class="tile">
+                    <h2 class="center">Balance</h2>
 
-            <p class="center">{{.Balance}}{{template "currency"}}</p>
+                    <p class="center">{{.Balance}}{{template "currency"}}</p>
 
-            <ul class="nav">
-                <li><a href="/coin-buy">Buy Coins</a></li>
-            </ul>
+                    <ul class="nav">
+                        <li><a href="/coin-buy">Buy Coins</a></li>
+                    </ul>
+                </div>
 
-            <h4 class="center">Notifications</h4>
+                <div class="tile">
+                    <h2 class="center">Notifications</h2>
 
-            <h5 class="center">Responses</h5>
+                    <table style="margin: 0 auto;">
+                        <tr>
+                            <th style="text-align: right; color: deepskyblue;">Responses</th>
+                            <td style="text-align: left;">You {{if .NotificationResponses}}will{{else}}will not{{end}} be notified when someone responds to one of your messages.</td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: right; color: deepskyblue;">Mentions</th>
+                            <td style="text-align: left;">You {{if .NotificationMentions}}will{{else}}will not{{end}} be notified when someone mentions you.</td>
+                        </tr>
+                        <tr>
+                            <th style="text-align: right; color: deepskyblue;">Digests</th>
+                            <td style="text-align: left;">You {{if .NotificationDigests}}will{{else}}will not{{end}} be notified when a new digest is published.</td>
+                        </tr>
+                    </table>
 
-            <p class="center">You {{if .NotificationResponses}}will{{else}}will not{{end}} be notified when someone responds to one of your messages.</p>
+                    <ul class="nav">
+                        <li><a href="/account-notification-preferences">Change Notification Preferences</a></li>
+                    </ul>
+                </div>
 
-            <h5 class="center">Mentions</h5>
+                <div class="tile">
+                    <h2 class="center">Referrals</h2>
 
-            <p class="center">You {{if .NotificationMentions}}will{{else}}will not{{end}} be notified when someone mentions you.</p>
+                    <p class="center">Refer a friend and earns coins whenever they appear in the digest.</p>
 
-            <h5 class="center">Digests</h5>
+                    <p class="center"><code>{{.Scheme}}://{{.Domain}}/sign-up?referrer={{.Account.Username}}</code></p>
 
-            <p class="center">You {{if .NotificationDigests}}will{{else}}will not{{end}} be notified when a new digest is published.</p>
-
-            <ul class="nav">
-                <li><a href="/account-notification-preferences">Change Notification Preferences</a></li>
-            </ul>
-
-            <h4 class="center">Referrals</h4>
-
-            <p class="center">Refer a friend to expand the community and earns coins whenever they appear in a digest.</p>
-
-            <p class="center"><code>{{.Scheme}}://{{.Domain}}/sign-up?referrer={{.Account.Username}}</code></p>
+                </div>
+            </div>
 
             <ul class="nav">
                 <li><a href="/sign-out">Sign Out</a></li>
