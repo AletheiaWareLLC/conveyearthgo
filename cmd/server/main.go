@@ -182,7 +182,7 @@ func main() {
 	handler.AttachDigestHandler(mux, templates, digests)
 
 	// Handle Account
-	handler.AttachAccountHandler(mux, auth, am, nm, templates)
+	handler.AttachAccountHandler(mux, auth, am, nm, templates, scheme, host)
 
 	// Handle Buy Coins
 	handler.AttachCoinBuyHandler(mux, auth, am, templates, scheme, host)

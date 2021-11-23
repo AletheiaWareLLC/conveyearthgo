@@ -11,11 +11,11 @@ import (
 	"net/http"
 )
 
-func AttachAccountHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
-	m.Handle("/account", handler.Log(Account(a, am, nm, ts)))
+func AttachAccountHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template, scheme, domain string) {
+	m.Handle("/account", handler.Log(Account(a, am, nm, ts, scheme, domain)))
 }
 
-func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {
+func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template, scheme, domain string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {
@@ -25,6 +25,8 @@ func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveye
 		data := &AccountData{
 			Account: account,
 			Live:    netgo.IsLive(),
+			Scheme:  scheme,
+			Domain:  domain,
 		}
 		balance, err := am.AccountBalance(account.ID)
 		if err != nil {
@@ -62,4 +64,6 @@ type AccountData struct {
 	NotificationResponses bool
 	NotificationMentions  bool
 	NotificationDigests   bool
+	Scheme                string
+	Domain                string
 }

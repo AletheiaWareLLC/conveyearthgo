@@ -1,0 +1,5 @@
+ALTER TABLE tbl_signups
+ADD COLUMN referrer VARCHAR(100) NULL,
+ADD CONSTRAINT referrer_exists FOREIGN KEY (referrer) REFERENCES tbl_users(username)
+ON UPDATE SET NULL
+ON DELETE SET NULL;

@@ -236,9 +236,9 @@ func (db *Sql) CreateSignUpSession(token string, created time.Time) (int64, erro
 	return result.LastInsertId()
 }
 
-func (db *Sql) SelectSignUpSession(token string) (string, string, string, string, time.Time, error) {
+func (db *Sql) SelectSignUpSession(token string) (string, string, string, string, string, time.Time, error) {
 	row := db.QueryRow(`
-		SELECT IFNULL(error, ''), IFNULL(email, ''), IFNULL(username, ''), IFNULL(challenge, ''), created_unix
+		SELECT IFNULL(error, ''), IFNULL(email, ''), IFNULL(username, ''), IFNULL(referrer, ''), IFNULL(challenge, ''), created_unix
 		FROM tbl_signups
 		WHERE token=?`, token)
 
@@ -246,13 +246,14 @@ func (db *Sql) SelectSignUpSession(token string) (string, string, string, string
 		error     string
 		email     string
 		username  string
+		referrer  string
 		challenge string
 		created   int64
 	)
-	if err := row.Scan(&error, &email, &username, &challenge, &created); err != nil {
-		return "", "", "", "", time.Time{}, err
+	if err := row.Scan(&error, &email, &username, &referrer, &challenge, &created); err != nil {
+		return "", "", "", "", "", time.Time{}, err
 	}
-	return error, email, username, challenge, time.Unix(created, 0), nil
+	return error, email, username, referrer, challenge, time.Unix(created, 0), nil
 }
 
 func (db *Sql) UpdateSignUpSessionError(token, error string) (int64, error) {
@@ -272,6 +273,34 @@ func (db *Sql) UpdateSignUpSessionIdentity(token, email, username string) (int64
 		SET email=?, username=?
 		WHERE token=?`, email, username, token)
 	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+func (db *Sql) UpdateSignUpSessionReferrer(token, referrer string) (int64, error) {
+	var (
+		result sql.Result
+		err    error
+	)
+	if referrer == "" {
+		result, err = db.Exec(`
+			UPDATE tbl_signups
+			SET referrer=NULL
+			WHERE token=?`, token)
+	} else {
+		result, err = db.Exec(`
+			UPDATE tbl_signups
+			SET referrer=?
+			WHERE token=?`, referrer, token)
+	}
+	if err != nil {
+		if driverErr, ok := err.(*mysql.MySQLError); ok {
+			switch driverErr.Number {
+			case 1452: // ER_NO_REFERENCED_ROW_2
+				return 0, authgo.ErrInvalidReferrer
+			}
+		}
 		return 0, err
 	}
 	return result.RowsAffected()
