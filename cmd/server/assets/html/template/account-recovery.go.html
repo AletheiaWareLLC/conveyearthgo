@@ -33,6 +33,8 @@
                 <!-- TODO(v2) add CSRF token
                 <input type="hidden" id="token" name="token" value="{ { .Token } }" />
                 -->
+                <input type="hidden" id="next" name="next" value="{{.Next}}" />
+
                 <label for="email">Email</label>
                 <input type="text" id="email" name="email" value="{{.Email}}" autocomplete="email" />
 
@@ -43,7 +45,7 @@
                 or
                 <br />
                 <br />
-                <a href="sign-in">Sign In</a>
+                <a href="sign-in{{with .Next}}?next={{.}}{{end}}">Sign In</a>
             </p>
 
             <div class="footer">

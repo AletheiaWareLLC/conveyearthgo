@@ -33,6 +33,8 @@
                 <!-- TODO(v2) add CSRF token
                 <input type="hidden" id="token" name="token" value="{ { .Token } }" />
                 -->
+                <input type="hidden" id="next" name="next" value="{{.Next}}" />
+
                 <label for="verification">Verification Code</label>
                 <input type="text" id="verification" name="verification" autocomplete="one-time-code" />
 
