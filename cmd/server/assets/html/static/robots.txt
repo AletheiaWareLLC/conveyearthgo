@@ -24,7 +24,7 @@ Disallow: /reply
 
 # Stripe
 User-agent: *
-Disallow: /stripe-webhook
+Disallow: /stripe
 
 # Everything Else OK
 User-agent: *
