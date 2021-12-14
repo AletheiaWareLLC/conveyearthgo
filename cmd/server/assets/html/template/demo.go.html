@@ -43,9 +43,9 @@
 
                 {{template "message" .Step2}}
 
-                <ul class="reply">
-                    {{template "reply" .Step2.Replies}}
-                </ul>
+                {{template "gift" .Step2.Gifts}}
+
+                {{template "reply" .Step2.Replies}}
             </div>
 
             <h2 style="color: white;">Step 3</h2>
@@ -57,9 +57,9 @@
 
                 {{template "message" .Step3}}
 
-                <ul class="reply">
-                    {{template "reply" .Step3.Replies}}
-                </ul>
+                {{template "gift" .Step3.Gifts}}
+
+                {{template "reply" .Step3.Replies}}
             </div>
 
             <h2 style="color: white;">Step 4</h2>
