@@ -16,7 +16,7 @@ import (
 
 const (
 	MAXIMUM_ATTACHMENTS  = 10
-	MAXIMUM_PARSE_MEMORY = 32 << 20
+	MAXIMUM_PARSE_MEMORY = 32 << 20 // 32MB
 )
 
 func AttachPublishHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
