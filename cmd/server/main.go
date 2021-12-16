@@ -257,10 +257,10 @@ func main() {
 			Addr:              ":443",
 			Handler:           mux,
 			TLSConfig:         config,
-			ReadTimeout:       time.Minute,
-			ReadHeaderTimeout: time.Minute,
-			WriteTimeout:      time.Minute,
-			IdleTimeout:       time.Minute,
+			ReadTimeout:       time.Hour,
+			ReadHeaderTimeout: time.Hour,
+			WriteTimeout:      time.Hour,
+			IdleTimeout:       time.Hour,
 		}
 		if err := server.ListenAndServeTLS(path.Join(certificates, "fullchain.pem"), path.Join(certificates, "privkey.pem")); err != nil {
 			log.Fatal(err)
