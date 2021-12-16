@@ -33,6 +33,9 @@ const (
 	MIME_MODEL_STL       = "model/stl"
 	MIME_TEXT_PLAIN      = "text/plain"
 	MIME_TEXT_MARKDOWN   = "text/markdown"
+	MIME_VIDEO_MP4       = "video/mp4"
+	MIME_VIDEO_OGG       = "video/ogg"
+	MIME_VIDEO_WEBM      = "video/webm"
 
 	MINIMUM_CONTENT_LENGTH = 1
 )
@@ -59,7 +62,10 @@ func ValidateMime(mime string) error {
 		MIME_IMAGE_SVG,
 		MIME_IMAGE_WEBP,
 		MIME_TEXT_PLAIN,
-		MIME_TEXT_MARKDOWN:
+		MIME_TEXT_MARKDOWN,
+		MIME_VIDEO_MP4,
+		MIME_VIDEO_OGG,
+		MIME_VIDEO_WEBM:
 		return nil
 	default:
 		return ErrMimeUnrecognized
@@ -253,6 +259,10 @@ func (m *contentManager) ToHTML(hash, mime string) (template.HTML, error) {
 			return "", err
 		}
 		return markdown.ToHTML(file)
+	case MIME_VIDEO_MP4,
+		MIME_VIDEO_OGG,
+		MIME_VIDEO_WEBM:
+		return template.HTML(`<video class="ucc" controls><source src="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" type="` + mime + `"/><p><small><a href="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" download>download</a></small></p></video>`), nil
 	default:
 		return "", ErrMimeUnrecognized
 	}

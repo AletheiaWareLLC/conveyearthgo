@@ -216,6 +216,9 @@ object.ucc {
 p.ucc {
     margin: 8px 0;
 }
+video.ucc {
+    max-width: 100%;
+}
 .currency {
     color: gold;
 }
