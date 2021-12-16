@@ -43,6 +43,7 @@ const (
 var (
 	ErrContentTooShort  = errors.New("Content Too Short")
 	ErrMimeUnrecognized = errors.New("Unrecognized MIME")
+	ErrMessageNotFound  = errors.New("Message Not Found")
 )
 
 func ValidateContent(content []byte) error {

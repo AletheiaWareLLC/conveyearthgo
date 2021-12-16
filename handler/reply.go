@@ -27,62 +27,9 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			authredirect.SignIn(w, r, r.URL.String())
 			return
 		}
-		var conversation int64
-		if c := strings.TrimSpace(r.FormValue("conversation")); c != "" {
-			if i, err := strconv.ParseInt(c, 10, 64); err != nil {
-				log.Println(err)
-			} else {
-				conversation = int64(i)
-			}
-		}
-		var message int64
-		if m := strings.TrimSpace(r.FormValue("message")); m != "" {
-			if i, err := strconv.ParseInt(m, 10, 64); err != nil {
-				log.Println(err)
-			} else {
-				message = int64(i)
-			}
-		}
-		if conversation == 0 || message == 0 {
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-		c, err := cm.LookupConversation(conversation)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-		m, err := cm.LookupMessage(message)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-		var content template.HTML
-		if err := cm.LookupFiles(message, func(f *conveyearthgo.File) error {
-			c, err := cm.ToHTML(f.Hash, f.Mime)
-			if err != nil {
-				return err
-			}
-			content += c
-			return nil
-		}); err != nil {
-			log.Println(err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
 		data := &ReplyData{
-			Live:           netgo.IsLive(),
-			Account:        account,
-			Topic:          c.Topic,
-			ConversationID: conversation,
-			MessageID:      message,
-			Author:         m.Author,
-			Cost:           m.Cost,
-			Yield:          m.Yield,
-			Content:        content,
-			Created:        m.Created,
+			Live:    netgo.IsLive(),
+			Account: account,
 		}
 		balance, err := am.AccountBalance(account.ID)
 		if err != nil {
@@ -94,12 +41,28 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 		data.Balance = balance
 		switch r.Method {
 		case "GET":
+			query := r.URL.Query()
+			conversation := parseInt(netgo.QueryParameter(query, "conversation"))
+			message := parseInt(netgo.QueryParameter(query, "message"))
+			if err := populateMessageData(cm, conversation, message, data); err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
 			executeReplyTemplate(w, ts, data)
 		case "POST":
 			if err := r.ParseMultipartForm(MAXIMUM_PARSE_MEMORY); err != nil {
 				log.Println(err)
 				data.Error = err.Error()
 				executeReplyTemplate(w, ts, data)
+				return
+			}
+
+			conversation := parseInt(r.FormValue("conversation"))
+			message := parseInt(r.FormValue("message"))
+			if err := populateMessageData(cm, conversation, message, data); err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 				return
 			}
 
@@ -198,8 +161,8 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			}
 
 			// Send Reply Notification
-			if account.ID != m.Author.ID {
-				if err := nm.NotifyResponse(m.Author, account, conversation, c.Topic, response.ID); err != nil {
+			if account.ID != data.Author.ID {
+				if err := nm.NotifyResponse(data.Author, account, conversation, data.Topic, response.ID); err != nil {
 					log.Println(err)
 				}
 			}
@@ -211,7 +174,7 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 					log.Println(err)
 					continue
 				}
-				if err := nm.NotifyMention(a, account, conversation, c.Topic, response.ID); err != nil {
+				if err := nm.NotifyMention(a, account, conversation, data.Topic, response.ID); err != nil {
 					log.Println(err)
 				}
 			}
@@ -225,6 +188,52 @@ func executeReplyTemplate(w http.ResponseWriter, ts *template.Template, data *Re
 	if err := ts.ExecuteTemplate(w, "reply.go.html", data); err != nil {
 		log.Println(err)
 	}
+}
+
+func populateMessageData(cm conveyearthgo.ContentManager, conversation, message int64, data *ReplyData) error {
+	if conversation == 0 || message == 0 {
+		return conveyearthgo.ErrMessageNotFound
+	}
+	data.ConversationID = conversation
+	data.MessageID = message
+	c, err := cm.LookupConversation(conversation)
+	if err != nil {
+		return err
+	}
+	data.Topic = c.Topic
+	m, err := cm.LookupMessage(message)
+	if err != nil {
+		return err
+	}
+	data.Author = m.Author
+	data.Cost = m.Cost
+	data.Yield = m.Yield
+	data.Created = m.Created
+	var content template.HTML
+	if err := cm.LookupFiles(message, func(f *conveyearthgo.File) error {
+		c, err := cm.ToHTML(f.Hash, f.Mime)
+		if err != nil {
+			return err
+		}
+		content += c
+		return nil
+	}); err != nil {
+		return err
+	}
+	data.Content = content
+	return nil
+}
+
+func parseInt(s string) int64 {
+	s = strings.TrimSpace(s)
+	if s != "" {
+		if i, err := strconv.ParseInt(s, 10, 64); err != nil {
+			log.Println(err)
+		} else {
+			return int64(i)
+		}
+	}
+	return 0
 }
 
 type ReplyData struct {

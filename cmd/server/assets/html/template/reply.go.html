@@ -27,7 +27,7 @@
             <h2 class="center">{{.Topic}}</h2>
 
             <div class="message">
-                <p class="meta">{{template "date-time" .Created}} {{.Author.Username}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
+                <p class="meta">{{template "date-time" .Created}} {{with .Author}}{{.Username}}{{end}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
 
                 {{.Content}}
             </div>
