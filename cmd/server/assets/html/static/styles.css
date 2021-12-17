@@ -197,11 +197,12 @@ ol {
 }
 ul.reply, ul.gift {
     list-style-type: none;
+    padding-left: 4px;
 }
 li.reply, li.gift {
     border-left: thin solid rgba(135,206,250,0.25); /*semi-transparent lightskyblue*/
-    margin: 8px;
-    padding-left: 8px;
+    margin: 4px;
+    padding-left: 4px;
 }
 ul.ucc {
     list-style-type: disc;
