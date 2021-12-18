@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <head>
-        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="shortcut icon" type="image/svg" href="/static/convey.svg">
         <link rel="stylesheet" href="/static/styles.css"/>
         <style type="text/css">
             .conversation {
@@ -22,18 +22,7 @@
 
     <body>
         <div class="content">
-            <div class="header">
-                <a href="https://aletheiaware.com">
-                    <img src="/static/logo.svg" />
-                </a>
-                {{if not .Live -}}
-                <div class="beta">BETA</div>
-                {{- end}}
-            </div>
-
-            <h1 class="center">Convey</h1>
-
-            <embed class="banner" src="/static/banner.svg" />
+            {{template "header" .}}
 
             <p class="subtitle">Quality Public Dialogue.</p>
 
@@ -52,7 +41,7 @@
 
             <p class="center">Convey is a Communication Platform that Incentivizes Quality Content, Collaboration, and Discussion.</p>
 
-            <a class="call-to-action" href="/static/subscribe-digest.html">Subscribe</a>
+            <a class="call-to-action" href="/subscribe-digest">Subscribe</a>
 
             <ul class="nav">
                 <li><a href="/sign-in">Sign In</a></li>
@@ -104,7 +93,7 @@
                     {{- end}}
 
                     {{if not .Account -}}
-                    <a class="call-to-action" href="/static/subscribe-digest.html">Get Next Edition</a>
+                    <a class="call-to-action" href="/subscribe-digest">Get Next Edition</a>
                     {{- end}}
                 </div>
             </div>

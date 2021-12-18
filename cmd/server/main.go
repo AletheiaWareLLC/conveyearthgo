@@ -228,6 +228,28 @@ func main() {
 		http.Redirect(w, r, "/static/robots.txt", http.StatusFound)
 	})
 
+	// Handle markdown
+	mux.HandleFunc("/markdown", func(w http.ResponseWriter, r *http.Request) {
+		if err := templates.ExecuteTemplate(w, "markdown.go.html", &struct {
+			Live bool
+		}{
+			Live: netgo.IsLive(),
+		}); err != nil {
+			log.Println(err)
+		}
+	})
+
+	// Handle subscribe-digest
+	mux.HandleFunc("/subscribe-digest", func(w http.ResponseWriter, r *http.Request) {
+		if err := templates.ExecuteTemplate(w, "subscribe-digest.go.html", &struct {
+			Live bool
+		}{
+			Live: netgo.IsLive(),
+		}); err != nil {
+			log.Println(err)
+		}
+	})
+
 	// Handle Index
 	handler.AttachIndexHandler(mux, auth, cm, templates, digests)
 

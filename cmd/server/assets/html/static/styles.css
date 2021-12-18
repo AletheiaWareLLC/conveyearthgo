@@ -1,3 +1,11 @@
+@font-face {
+    font-family: "Noto Serif Regular";
+    src: url("/static/NotoSerif-Regular.ttf");
+}
+@font-face {
+    font-family: "Noto Serif Extra Bold";
+    src: url("/static/NotoSerif-ExtraBold.ttf");
+}
 a {
     color: deepskyblue;
 }
@@ -27,7 +35,7 @@ a.call-to-action:hover {
 }
 body {
     background-color: white;
-    font-family: Helvetica, sans-serif;
+    font-family: 'Noto Serif Regular', serif;
 }
 div.beta {
     background-color: red;
@@ -165,9 +173,15 @@ ol {
     overflow: hidden;
     padding-bottom: 10px;
 }
-.header img {
-    display: block;
-    margin: 0 auto;
+.header a {
+    text-decoration: none;
+}
+.header a h1 {
+    font-family: 'Noto Serif Extra Bold', serif;
+    font-size: 64px;
+    font-size: 10vw;
+    margin: 0;
+    text-align: center;
 }
 .footer {
     border-top: 1px solid deepskyblue;

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
     <head>
-        <link rel="shortcut icon" type="image/svg" href="/static/logo.svg">
+        <link rel="shortcut icon" type="image/svg" href="/static/convey.svg">
         <link rel="stylesheet" href="/static/styles.css"/>
         <link rel="stylesheet" href="/static/editor-styles.css"/>
         <title>Convey</title>
@@ -13,14 +13,7 @@
 
     <body>
         <div class="content">
-            <div class="header">
-                <a href="https://aletheiaware.com">
-                    <img src="static/logo.svg" />
-                </a>
-                {{if not .Live -}}
-                <div class="beta">BETA</div>
-                {{- end}}
-            </div>
+            {{template "header" .}}
 
             <h1 class="center">Reply</h1>
 
@@ -57,7 +50,7 @@
                     </div>
                     <div id="markdown-preview" class="markdown-tab"></div>
                 </div>
-                <p style="font-size: x-small; margin: 0; text-align: center;"><a href="/static/markdown.html">Formatting Guide</a></p>
+                <p style="font-size: x-small; margin: 0; text-align: center;"><a href="/markdown">Formatting Guide</a></p>
 
                 <input type="file" id="attachment" name="attachment" />
 

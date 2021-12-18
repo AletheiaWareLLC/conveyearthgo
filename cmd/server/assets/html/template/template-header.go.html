@@ -1,0 +1,10 @@
+{{define "header" -}}
+<div class="header">
+    <a href="/">
+        <h1>CONVEY</h1>
+    </a>
+    {{if not .Live -}}
+    <div class="beta">BETA</div>
+    {{- end}}
+</div>
+{{- end}}
