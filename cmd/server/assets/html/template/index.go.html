@@ -48,8 +48,6 @@
 
             <p class="center">Convey is a Communication Platform that Incentivizes Quality Content, Collaboration, and Discussion.</p>
 
-            <a class="call-to-action" href="/subscribe-digest">Subscribe</a>
-
             <ul class="nav">
                 <li><a href="/sign-in">Sign In</a></li>
                 <li><a href="/sign-up">Sign Up</a></li>
@@ -88,8 +86,16 @@
 
                 <div class="tile">
                     <a href="/digest">
-                        <h2 class="center">Editions</h2>
+                        <h2 class="center">Digest</h2>
                     </a>
+
+                    <p class="center">Each month the best content is compiled into a digest and the featured authors win a $625 prize fund.</p>
+
+                    {{if not .Account -}}
+                    <p class="center">Subscribe to get next month's edition delivered right to your inbox, filled with content that will move you.</p>
+
+                    <a class="call-to-action" href="/subscribe-digest">Get Next Edition</a>
+                    {{- end}}
 
                     {{template "editions" .Editions}}
 
@@ -97,10 +103,6 @@
                     <ul class="nav">
                         <li><a href="/digest">More</a></li>
                     </ul>
-                    {{- end}}
-
-                    {{if not .Account -}}
-                    <a class="call-to-action" href="/subscribe-digest">Get Next Edition</a>
                     {{- end}}
                 </div>
             </div>

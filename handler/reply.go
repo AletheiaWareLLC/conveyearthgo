@@ -7,7 +7,6 @@ import (
 	"aletheiaware.com/conveyearthgo/redirect"
 	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -110,9 +109,9 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 				}
 			} else {
 				defer file.Close()
-				fmt.Printf("Filename: %+v\n", header.Filename)
-				fmt.Printf("Header: %+v\n", header.Header)
-				fmt.Printf("Size: %+v\n", header.Size)
+				log.Println("Filename:", header.Filename)
+				log.Println("Header:", header.Header)
+				log.Println("Size:", header.Size)
 				fileMime, err := conveyearthgo.MimeTypeFromHeader(header)
 				if err != nil {
 					log.Println(err)

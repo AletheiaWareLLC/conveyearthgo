@@ -5,9 +5,11 @@ import (
 	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -46,6 +48,8 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			Cost           int64
 			Yield          int64
 			Content        template.HTML
+			ShareTitle     string
+			ShareURL       string
 			Replies        []*MessageData
 			Gifts          []*GiftData
 			Created        time.Time
@@ -70,6 +74,11 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 		data.Topic = c.Topic
 		data.Created = c.Created
 
+		scheme := conveyearthgo.Scheme()
+		host := conveyearthgo.Host()
+		data.ShareTitle = url.QueryEscape(c.Topic)
+		data.ShareURL = url.QueryEscape(fmt.Sprintf("%s://%s/conversation?id=%d", scheme, host, id))
+
 		// Lookup Messages
 		messages := make(map[int64]*MessageData)
 		if err := cm.LookupMessages(id, func(m *conveyearthgo.Message) error {
@@ -91,6 +100,8 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 					Author:         m.Author,
 					Cost:           m.Cost,
 					Yield:          m.Yield,
+					ShareTitle:     data.ShareTitle,
+					ShareURL:       url.QueryEscape(fmt.Sprintf("%s://%s/conversation?id=%d#message%d", scheme, host, m.ConversationID, m.ID)),
 				}
 			}
 			return nil

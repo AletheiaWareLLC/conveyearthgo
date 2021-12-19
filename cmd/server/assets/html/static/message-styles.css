@@ -1,0 +1,85 @@
+.message-options {
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+    text-align: left;
+}
+.message-option {
+    color: deepskyblue;
+    display: inline-block;
+    font-size: x-small;
+    letter-spacing: 0.05em;
+    padding: 4px;
+}
+.message-option:hover {
+    color: lightskyblue;
+}
+.message-option .danger {
+    color: red;
+}
+.message-option .danger:hover {
+    color: orangered;
+}
+.message-options li {
+    display: inline;
+}
+.share-option {
+    color: deepskyblue;
+}
+.share-option:hover {
+    color: lightskyblue;
+}
+.share-dropdown {
+    display: inline-block;
+    position: relative;
+}
+.share-dropdown-content {
+    background-color: #f9f9f9;
+    box-shadow: 0px 4px 8px 0px rgba(0,0,0,0.2);
+    display: none;
+    min-width: 80px;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    z-index: 1;
+}
+.share-dropdown:hover .share-dropdown-content {
+    display: block;
+}
+.share-button {
+    border: none;
+    color: #ffffff;
+    display: block;
+    font-size: x-small;
+    letter-spacing: 0.05em;
+    margin: 2px;
+    outline: none;
+    padding: 2px;
+    text-align: center;
+    text-decoration: none;
+    max-width: 100%;
+}
+.share-button:focus, .share-button:hover {
+    opacity: 0.8;
+}
+.share-button:active {
+    color: #e2e2e2;
+}
+.share-button.reddit {
+    background: #ff5700;
+}
+.share-button.hackernews {
+    background: #ff6600;
+}
+.share-button.twitter {
+    background: #55acee;
+}
+.share-button.linkedin {
+    background: #4875B4;
+}
+.share-button.facebook {
+    background: #3B5998;
+}
+.share-button.email {
+    background: #444444;
+}

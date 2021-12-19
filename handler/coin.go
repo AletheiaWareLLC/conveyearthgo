@@ -19,11 +19,13 @@ import (
 	"strings"
 )
 
-func AttachCoinBuyHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, ts *template.Template, scheme, domain string) {
-	m.Handle("/coin-buy", handler.Log(CoinBuy(a, am, ts, scheme, domain)))
+func AttachCoinBuyHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, ts *template.Template) {
+	m.Handle("/coin-buy", handler.Log(CoinBuy(a, am, ts)))
 }
 
-func CoinBuy(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *template.Template, scheme, domain string) http.Handler {
+func CoinBuy(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *template.Template) http.Handler {
+	scheme := conveyearthgo.Scheme()
+	domain := conveyearthgo.Host()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {

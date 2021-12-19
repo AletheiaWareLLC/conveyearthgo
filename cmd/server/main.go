@@ -52,13 +52,10 @@ func main() {
 
 	secure := netgo.IsSecure()
 
-	scheme := "http"
-	if secure {
-		scheme = "https"
-	}
+	scheme := conveyearthgo.Scheme()
 
-	host, ok := os.LookupEnv("HOST")
-	if !ok {
+	host := conveyearthgo.Host()
+	if host == "" {
 		log.Fatal(errors.New("Missing HOST environment variable"))
 	}
 
@@ -184,16 +181,16 @@ func main() {
 	handler.AttachDigestHandler(mux, templates, digests, fmt.Sprintf("public, max-age=%d", 60*60*24*7*52)) // 52 week max-age
 
 	// Handle Account
-	handler.AttachAccountHandler(mux, auth, am, nm, templates, scheme, host)
+	handler.AttachAccountHandler(mux, auth, am, nm, templates)
 
 	// Handle Buy Coins
-	handler.AttachCoinBuyHandler(mux, auth, am, templates, scheme, host)
+	handler.AttachCoinBuyHandler(mux, auth, am, templates)
 
 	// Create a Stripe Manager
 	sm := conveyearthgo.NewStripeManager(db)
 
 	// Handle Stripe
-	handler.AttachStripeHandler(mux, auth, sm, templates, scheme, host)
+	handler.AttachStripeHandler(mux, auth, sm, templates)
 
 	// Handle Stripe Webhook
 	handler.AttachStripeWebhookHandler(mux, am, os.Getenv("STRIPE_WEBHOOK_SECRET_KEY"), host)

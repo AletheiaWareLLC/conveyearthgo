@@ -5,21 +5,38 @@
     {{.Content}}
 
     {{if .ConversationID -}}
-    <p class="meta">
-        <small>
-            {{if .Account -}}
-            {{if and (eq .Account.ID .Author.ID) (eq (len .Gifts) 0) (eq (len .Replies) 0) -}}
-            <a href="delete?conversation={{.ConversationID}}&message={{.MessageID}}" class="danger">delete</a>
-            {{- end}}
-            {{- end}}
-            <a href="reply?conversation={{.ConversationID}}&message={{.MessageID}}">reply</a>
-            {{if .Account -}}
-            {{if ne .Account.ID .Author.ID -}}
-            <a href="gift?conversation={{.ConversationID}}&message={{.MessageID}}">gift</a>
-            {{- end}}
-            {{- end}}
-        </small>
-    </p>
+    <ul class="message-options">
+        {{if .Account -}}
+        {{if and (eq .Account.ID .Author.ID) (eq (len .Gifts) 0) (eq (len .Replies) 0) -}}
+        <li>
+            <a class="message-option danger" href="delete?conversation={{.ConversationID}}&message={{.MessageID}}">delete</a>
+        </li>
+        {{- end}}
+        {{- end}}
+        <li>
+            <a class="message-option" href="reply?conversation={{.ConversationID}}&message={{.MessageID}}">reply</a>
+        </li>
+        {{if .Account -}}
+        {{if ne .Account.ID .Author.ID -}}
+        <li>
+            <a class="message-option" href="gift?conversation={{.ConversationID}}&message={{.MessageID}}">gift</a>
+        </li>
+        {{- end}}
+        {{- end}}
+        <li>
+            <div class="share-dropdown">
+                <a class="message-option" href="javascript:;" class="share-option">share</a>
+                <div class="share-dropdown-content">
+                    <a class="share-button reddit" href="https://reddit.com/submit?url={{.ShareURL}}&title={{.ShareTitle}}">Reddit</a>
+                    <a class="share-button hackernews" href="https://news.ycombinator.com/submitlink?u={{.ShareURL}}&t={{.ShareTitle}}">Hacker News</a>
+                    <a class="share-button twitter" href="https://twitter.com/intent/tweet?url={{.ShareURL}}&text={{.ShareTitle}}">Twitter</a>
+                    <a class="share-button linkedin" href="https://www.linkedin.com/sharing/share-offsite/?url={{.ShareURL}}&title={{.ShareTitle}}">LinkedIn</a>
+                    <a class="share-button facebook" href="https://www.facebook.com/sharer.php?u={{.ShareURL}}">Facebook</a>
+                    <a class="share-button email" href="mailto:?subject={{.ShareTitle}}&body={{.ShareURL}}">Email</a>
+                </div>
+            </div>
+        </li>
+    </ul>
     {{- end}}
 </div>
 {{- end}}

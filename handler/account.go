@@ -11,11 +11,13 @@ import (
 	"net/http"
 )
 
-func AttachAccountHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template, scheme, domain string) {
-	m.Handle("/account", handler.Log(Account(a, am, nm, ts, scheme, domain)))
+func AttachAccountHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
+	m.Handle("/account", handler.Log(Account(a, am, nm, ts)))
 }
 
-func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template, scheme, domain string) http.Handler {
+func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {
+	scheme := conveyearthgo.Scheme()
+	domain := conveyearthgo.Host()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		account := a.CurrentAccount(w, r)
 		if account == nil {

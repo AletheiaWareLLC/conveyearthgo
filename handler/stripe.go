@@ -24,11 +24,13 @@ import (
 
 const MaxBodyBytes = int64(65536)
 
-func AttachStripeHandler(m *http.ServeMux, a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template.Template, scheme, domain string) {
-	m.Handle("/stripe", handler.Log(Stripe(a, sm, ts, scheme, domain)))
+func AttachStripeHandler(m *http.ServeMux, a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template.Template) {
+	m.Handle("/stripe", handler.Log(Stripe(a, sm, ts)))
 }
 
-func Stripe(a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template.Template, scheme, domain string) http.Handler {
+func Stripe(a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template.Template) http.Handler {
+	scheme := conveyearthgo.Scheme()
+	domain := conveyearthgo.Host()
 	url := fmt.Sprintf("%s://%s/stripe", scheme, domain)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		acc := a.CurrentAccount(w, r)
