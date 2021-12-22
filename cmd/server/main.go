@@ -32,8 +32,6 @@ import (
 //go:embed assets
 var embeddedFS embed.FS
 
-var cache = fmt.Sprintf("max-age=%d", 60*60*24*7*4) // 4 week max-age
-
 func main() {
 	// Configure Logging
 	logs, ok := os.LookupEnv("LOG_DIRECTORY")
@@ -77,7 +75,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	nethandler.AttachStaticFSHandler(mux, staticFS, false, cache)
+	nethandler.AttachStaticFSHandler(mux, staticFS, false, fmt.Sprintf("public, max-age=%d", 60*60*24*7*52)) // 52 week max-age
 
 	// Parse Templates
 	templateFS, err := fs.Sub(embeddedFS, path.Join("assets", "html", "template"))
@@ -170,7 +168,7 @@ func main() {
 	cm := conveyearthgo.NewContentManager(db, filesystem.NewOnDisk(uploads))
 
 	// Handle Content
-	handler.AttachContentHandler(mux, cm, cache)
+	handler.AttachContentHandler(mux, cm, fmt.Sprintf("public, immutable, max-age=%d", 60*60*24*7*52)) // 52 week max-age
 
 	digests, ok := os.LookupEnv("DIGEST_DIRECTORY")
 	if !ok {
@@ -182,7 +180,7 @@ func main() {
 	log.Println("Digests Directory:", digests)
 
 	// Handle Digest
-	handler.AttachDigestHandler(mux, templates, digests, cache)
+	handler.AttachDigestHandler(mux, templates, digests, fmt.Sprintf("public, max-age=%d", 60*60*24*7*52)) // 52 week max-age
 
 	// Handle Account
 	handler.AttachAccountHandler(mux, auth, am, nm, templates, scheme, host)
