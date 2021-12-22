@@ -11,8 +11,8 @@ import (
 	"strings"
 )
 
-func AttachDigestHandler(m *http.ServeMux, ts *template.Template, dir string) {
-	m.Handle("/digest/", handler.Log(http.StripPrefix("/digest/", http.FileServer(http.Dir(dir)))))
+func AttachDigestHandler(m *http.ServeMux, ts *template.Template, dir, cache string) {
+	m.Handle("/digest/", handler.Log(handler.CacheControl(http.StripPrefix("/digest/", http.FileServer(http.Dir(dir))), cache)))
 	m.Handle("/digest", handler.Log(Digest(ts, dir)))
 }
 
