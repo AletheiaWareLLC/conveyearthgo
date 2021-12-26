@@ -50,9 +50,10 @@ div.beta {
     display: table;
     font-size: x-small;
     font-weight: bold;
-    text-align: center;
+    letter-spacing: 0.05em;
     margin: 0 auto;
     padding: 4px;
+    text-align: center;
 }
 div.message {
     overflow-x: visible;
@@ -124,6 +125,7 @@ p.error {
 p.meta {
     color: lightskyblue;
     font-size: x-small;
+    letter-spacing: 0.05em;
     margin: 3px 0px 3px 0px;
 }
 p.subtitle {
