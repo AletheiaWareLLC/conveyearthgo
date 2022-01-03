@@ -41,7 +41,7 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 		}
 		// Query best of the year posts
 		now := time.Now()
-		since := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, time.UTC)
+		since := time.Date(now.Year()-1, 1, 1, 0, 0, 0, 0, time.UTC)
 		if err := cm.LookupBestConversations(func(c *conveyearthgo.Conversation) error {
 			data.Best = append(data.Best, c)
 			return nil
