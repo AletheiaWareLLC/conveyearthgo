@@ -36,9 +36,7 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 			Live:  netgo.IsLive(),
 			Limit: limit * 2,
 		}
-		if account := a.CurrentAccount(w, r); account != nil {
-			data.Account = account
-		}
+		data.Account = a.CurrentAccount(w, r)
 		// Query best of the year posts
 		now := time.Now()
 		since := time.Date(now.Year()-1, 1, 1, 0, 0, 0, 0, time.UTC)

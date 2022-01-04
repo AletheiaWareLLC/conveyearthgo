@@ -35,13 +35,11 @@ func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templat
 			}
 		}
 		data.Limit = limit * 2
-		account := a.CurrentAccount(w, r)
-		if account == nil {
+		data.Account = a.CurrentAccount(w, r)
+		if data.Account == nil {
 			if limit > 100 {
 				limit = 100
 			}
-		} else {
-			data.Account = account
 		}
 		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation) error {
 			data.Conversations = append(data.Conversations, c)
