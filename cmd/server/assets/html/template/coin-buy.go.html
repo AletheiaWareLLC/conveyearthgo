@@ -22,7 +22,7 @@
 
             {{$count:=(len .Bundles) -}}
             {{if gt $count 0 -}}
-            <p style="text-align: center;">Select a coin bundle to purchase.</p>
+            <p class="center">Select a coin bundle to purchase.</p>
 
             <form action="/coin-buy" method="post" id="coin-buy-form">
                 <!-- TODO(v2) add CSRF token

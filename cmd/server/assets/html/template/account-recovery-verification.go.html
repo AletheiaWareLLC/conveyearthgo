@@ -19,10 +19,10 @@
             {{if ne .Error "" -}}
             <p class="error">{{.Error}}</p>
             {{- else -}}
-            <p style="text-align: center;">Your username is {{.Username}}</p>
+            <p class="center">Your username is {{.Username}}</p>
             {{- end}}
 
-            <p style="text-align: center;">Verify your account by entering the verification code that was sent to your email address.</p>
+            <p class="center">Verify your account by entering the verification code that was sent to your email address.</p>
 
             <form action="/account-recovery-verification" method="post" id="account-recovery-verification-form">
                 <!-- TODO(v2) add CSRF token
