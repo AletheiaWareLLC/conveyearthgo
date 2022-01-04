@@ -17,10 +17,12 @@
 
             <h1 class="center">Reply</h1>
 
-            <h2 class="center">{{.Topic}}</h2>
+            <h2 class="center">{{.Conversation.Topic}}</h2>
 
             <div class="message">
+                {{with .Message -}}
                 <p class="meta">{{template "date-time" .Created}} {{with .Author}}{{.Username}}{{end}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
+                {{- end}}
 
                 {{.Content}}
             </div>
@@ -37,8 +39,8 @@
                 <!-- TODO(v2) add CSRF token
                 <input type="hidden" id="token" name="token" value="{ { .Token } }" />
                 -->
-                <input type="hidden" id="conversation" name="conversation" value="{{.ConversationID}}" />
-                <input type="hidden" id="message" name="message" value="{{.MessageID}}" />
+                <input type="hidden" id="conversation" name="conversation" value="{{.Conversation.ID}}" />
+                <input type="hidden" id="message" name="message" value="{{.Message.ID}}" />
 
                 <div class="markdown-tool">
                     <div class="markdown-tabbar">

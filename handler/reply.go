@@ -11,9 +11,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
-	"time"
 )
 
 func AttachReplyHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
@@ -42,9 +40,9 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 		switch r.Method {
 		case "GET":
 			query := r.URL.Query()
-			conversation := parseInt(netgo.QueryParameter(query, "conversation"))
-			message := parseInt(netgo.QueryParameter(query, "message"))
-			if err := populateMessageData(cm, conversation, message, data); err != nil {
+			conversation := netgo.ParseInt(netgo.QueryParameter(query, "conversation"))
+			message := netgo.ParseInt(netgo.QueryParameter(query, "message"))
+			if err := populateReplyData(cm, conversation, message, data); err != nil {
 				log.Println(err)
 				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 				return
@@ -58,9 +56,9 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 				return
 			}
 
-			conversation := parseInt(r.FormValue("conversation"))
-			message := parseInt(r.FormValue("message"))
-			if err := populateMessageData(cm, conversation, message, data); err != nil {
+			conversation := netgo.ParseInt(r.FormValue("conversation"))
+			message := netgo.ParseInt(r.FormValue("message"))
+			if err := populateReplyData(cm, conversation, message, data); err != nil {
 				log.Println(err)
 				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 				return
@@ -161,8 +159,8 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 			}
 
 			// Send Reply Notification
-			if account.ID != data.Author.ID {
-				if err := nm.NotifyResponse(data.Author, account, conversation, data.Topic, response.ID); err != nil {
+			if account.ID != data.Message.Author.ID {
+				if err := nm.NotifyResponse(data.Message.Author, account, conversation, data.Conversation.Topic, response.ID); err != nil {
 					log.Println(err)
 				}
 			}
@@ -174,7 +172,7 @@ func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyear
 					log.Println(err)
 					continue
 				}
-				if err := nm.NotifyMention(a, account, conversation, data.Topic, response.ID); err != nil {
+				if err := nm.NotifyMention(a, account, conversation, data.Conversation.Topic, response.ID); err != nil {
 					log.Println(err)
 				}
 			}
@@ -190,25 +188,17 @@ func executeReplyTemplate(w http.ResponseWriter, ts *template.Template, data *Re
 	}
 }
 
-func populateMessageData(cm conveyearthgo.ContentManager, conversation, message int64, data *ReplyData) error {
-	if conversation == 0 || message == 0 {
-		return conveyearthgo.ErrMessageNotFound
-	}
-	data.ConversationID = conversation
-	data.MessageID = message
+func populateReplyData(cm conveyearthgo.ContentManager, conversation, message int64, data *ReplyData) error {
 	c, err := cm.LookupConversation(conversation)
 	if err != nil {
 		return err
 	}
-	data.Topic = c.Topic
+	data.Conversation = c
 	m, err := cm.LookupMessage(message)
 	if err != nil {
 		return err
 	}
-	data.Author = m.Author
-	data.Cost = m.Cost
-	data.Yield = m.Yield
-	data.Created = m.Created
+	data.Message = m
 	var content template.HTML
 	if err := cm.LookupFiles(message, func(f *conveyearthgo.File) error {
 		c, err := cm.ToHTML(f.Hash, f.Mime)
@@ -224,30 +214,13 @@ func populateMessageData(cm conveyearthgo.ContentManager, conversation, message 
 	return nil
 }
 
-func parseInt(s string) int64 {
-	s = strings.TrimSpace(s)
-	if s != "" {
-		if i, err := strconv.ParseInt(s, 10, 64); err != nil {
-			log.Println(err)
-		} else {
-			return int64(i)
-		}
-	}
-	return 0
-}
-
 type ReplyData struct {
-	Live           bool
-	Error          string
-	Account        *authgo.Account
-	Balance        int64
-	Topic          string
-	ConversationID int64
-	MessageID      int64
-	Author         *authgo.Account
-	Cost           int64
-	Yield          int64
-	Content        template.HTML
-	Created        time.Time
-	Reply          string
+	Live         bool
+	Error        string
+	Account      *authgo.Account
+	Balance      int64
+	Conversation *conveyearthgo.Conversation
+	Message      *conveyearthgo.Message
+	Content      template.HTML
+	Reply        string
 }

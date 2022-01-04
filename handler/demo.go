@@ -53,6 +53,7 @@ func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
 			return
 		}
 		type GiftData struct {
+			Account        *authgo.Account
 			ConversationID int64
 			MessageID      int64
 			Author         *authgo.Account
@@ -60,11 +61,12 @@ func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
 			Created        time.Time
 		}
 		type MessageData struct {
-			Created        time.Time
+			Account        *authgo.Account
 			ConversationID int64
 			MessageID      int64
 			Author         *authgo.Account
 			Content        template.HTML
+			Created        time.Time
 			Cost           int
 			Yield          int
 			Replies        []MessageData

@@ -19,7 +19,6 @@ func AttachMessageHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyear
 
 func Message(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		account := a.CurrentAccount(w, r)
 		var id int64
 		if m := strings.TrimSpace(r.FormValue("id")); m != "" {
 			if i, err := strconv.ParseInt(m, 10, 64); err != nil {
@@ -64,7 +63,7 @@ func Message(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templa
 			Created        time.Time
 		}{
 			Live:           netgo.IsLive(),
-			Account:        account,
+			Account:        a.CurrentAccount(w, r),
 			ConversationID: m.ConversationID,
 			MessageID:      id,
 			ParentID:       m.ParentID,

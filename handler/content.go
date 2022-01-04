@@ -17,6 +17,7 @@ func Content(cm conveyearthgo.ContentManager) http.Handler {
 		if results, ok := r.URL.Query()["mime"]; ok && len(results) > 0 {
 			w.Header().Add("Content-Type", results[0])
 		}
+		// TODO ensure file wasn't deleted by checking DB deleted_at field, or move content to another directory on delete
 		fs.ServeHTTP(w, r)
 	})
 }

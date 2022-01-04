@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" xmlns="http://www.w3.org/1999/xhtml">
+    <meta charset="UTF-8"/>
+    <meta http-equiv="Content-Language" content="en"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <head>
+        <link rel="shortcut icon" type="image/svg" href="/static/convey.svg">
+        <link rel="stylesheet" href="/static/styles.css"/>
+        <title>Convey</title>
+    </head>
+
+    <body>
+        <div class="content">
+            {{template "header" .}}
+
+            <h1 class="center">Delete</h1>
+
+            {{if ne .Error "" -}}
+            <p class="error">{{.Error}}</p>
+            {{- end}}
+
+            <h2 class="center">{{.Conversation.Topic}}</h2>
+
+            {{with .Message -}}
+            <div class="message">
+                <p class="meta">{{template "date-time" .Created}} {{with .Author}}{{.Username}}{{end}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
+
+                {{$.Content}}
+            </div>
+
+            <p class="center">{{$.Account.Username}} are you sure you want to delete this message?</p>
+            {{- end}}
+
+            {{with .Gift -}}
+            <div class="gift">
+                <p class="meta">{{template "date-time" .Created}} {{with .Author}}{{.Username}}{{end}} {{template "cost" .Amount}} 🎁</p>
+            </div>
+
+            <p class="center">{{$.Account.Username}} are you sure you want to delete this gift?</p>
+            {{- end}}
+
+            <form action="/delete" method="post" id="delete-form">
+                <!-- TODO(v2) add CSRF token
+                <input type="hidden" id="token" name="token" value="{ { .Token } }" />
+                -->
+                <input type="hidden" id="conversation" name="conversation" value="{{.Conversation.ID}}" />
+                <input type="hidden" id="message" name="message" value="{{with .Message}}{{.ID}}{{end}}" />
+                <input type="hidden" id="gift" name="gift" value="{{with .Gift}}{{.ID}}{{end}}" />
+                <input type="submit" value="Delete" class="danger" />
+            </form>
+
+            {{template "footer"}}
+        </div>
+    </body>
+</html>

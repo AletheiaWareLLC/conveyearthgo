@@ -3,7 +3,19 @@
 <ul class="gift">
     {{range . -}}
     <li class="gift">
-        <p class="meta">{{template "date-time" .Created}} {{.Author.Username}} {{template "cost" .Amount}} 🎁</p>
+        <div class="gift" id="gift{{.GiftID}}">
+            <p class="meta">{{template "date-time" .Created}} {{with .Author}}{{.Username}}{{end}} {{template "cost" .Amount}} 🎁</p>
+
+            {{if and .ConversationID .Account -}}
+            {{if eq .Account.ID .Author.ID -}}
+            <p class="meta">
+                <small>
+                    <a href="delete?conversation={{.ConversationID}}&gift={{.GiftID}}" class="danger">delete</a>
+                </small>
+            </p>
+            {{- end}}
+            {{- end}}
+        </div>
     </li>
     {{- end}}
 </ul>

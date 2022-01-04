@@ -20,7 +20,6 @@ func AttachConversationHandler(m *http.ServeMux, a authgo.Authenticator, cm conv
 
 func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		account := a.CurrentAccount(w, r)
 		var id int64
 		if c := strings.TrimSpace(r.FormValue("id")); c != "" {
 			if i, err := strconv.ParseInt(c, 10, 64); err != nil {
@@ -34,6 +33,8 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			return
 		}
 		type GiftData struct {
+			Account        *authgo.Account
+			GiftID         int64
 			ConversationID int64
 			MessageID      int64
 			Author         *authgo.Account
@@ -41,6 +42,7 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 			Created        time.Time
 		}
 		type MessageData struct {
+			Account        *authgo.Account
 			ConversationID int64
 			MessageID      int64
 			ParentID       int64
@@ -54,14 +56,13 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 		}
 		data := struct {
 			MessageData
-			Live    bool
-			Account *authgo.Account
-			Topic   string
-			Sort    string
+			Live  bool
+			Topic string
+			Sort  string
 		}{
-			Live:    netgo.IsLive(),
-			Account: account,
+			Live: netgo.IsLive(),
 		}
+		data.Account = a.CurrentAccount(w, r)
 		data.ConversationID = id
 		data.Sort = strings.TrimSpace(r.FormValue("sort"))
 		c, err := cm.LookupConversation(id)
@@ -86,6 +87,7 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 				data.Yield = m.Yield
 			} else {
 				messages[m.ID] = &MessageData{
+					Account:        data.Account,
 					ConversationID: m.ConversationID,
 					MessageID:      m.ID,
 					Created:        m.Created,
@@ -104,6 +106,8 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 		// Lookup Gifts
 		if err := cm.LookupGifts(id, 0, func(g *conveyearthgo.Gift) error {
 			gd := &GiftData{
+				Account:        data.Account,
+				GiftID:         g.ID,
 				ConversationID: g.ConversationID,
 				MessageID:      g.MessageID,
 				Created:        g.Created,

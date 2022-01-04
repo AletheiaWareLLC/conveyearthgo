@@ -134,6 +134,7 @@ func main() {
 	// authhandler.AttachAccountHandler(mux, auth, templates) - replaced with custom handler
 	authhandler.AttachAccountPasswordHandler(mux, auth, templates)
 	authhandler.AttachAccountRecoveryHandler(mux, auth, templates)
+	authhandler.AttachAccountDeactivateHandler(mux, auth, templates)
 	authhandler.AttachSignInHandler(mux, auth, templates)
 	authhandler.AttachSignOutHandler(mux, auth, templates)
 	authhandler.AttachSignUpHandler(mux, auth, templates)
@@ -211,6 +212,9 @@ func main() {
 
 	// Handle Gift
 	handler.AttachGiftHandler(mux, auth, am, cm, nm, templates)
+
+	// Handle Delete
+	handler.AttachDeleteHandler(mux, auth, am, cm, templates)
 
 	// Handle Best
 	handler.AttachBestHandler(mux, auth, cm, templates)

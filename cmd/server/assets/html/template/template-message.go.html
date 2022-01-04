@@ -7,6 +7,11 @@
     {{if .ConversationID -}}
     <p class="meta">
         <small>
+            {{if .Account -}}
+            {{if and (eq .Account.ID .Author.ID) (eq (len .Gifts) 0) (eq (len .Replies) 0) -}}
+            <a href="delete?conversation={{.ConversationID}}&message={{.MessageID}}" class="danger">delete</a>
+            {{- end}}
+            {{- end}}
             <a href="reply?conversation={{.ConversationID}}&message={{.MessageID}}">reply</a>
             {{if .Account -}}
             {{if ne .Account.ID .Author.ID -}}

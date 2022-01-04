@@ -41,9 +41,13 @@ const (
 )
 
 var (
-	ErrContentTooShort  = errors.New("Content Too Short")
-	ErrMimeUnrecognized = errors.New("Unrecognized MIME")
-	ErrMessageNotFound  = errors.New("Message Not Found")
+	ErrContentTooShort      = errors.New("Content Too Short")
+	ErrMimeUnrecognized     = errors.New("Unrecognized MIME")
+	ErrConversationNotFound = errors.New("Conversation Not Found")
+	ErrMessageNotFound      = errors.New("Message Not Found")
+	ErrFileNotFound         = errors.New("File Not Found")
+	ErrGiftNotFound         = errors.New("Gift Not Found")
+	ErrDeletionNotPermitted = errors.New("Deletion Not Permitted")
 )
 
 func ValidateContent(content []byte) error {
@@ -105,11 +109,13 @@ func Mentions(input string) []string {
 
 type ContentDatabase interface {
 	CreateConversation(int64, string, time.Time) (int64, error)
+	DeleteConversation(int64, int64, time.Time) (int64, error)
 	SelectConversation(int64) (*authgo.Account, string, time.Time, error)
 	SelectBestConversations(func(int64, *authgo.Account, string, time.Time, int64, int64) error, time.Time, int64) error
 	SelectRecentConversations(func(int64, *authgo.Account, string, time.Time, int64, int64) error, int64) error
 
 	CreateMessage(int64, int64, int64, time.Time) (int64, error)
+	DeleteMessage(int64, int64, time.Time) (int64, error)
 	SelectMessage(int64) (*authgo.Account, int64, int64, time.Time, int64, int64, error)
 	SelectMessages(int64, func(int64, *authgo.Account, int64, time.Time, int64, int64) error) error
 	SelectMessageParent(int64) (int64, error)
@@ -122,6 +128,8 @@ type ContentDatabase interface {
 	CreateYield(int64, int64, int64, int64, int64, time.Time) (int64, error)
 
 	CreateGift(int64, int64, int64, int64, time.Time) (int64, error)
+	DeleteGift(int64, int64, time.Time) (int64, error)
+	SelectGift(int64) (int64, int64, *authgo.Account, int64, time.Time, error)
 	SelectGifts(int64, int64, func(int64, int64, int64, *authgo.Account, int64, time.Time) error) error
 }
 
@@ -135,11 +143,14 @@ type ContentManager interface {
 	LookupBestConversations(func(*Conversation) error, time.Time, int64) error
 	LookupRecentConversations(func(*Conversation) error, int64) error
 	NewMessage(*authgo.Account, int64, int64, []string, []string, []int64) (*Message, []*File, error)
+	DeleteMessage(*authgo.Account, *Message) error
 	LookupMessage(int64) (*Message, error)
 	LookupMessages(int64, func(*Message) error) error
 	LookupFile(int64) (*File, error)
 	LookupFiles(int64, func(*File) error) error
 	NewGift(*authgo.Account, int64, int64, int64) (*Gift, error)
+	DeleteGift(*authgo.Account, *Gift) error
+	LookupGift(int64) (*Gift, error)
 	LookupGifts(int64, int64, func(*Gift) error) error
 }
 
@@ -320,9 +331,13 @@ func (m *contentManager) NewConversation(account *authgo.Account, topic string, 
 }
 
 func (m *contentManager) LookupConversation(id int64) (*Conversation, error) {
+	if id == 0 {
+		return nil, ErrConversationNotFound
+	}
 	author, topic, created, err := m.database.SelectConversation(id)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil, ErrConversationNotFound
 	}
 	return &Conversation{
 		ID:      id,
@@ -413,10 +428,37 @@ func (m *contentManager) NewMessage(account *authgo.Account, conversation, paren
 	}, files, nil
 }
 
+func (m *contentManager) DeleteMessage(account *authgo.Account, message *Message) error {
+	deleted := time.Now()
+	count, err := m.database.DeleteMessage(account.ID, message.ID, deleted)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return ErrDeletionNotPermitted
+	}
+	log.Println("Deleted Message", message.ID)
+	if message.ParentID == 0 {
+		count, err := m.database.DeleteConversation(account.ID, message.ConversationID, deleted)
+		if err != nil {
+			return err
+		}
+		if count == 0 {
+			return ErrDeletionNotPermitted
+		}
+		log.Println("Deleted Conversation", message.ConversationID)
+	}
+	return nil
+}
+
 func (m *contentManager) LookupMessage(id int64) (*Message, error) {
+	if id == 0 {
+		return nil, ErrMessageNotFound
+	}
 	author, conversation, parent, created, cost, yield, err := m.database.SelectMessage(id)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil, ErrMessageNotFound
 	}
 	return &Message{
 		ID:             id,
@@ -444,9 +486,13 @@ func (m *contentManager) LookupMessages(conversation int64, callback func(*Messa
 }
 
 func (m *contentManager) LookupFile(id int64) (*File, error) {
+	if id == 0 {
+		return nil, ErrFileNotFound
+	}
 	message, hash, mime, created, err := m.database.SelectFile(id)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil, ErrFileNotFound
 	}
 	return &File{
 		ID:      id,
@@ -481,6 +527,38 @@ func (m *contentManager) NewGift(account *authgo.Account, conversation, message 
 		Author:         account,
 		ConversationID: conversation,
 		MessageID:      message,
+		Amount:         amount,
+		Created:        created,
+	}, nil
+}
+
+func (m *contentManager) DeleteGift(account *authgo.Account, gift *Gift) error {
+	deleted := time.Now()
+	count, err := m.database.DeleteGift(account.ID, gift.ID, deleted)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return ErrDeletionNotPermitted
+	}
+	log.Println("Deleted Gift", gift.ID)
+	return nil
+}
+
+func (m *contentManager) LookupGift(id int64) (*Gift, error) {
+	if id == 0 {
+		return nil, ErrGiftNotFound
+	}
+	conversation, message, author, amount, created, err := m.database.SelectGift(id)
+	if err != nil {
+		log.Println(err)
+		return nil, ErrGiftNotFound
+	}
+	return &Gift{
+		ID:             id,
+		ConversationID: conversation,
+		MessageID:      message,
+		Author:         author,
 		Amount:         amount,
 		Created:        created,
 	}, nil

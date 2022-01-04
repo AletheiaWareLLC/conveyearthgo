@@ -37,6 +37,12 @@ a.call-to-action:hover {
     background-color: deepskyblue;
     color: white;
 }
+a.danger {
+    color: red;
+}
+a.danger:hover {
+    color: orangered;
+}
 body {
     background-color: white;
     font-family: "Noto Serif Regular", serif;
@@ -55,7 +61,7 @@ div.beta {
     padding: 4px;
     text-align: center;
 }
-div.message {
+div.message, div.gift {
     overflow-x: visible;
 }
 embed.banner {
@@ -117,6 +123,12 @@ input[type=button]:hover, input[type=submit]:hover, input[type=reset]:hover {
 input[type=button]:disabled, input[type=submit]:disabled, input[type=reset]:disabled {
     background-color: lightgrey;
     cursor: not-allowed;
+}
+input[type=submit].danger {
+    background-color: red;
+}
+input[type=submit].danger:hover {
+    background-color: orangered;
 }
 p.error {
     color: red;
@@ -215,6 +227,12 @@ ol {
 }
 .nav a:hover {
     color: lightskyblue;
+}
+.nav a.danger {
+    color: red;
+}
+.nav a.danger:hover {
+    color: orangered;
 }
 .nav li {
     display: inline;

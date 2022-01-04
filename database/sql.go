@@ -99,7 +99,7 @@ func NewSql(dbname, username, password, host, port string, secure bool) (*Sql, e
 	if port == "" {
 		port = "3306"
 	}
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?tls=%t", username, password, host, port, dbname, secure)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?tls=%t&multiStatements=true", username, password, host, port, dbname, secure)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (db *Sql) SelectUser(username string) (int64, string, []byte, time.Time, er
 	row := db.QueryRow(`
 		SELECT id, email, password, created_unix
 		FROM tbl_users
-		WHERE username=?`, username)
+		WHERE deleted_at=0 AND username=?`, username)
 
 	var (
 		id       int64
@@ -175,7 +175,7 @@ func (db *Sql) SelectUsernameByEmail(email string) (string, error) {
 	row := db.QueryRow(`
 		SELECT username
 		FROM tbl_users
-		WHERE email=?`, email)
+		WHERE deleted_at=0 AND email=?`, email)
 	var (
 		username string
 	)
@@ -192,7 +192,7 @@ func (db *Sql) ChangePassword(username string, password []byte) (int64, error) {
 	result, err := db.Exec(`
 		UPDATE tbl_users
 		SET password=?
-		WHERE username=?`, password, username)
+		WHERE deleted_at=0 AND username=?`, password, username)
 	if err != nil {
 		return 0, err
 	}
@@ -203,7 +203,7 @@ func (db *Sql) IsEmailVerified(email string) (bool, error) {
 	row := db.QueryRow(`
 		SELECT verified
 		FROM tbl_users
-		WHERE email=?`, email)
+		WHERE deleted_at=0 AND email=?`, email)
 
 	var verified bool
 	if err := row.Scan(&verified); err != nil {
@@ -219,11 +219,43 @@ func (db *Sql) SetEmailVerified(email string, verified bool) (int64, error) {
 	result, err := db.Exec(`
 		UPDATE tbl_users 
 		SET verified=? 
-		WHERE email=?`, verified, email)
+		WHERE deleted_at=0 AND email=?`, verified, email)
 	if err != nil {
 		return 0, err
 	}
 	return result.RowsAffected()
+}
+
+func (db *Sql) DeactivateUser(username string, deleted time.Time) (int64, error) {
+	d := deleted.Unix()
+	{
+		// Deactivate user
+		result, err := db.Exec(`
+			UPDATE tbl_users
+			SET deleted_at=?
+			WHERE username=?`, d, username)
+		if err != nil {
+			return 0, err
+		}
+		count, err := result.RowsAffected()
+		if err != nil || count == 0 {
+			return 0, err
+		}
+	}
+	{
+		// Sign out all sessions
+		result, err := db.Exec(`
+			UPDATE tbl_signins
+			SET authenticated=FALSE
+			WHERE username=?`, username)
+		if err != nil {
+			return 0, err
+		}
+		if _, err := result.RowsAffected(); err != nil {
+			return 0, err
+		}
+	}
+	return 1, nil
 }
 
 func (db *Sql) CreateSignUpSession(token string, created time.Time) (int64, error) {
@@ -499,12 +531,23 @@ func (db *Sql) CreateConversation(user int64, topic string, created time.Time) (
 	return result.LastInsertId()
 }
 
+func (db *Sql) DeleteConversation(user, id int64, deleted time.Time) (int64, error) {
+	result, err := db.Exec(`
+		UPDATE tbl_conversations
+		SET deleted_at=?
+		WHERE user=? AND id=?`, deleted.Unix(), user, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 func (db *Sql) SelectConversation(id int64) (*authgo.Account, string, time.Time, error) {
 	row := db.QueryRow(`
 		SELECT tbl_conversations.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_conversations.topic, tbl_conversations.created_unix
 		FROM tbl_conversations
 		INNER JOIN tbl_users ON tbl_conversations.user=tbl_users.id
-		WHERE tbl_conversations.id=?`, id)
+		WHERE tbl_users.deleted_at=0 AND tbl_conversations.deleted_at=0 AND tbl_conversations.id=?`, id)
 
 	var (
 		user     int64
@@ -535,9 +578,10 @@ func (db *Sql) SelectBestConversations(callback func(int64, *authgo.Account, str
 		LEFT JOIN (
 			SELECT parent, SUM(IFNULL(amount, 0)) AS yield
 			FROM tbl_yields
+			WHERE deleted_at=0
 			GROUP BY parent
 		) AS yields ON tbl_messages.id=yields.parent
-		WHERE tbl_conversations.created_unix>=? AND yields.yield>0
+		WHERE tbl_users.deleted_at=0 AND tbl_conversations.deleted_at=0 AND tbl_messages.deleted_at=0 AND tbl_charges.deleted_at=0 AND tbl_conversations.created_unix>=? AND yields.yield>0
 		ORDER BY yields.yield DESC
 		LIMIT ?`, since.Unix(), limit)
 	if err != nil {
@@ -580,8 +624,10 @@ func (db *Sql) SelectRecentConversations(callback func(int64, *authgo.Account, s
 		LEFT JOIN (
 			SELECT parent, SUM(IFNULL(amount, 0)) AS yield
 			FROM tbl_yields
+			WHERE deleted_at=0
 			GROUP BY parent
 		) AS yields ON tbl_messages.id=yields.parent
+		WHERE tbl_users.deleted_at=0 AND tbl_conversations.deleted_at=0 AND tbl_messages.deleted_at=0 AND tbl_charges.deleted_at=0
 		ORDER BY tbl_conversations.created_unix DESC
 		LIMIT ?`, limit)
 	if err != nil {
@@ -634,6 +680,74 @@ func (db *Sql) CreateMessage(user, conversation, parent int64, created time.Time
 	return result.LastInsertId()
 }
 
+func (db *Sql) DeleteMessage(user, id int64, deleted time.Time) (int64, error) {
+	d := deleted.Unix()
+	{
+		// Delete message
+		result, err := db.Exec(`
+			UPDATE tbl_messages
+			SET deleted_at=?
+			WHERE user=? AND id=? AND id NOT IN (
+				SELECT parent
+				FROM tbl_messages
+				WHERE deleted_at=0 AND parent IS NOT NULL
+			) AND id NOT IN (
+				SELECT message
+				FROM tbl_gifts
+				WHERE deleted_at=0
+			)`, d, user, id)
+		if err != nil {
+			return 0, err
+		}
+		count, err := result.RowsAffected()
+		if err != nil || count == 0 {
+			return 0, err
+		}
+	}
+	{
+		// Delete associated files
+		result, err := db.Exec(`
+			UPDATE tbl_files
+			SET deleted_at=?
+			WHERE message=?`, d, id)
+		if err != nil {
+			return 0, err
+		}
+		count, err := result.RowsAffected()
+		if err != nil || count == 0 {
+			return 0, err
+		}
+	}
+	{
+		// Delete associated charge
+		result, err := db.Exec(`
+			UPDATE tbl_charges
+			SET deleted_at=?
+			WHERE user=? AND message=?`, d, user, id)
+		if err != nil {
+			return 0, err
+		}
+		count, err := result.RowsAffected()
+		if err != nil || count == 0 {
+			return 0, err
+		}
+	}
+	{
+		// Delete associated yields
+		result, err := db.Exec(`
+			UPDATE tbl_yields
+			SET deleted_at=?
+			WHERE user=? AND message=?`, d, user, id)
+		if err != nil {
+			return 0, err
+		}
+		if _, err := result.RowsAffected(); err != nil {
+			return 0, err
+		}
+	}
+	return 1, nil
+}
+
 func (db *Sql) CreateFile(message int64, hash, mime string, created time.Time) (int64, error) {
 	result, err := db.Exec(`
 		INSERT INTO tbl_files
@@ -653,9 +767,10 @@ func (db *Sql) SelectMessage(id int64) (*authgo.Account, int64, int64, time.Time
 		LEFT JOIN (
 			SELECT parent, SUM(IFNULL(amount, 0)) AS yield
 			FROM tbl_yields
+			WHERE deleted_at=0
 			GROUP BY parent
 		) AS yields ON tbl_messages.id=yields.parent
-		WHERE tbl_messages.id=?`, id)
+		WHERE tbl_users.deleted_at=0 AND tbl_messages.deleted_at=0 AND tbl_charges.deleted_at=0 AND tbl_messages.id=?`, id)
 
 	var (
 		user         int64
@@ -688,9 +803,10 @@ func (db *Sql) SelectMessages(conversation int64, callback func(int64, *authgo.A
 		LEFT JOIN (
 			SELECT parent, SUM(amount) AS yield
 			FROM tbl_yields
+			WHERE deleted_at=0
 			GROUP BY parent
 		) AS yields ON tbl_messages.id=yields.parent
-		WHERE tbl_messages.conversation=?`, conversation)
+		WHERE tbl_users.deleted_at=0 AND tbl_messages.deleted_at=0 AND tbl_charges.deleted_at=0 AND tbl_messages.conversation=?`, conversation)
 	if err != nil {
 		return err
 	}
@@ -725,7 +841,7 @@ func (db *Sql) SelectMessageParent(id int64) (int64, error) {
 	row := db.QueryRow(`
 			SELECT IFNULL(parent, 0)
 			FROM tbl_messages
-			WHERE id=?`, id)
+			WHERE deleted_at=0 AND id=?`, id)
 	var (
 		parent int64
 	)
@@ -737,9 +853,9 @@ func (db *Sql) SelectMessageParent(id int64) (int64, error) {
 
 func (db *Sql) SelectFile(id int64) (int64, string, string, time.Time, error) {
 	row := db.QueryRow(`
-		SELECT tbl_files.message, tbl_files.hash, tbl_files.mime, tbl_files.created_unix
+		SELECT message, hash, mime, created_unix
 		FROM tbl_files
-		WHERE tbl_files.id=?`, id)
+		WHERE deleted_at=0 AND id=?`, id)
 
 	var (
 		message int64
@@ -755,9 +871,9 @@ func (db *Sql) SelectFile(id int64) (int64, string, string, time.Time, error) {
 
 func (db *Sql) SelectFiles(message int64, callback func(int64, string, string, time.Time) error) error {
 	rows, err := db.Query(`
-		SELECT tbl_files.id, tbl_files.hash, tbl_files.mime, tbl_files.created_unix
+		SELECT id, hash, mime, created_unix
 		FROM tbl_files
-		WHERE tbl_files.message=?`, message)
+		WHERE deleted_at=0 AND message=?`, message)
 	if err != nil {
 		return err
 	}
@@ -795,13 +911,15 @@ func (db *Sql) SelectChargesForUser(user int64) (int64, error) {
 		LEFT JOIN (
 			SELECT id, user
 			FROM tbl_messages
+			WHERE deleted_at=0
 		) AS ms ON ms.user=tbl_users.id
 		LEFT JOIN (
 			SELECT message, SUM(IFNULL(amount, 0)) AS total_charges
 			FROM tbl_charges
+			WHERE deleted_at=0
 			GROUP BY message
 		) AS cs ON cs.message=ms.id
-		WHERE tbl_users.id=?`, user)
+		WHERE tbl_users.deleted_at=0 AND tbl_users.id=?`, user)
 	var (
 		charges int64
 	)
@@ -828,13 +946,15 @@ func (db *Sql) SelectYieldsForUser(user int64) (int64, error) {
 		LEFT JOIN (
 			SELECT id, user
 			FROM tbl_messages
+			WHERE deleted_at=0
 		) AS ms ON ms.user=tbl_users.id
 		LEFT JOIN (
 			SELECT parent, SUM(IFNULL(amount, 0)) AS total_yields
 			FROM tbl_yields
+			WHERE deleted_at=0
 			GROUP BY parent
 		) AS ys ON ys.parent=ms.id
-		WHERE tbl_users.id=?`, user)
+		WHERE tbl_users.deleted_at=0 AND tbl_users.id=?`, user)
 	var (
 		yields int64
 	)
@@ -858,7 +978,7 @@ func (db *Sql) SelectPurchasesForUser(user int64) (int64, error) {
 	row := db.QueryRow(`
 		SELECT IFNULL(SUM(IFNULL(bundle_size, 0)), 0)
 		FROM tbl_purchases
-		WHERE tbl_purchases.user=?`, user)
+		WHERE deleted_at=0 AND user=?`, user)
 	var (
 		purchases int64
 	)
@@ -916,7 +1036,7 @@ func (db *Sql) SelectAwardsForUser(user int64) (int64, error) {
 	row := db.QueryRow(`
 		SELECT IFNULL(SUM(IFNULL(amount, 0)), 0)
 		FROM tbl_awards
-		WHERE tbl_awards.user=?`, user)
+		WHERE deleted_at=0 AND user=?`, user)
 	var (
 		awards int64
 	)
@@ -940,7 +1060,7 @@ func (db *Sql) SelectStripeAccount(user int64) (string, time.Time, error) {
 	row := db.QueryRow(`
 		SELECT identity, created_unix
 		FROM tbl_stripe_account
-		WHERE tbl_stripe_account.user=?`, user)
+		WHERE deleted_at=0 AND user=?`, user)
 	var (
 		identity string
 		created  int64
@@ -961,6 +1081,44 @@ func (db *Sql) CreateGift(user, conversation, message, amount int64, created tim
 	return result.LastInsertId()
 }
 
+func (db *Sql) DeleteGift(user, id int64, deleted time.Time) (int64, error) {
+	result, err := db.Exec(`
+		UPDATE tbl_gifts
+		SET deleted_at=?
+		WHERE user=? AND id=?`, deleted.Unix(), user, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+func (db *Sql) SelectGift(id int64) (int64, int64, *authgo.Account, int64, time.Time, error) {
+	row := db.QueryRow(`
+		SELECT tbl_gifts.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_gifts.conversation, tbl_gifts.message, tbl_gifts.amount, tbl_gifts.created_unix
+		FROM tbl_gifts
+		INNER JOIN tbl_users ON tbl_gifts.user=tbl_users.id
+		WHERE tbl_users.deleted_at=0 AND tbl_gifts.deleted_at=0 AND tbl_gifts.id=?`, id)
+	var (
+		user         int64
+		username     string
+		email        string
+		joined       int64
+		conversation int64
+		message      int64
+		amount       int64
+		created      int64
+	)
+	if err := row.Scan(&user, &username, &email, &joined, &conversation, &message, &amount, &created); err != nil {
+		return 0, 0, nil, 0, time.Time{}, err
+	}
+	return conversation, message, &authgo.Account{
+		ID:       user,
+		Username: username,
+		Email:    email,
+		Created:  time.Unix(joined, 0),
+	}, amount, time.Unix(created, 0), nil
+}
+
 func (db *Sql) SelectGifts(conversation, message int64, callback func(int64, int64, int64, *authgo.Account, int64, time.Time) error) error {
 	var (
 		rows *sql.Rows
@@ -971,13 +1129,13 @@ func (db *Sql) SelectGifts(conversation, message int64, callback func(int64, int
 		SELECT tbl_gifts.id, tbl_gifts.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_gifts.conversation, tbl_gifts.message, tbl_gifts.amount, tbl_gifts.created_unix
 		FROM tbl_gifts
 		INNER JOIN tbl_users ON tbl_gifts.user=tbl_users.id
-		WHERE tbl_gifts.conversation=?`, conversation)
+		WHERE tbl_users.deleted_at=0 AND tbl_gifts.deleted_at=0 AND tbl_gifts.conversation=?`, conversation)
 	} else {
 		rows, err = db.Query(`
 		SELECT tbl_gifts.id, tbl_gifts.user, tbl_users.username, tbl_users.email, tbl_users.created_unix, tbl_gifts.conversation, tbl_gifts.message, tbl_gifts.amount, tbl_gifts.created_unix
 		FROM tbl_gifts
 		INNER JOIN tbl_users ON tbl_gifts.user=tbl_users.id
-		WHERE tbl_gifts.conversation=? AND tbl_gifts.message=?`, conversation, message)
+		WHERE tbl_users.deleted_at=0 AND tbl_gifts.deleted_at=0 AND tbl_gifts.conversation=? AND tbl_gifts.message=?`, conversation, message)
 	}
 	if err != nil {
 		return err
@@ -1016,13 +1174,15 @@ func (db *Sql) SelectGiftsForUser(user int64) (int64, error) {
 		LEFT JOIN (
 			SELECT id, user
 			FROM tbl_messages
+			WHERE deleted_at=0
 		) AS ms ON ms.user=tbl_users.id
 		LEFT JOIN (
 			SELECT message, SUM(IFNULL(amount, 0)) AS total_amounts
 			FROM tbl_gifts
+			WHERE deleted_at=0
 			GROUP BY message
 		) AS ys ON ys.message=ms.id
-		WHERE tbl_users.id=?`, user)
+		WHERE tbl_users.deleted_at=0 AND tbl_users.id=?`, user)
 	var (
 		gifts int64
 	)
@@ -1036,7 +1196,7 @@ func (db *Sql) SelectGiftsFromUser(user int64) (int64, error) {
 	row := db.QueryRow(`
 		SELECT IFNULL(SUM(IFNULL(amount, 0)), 0)
 		FROM tbl_gifts
-		WHERE tbl_gifts.user=?`, user)
+		WHERE deleted_at=0 AND user=?`, user)
 	var (
 		gifts int64
 	)
