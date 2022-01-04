@@ -8,7 +8,11 @@
     <p class="meta">
         <small>
             <a href="reply?conversation={{.ConversationID}}&message={{.MessageID}}">reply</a>
+            {{if .Account -}}
+            {{if ne .Account.ID .Author.ID -}}
             <a href="gift?conversation={{.ConversationID}}&message={{.MessageID}}">gift</a>
+            {{- end}}
+            {{- end}}
         </small>
     </p>
     {{- end}}
