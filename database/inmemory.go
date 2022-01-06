@@ -317,7 +317,29 @@ func (db *InMemory) DeleteMessage(user, id int64, deleted time.Time) (int64, err
 	if db.MessageUser[id] != user {
 		return 0, nil
 	}
-	// TODO don't delete message if it has received any replies or gifts
+
+	// Don't delete message if it has received any replies
+	for mid := range db.MessageId {
+		if db.MessageParent[mid] != id {
+			continue
+		}
+		if _, ok := db.MessageDeleted[mid]; ok {
+			continue
+		}
+		return 0, nil
+	}
+
+	// Don't delete message if it has received any gifts
+	for gid := range db.GiftId {
+		if db.GiftMessage[gid] != id {
+			continue
+		}
+		if _, ok := db.GiftDeleted[gid]; ok {
+			continue
+		}
+		return 0, nil
+	}
+
 	db.MessageDeleted[id] = deleted
 	for f := range db.FileId {
 		if db.FileMessage[f] == id {
@@ -665,12 +687,14 @@ func (db *InMemory) SelectGift(id int64) (int64, int64, *authgo.Account, int64, 
 		return 0, 0, nil, 0, time.Time{}, database.ErrNoSuchRecord
 	}
 	email := db.AccountEmail[username]
+	joined := db.AccountCreated[username]
 	amount := db.GiftAmount[id]
 	created := db.GiftCreated[id]
 	return conversation, message, &authgo.Account{
 		ID:       user,
 		Username: username,
 		Email:    email,
+		Created:  joined,
 	}, amount, created, nil
 }
 
@@ -695,12 +719,14 @@ func (db *InMemory) SelectGifts(conversation, message int64, callback func(int64
 			continue
 		}
 		email := db.AccountEmail[username]
+		joined := db.AccountCreated[username]
 		amount := db.GiftAmount[id]
 		created := db.GiftCreated[id]
 		if err := callback(id, conversation, message, &authgo.Account{
 			ID:       user,
 			Username: username,
 			Email:    email,
+			Created:  joined,
 		}, amount, created); err != nil {
 			return err
 		}

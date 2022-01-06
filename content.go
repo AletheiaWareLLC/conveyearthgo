@@ -51,7 +51,7 @@ var (
 )
 
 func ValidateContent(content []byte) error {
-	if len(content) < MINIMUM_TOPIC_LENGTH {
+	if len(content) < MINIMUM_CONTENT_LENGTH {
 		return ErrContentTooShort
 	}
 	return nil
@@ -274,7 +274,7 @@ func (m *contentManager) ToHTML(hash, mime string) (template.HTML, error) {
 	case MIME_VIDEO_MP4,
 		MIME_VIDEO_OGG,
 		MIME_VIDEO_WEBM:
-		return template.HTML(`<video class="ucc" controls><source src="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" type="` + mime + `"/><p><small><a href="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" download>download</a></small></p></video>`), nil
+		return template.HTML(`<video class="ucc" controls><source src="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" type="` + mime + `" /><p><small><a href="/content/` + hash + `?mime=` + url.QueryEscape(mime) + `" download>download</a></small></p></video>`), nil
 	default:
 		return "", ErrMimeUnrecognized
 	}
