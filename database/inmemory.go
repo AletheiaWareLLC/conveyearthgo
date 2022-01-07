@@ -221,8 +221,9 @@ func (db *InMemory) SelectBestConversations(callback func(int64, *authgo.Account
 			results = append(results, cid)
 		}
 	}
+	// Sort results by decending yields
 	sort.Slice(results, func(a, b int) bool {
-		return yields[results[a]] < yields[results[b]]
+		return yields[results[a]] > yields[results[b]]
 	})
 	count := int64(len(results))
 	for i := int64(0); i < limit && i < count; i++ {
@@ -230,6 +231,7 @@ func (db *InMemory) SelectBestConversations(callback func(int64, *authgo.Account
 		user := db.ConversationUser[cid]
 		username := db.username(user)
 		if _, ok := db.AccountDeleted[username]; ok {
+			// This can result in fewer than limit results returned
 			continue
 		}
 		email := db.AccountEmail[username]
@@ -272,8 +274,9 @@ func (db *InMemory) SelectRecentConversations(callback func(int64, *authgo.Accou
 			yields[cid] = db.yield(mid)
 		}
 	}
+	// Sort results by decending creation time
 	sort.Slice(results, func(a, b int) bool {
-		return db.ConversationCreated[results[a]].Before(db.ConversationCreated[results[b]])
+		return db.ConversationCreated[results[a]].After(db.ConversationCreated[results[b]])
 	})
 	count := int64(len(results))
 	for i := int64(0); i < limit && i < count; i++ {
@@ -281,6 +284,7 @@ func (db *InMemory) SelectRecentConversations(callback func(int64, *authgo.Accou
 		user := db.ConversationUser[cid]
 		username := db.username(user)
 		if _, ok := db.AccountDeleted[username]; ok {
+			// This can result in fewer than limit results returned
 			continue
 		}
 		email := db.AccountEmail[username]

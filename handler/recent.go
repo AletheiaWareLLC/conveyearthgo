@@ -12,11 +12,11 @@ import (
 	"strings"
 )
 
-func AttachRecentHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) {
-	m.Handle("/recent", handler.Log(Recent(a, cm, ts)))
+func AttachRecentHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, count, maximum int64) {
+	m.Handle("/recent", handler.Log(Recent(a, cm, ts, count, maximum)))
 }
 
-func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
+func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, count, maximum int64) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data := struct {
 			Live          bool
@@ -26,7 +26,7 @@ func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templat
 		}{
 			Live: netgo.IsLive(),
 		}
-		limit := int64(8)
+		limit := count
 		if l := strings.TrimSpace(r.FormValue("limit")); l != "" {
 			if i, err := strconv.ParseInt(l, 10, 64); err != nil {
 				log.Println(err)
@@ -37,8 +37,8 @@ func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *templat
 		data.Limit = limit * 2
 		data.Account = a.CurrentAccount(w, r)
 		if data.Account == nil {
-			if limit > 100 {
-				limit = 100
+			if limit > maximum {
+				limit = maximum
 			}
 		}
 		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation) error {

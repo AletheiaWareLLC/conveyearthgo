@@ -217,10 +217,10 @@ func main() {
 	handler.AttachDeleteHandler(mux, auth, am, cm, templates)
 
 	// Handle Best
-	handler.AttachBestHandler(mux, auth, cm, templates)
+	handler.AttachBestHandler(mux, auth, cm, templates, 8, 100)
 
 	// Handle Recent
-	handler.AttachRecentHandler(mux, auth, cm, templates)
+	handler.AttachRecentHandler(mux, auth, cm, templates, 8, 100)
 
 	// Handle About
 	handler.AttachAboutHandler(mux, templates)

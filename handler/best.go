@@ -13,11 +13,11 @@ import (
 	"time"
 )
 
-func AttachBestHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) {
-	m.Handle("/best", handler.Log(Best(a, cm, ts)))
+func AttachBestHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, count, maximum int64) {
+	m.Handle("/best", handler.Log(Best(a, cm, ts, count, maximum)))
 }
 
-func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {
+func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, count, maximum int64) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data := struct {
 			Live          bool
@@ -49,7 +49,7 @@ func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.
 			since = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 		}
 		data.Period = period
-		limit := int64(8)
+		limit := count
 		if l := strings.TrimSpace(r.FormValue("limit")); l != "" {
 			if i, err := strconv.ParseInt(l, 10, 64); err != nil {
 				log.Println(err)
@@ -60,8 +60,8 @@ func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.
 		data.Limit = limit * 2
 		data.Account = a.CurrentAccount(w, r)
 		if data.Account == nil {
-			if limit > 100 {
-				limit = 100
+			if limit > maximum {
+				limit = maximum
 			}
 		}
 		if err := cm.LookupBestConversations(func(c *conveyearthgo.Conversation) error {
