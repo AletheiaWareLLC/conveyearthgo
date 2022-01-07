@@ -37,6 +37,7 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 			Limit: limit * 2,
 		}
 		data.Account = a.CurrentAccount(w, r)
+
 		// Query best of the year posts
 		now := time.Now()
 		since := time.Date(now.Year()-1, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -48,6 +49,7 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
+
 		// Query most recent posts
 		if err := cm.LookupRecentConversations(func(c *conveyearthgo.Conversation) error {
 			data.Recent = append(data.Recent, c)
@@ -57,6 +59,7 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
+
 		// Query most recent editions
 		editions, err := conveyearthgo.ReadDigests(dir)
 		if err != nil {
