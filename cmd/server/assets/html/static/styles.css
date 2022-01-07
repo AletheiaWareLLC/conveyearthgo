@@ -263,6 +263,12 @@ p.ucc {
     margin: 8px 0;
     max-width: 100%;
 }
+pre.ucc, code.ucc {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
 video.ucc {
     max-width: 100%;
 }
