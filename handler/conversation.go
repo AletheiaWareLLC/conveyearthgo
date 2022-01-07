@@ -28,10 +28,6 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 				id = int64(i)
 			}
 		}
-		if id == 0 {
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
 		type GiftData struct {
 			Account        *authgo.Account
 			GiftID         int64
