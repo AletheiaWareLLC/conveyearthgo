@@ -17,6 +17,7 @@ User-agent: *
 Disallow: /best
 Disallow: /content
 Disallow: /conversation
+Disallow: /delete
 Disallow: /digest
 Disallow: /gift
 Disallow: /message
