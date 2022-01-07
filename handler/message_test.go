@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/conveyearthgo/conveytest"
 	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/filesystem"
 	"aletheiaware.com/conveyearthgo/handler"
@@ -31,15 +32,7 @@ func TestMessage(t *testing.T) {
 		auth := authgo.NewAuthenticator(db, ev)
 		acc := authtest.NewTestAccount(t, auth)
 		cm := conveyearthgo.NewContentManager(db, fs)
-		topic := "FooBar"
-		content := "Hello World!"
-		hash, size, err := cm.AddText([]byte(content))
-		assert.Nil(t, err)
-		mime := "text/plain"
-		cost := strconv.FormatInt(size, 10)
-		yield := "0"
-		_, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-		assert.Nil(t, err)
+		c, m, _ := conveytest.NewConversation(t, cm, acc)
 		mux := http.NewServeMux()
 		handler.AttachMessageHandler(mux, auth, cm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/message?id=%d", m.ID), nil)
@@ -49,7 +42,7 @@ func TestMessage(t *testing.T) {
 		assert.Equal(t, http.StatusOK, result.StatusCode)
 		body, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
-		assert.Equal(t, authtest.TEST_USERNAME+cost+yield+`<p class="ucc">`+content+`</p>`, string(body))
+		assert.Equal(t, authtest.TEST_USERNAME+strconv.FormatInt(c.Cost, 10)+"0"+`<p class="ucc">`+conveytest.TEST_CONTENT+`</p>`, string(body))
 	})
 	t.Run("Returns 200 When Signed In And Message Exists", func(t *testing.T) {
 		db := database.NewInMemory()
@@ -58,15 +51,7 @@ func TestMessage(t *testing.T) {
 		acc := authtest.NewTestAccount(t, auth)
 		token, _ := authtest.SignIn(t, auth)
 		cm := conveyearthgo.NewContentManager(db, fs)
-		topic := "FooBar"
-		content := "Hello World!"
-		hash, size, err := cm.AddText([]byte(content))
-		assert.Nil(t, err)
-		mime := "text/plain"
-		cost := strconv.FormatInt(size, 10)
-		yield := "0"
-		_, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-		assert.Nil(t, err)
+		c, m, _ := conveytest.NewConversation(t, cm, acc)
 		mux := http.NewServeMux()
 		handler.AttachMessageHandler(mux, auth, cm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/message?id=%d", m.ID), nil)
@@ -77,7 +62,7 @@ func TestMessage(t *testing.T) {
 		assert.Equal(t, http.StatusOK, result.StatusCode)
 		body, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
-		assert.Equal(t, authtest.TEST_USERNAME+authtest.TEST_USERNAME+cost+yield+`<p class="ucc">`+content+`</p>`, string(body))
+		assert.Equal(t, authtest.TEST_USERNAME+authtest.TEST_USERNAME+strconv.FormatInt(c.Cost, 10)+"0"+`<p class="ucc">`+conveytest.TEST_CONTENT+`</p>`, string(body))
 	})
 	t.Run("Returns 404 When Message Does Not Exist", func(t *testing.T) {
 		db := database.NewInMemory()

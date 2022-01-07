@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/conveyearthgo/conveytest"
 	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/filesystem"
 	"aletheiaware.com/conveyearthgo/handler"
@@ -51,21 +52,8 @@ func TestBest(t *testing.T) {
 		auth := authgo.NewAuthenticator(db, ev)
 		acc := authtest.NewTestAccount(t, auth)
 		token, _ := authtest.SignIn(t, auth)
-
-		// Create Conversation
-		topic := "FooBar"
-		hash, size, err := cm.AddText([]byte("Hello World!"))
-		assert.NoError(t, err)
-		mime := "text/plain"
-		c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-		assert.NoError(t, err)
-
-		// Add a Reply
-		hash, size, err = cm.AddText([]byte("Hi!"))
-		assert.NoError(t, err)
-		_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{mime}, []int64{size})
-		assert.NoError(t, err)
-
+		c, m, _ := conveytest.NewConversation(t, cm, acc)
+		conveytest.NewReply(t, cm, acc, c, m)
 		mux := http.NewServeMux()
 		handler.AttachBestHandler(mux, auth, cm, tmpl, 1, 1)
 		request := httptest.NewRequest(http.MethodGet, "/best", nil)
@@ -93,14 +81,13 @@ func TestBest(t *testing.T) {
 			topic := fmt.Sprintf("FooBar%d", i)
 			hash, size, err := cm.AddText([]byte(fmt.Sprintf("Hello World%d!", i)))
 			assert.NoError(t, err)
-			mime := "text/plain"
-			c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
+			c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{conveyearthgo.MIME_TEXT_PLAIN}, []int64{size})
 			assert.NoError(t, err)
 
 			// Add a Reply
 			hash, size, err = cm.AddText([]byte(strings.Repeat("Hi!", limit-i+1)))
 			assert.NoError(t, err)
-			_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{mime}, []int64{size})
+			_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{conveyearthgo.MIME_TEXT_PLAIN}, []int64{size})
 			assert.NoError(t, err)
 		}
 		mux := http.NewServeMux()
@@ -130,14 +117,13 @@ func TestBest(t *testing.T) {
 			topic := fmt.Sprintf("FooBar%d", i)
 			hash, size, err := cm.AddText([]byte(fmt.Sprintf("Hello World%d!", i)))
 			assert.NoError(t, err)
-			mime := "text/plain"
-			c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
+			c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{conveyearthgo.MIME_TEXT_PLAIN}, []int64{size})
 			assert.NoError(t, err)
 
 			// Add a Reply
 			hash, size, err = cm.AddText([]byte(strings.Repeat("Hi!", limit-i+1)))
 			assert.NoError(t, err)
-			_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{mime}, []int64{size})
+			_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{conveyearthgo.MIME_TEXT_PLAIN}, []int64{size})
 			assert.NoError(t, err)
 		}
 		mux := http.NewServeMux()

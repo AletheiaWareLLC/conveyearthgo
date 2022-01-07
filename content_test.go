@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/conveyearthgo/conveytest"
 	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/filesystem"
 	"bytes"
@@ -292,13 +293,7 @@ func TestContentManager_NewConversation(t *testing.T) {
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
 	cm := conveyearthgo.NewContentManager(db, fs)
-	topic := "FooBar"
-	content := "Hello World!"
-	hash, size, err := cm.AddText([]byte(content))
-	assert.NoError(t, err)
-	mime := "text/plain"
-	c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-	assert.NoError(t, err)
+	c, m, _ := conveytest.NewConversation(t, cm, acc)
 	t.Run("Lookup", func(t *testing.T) {
 		found, err := cm.LookupConversation(c.ID)
 		assert.NoError(t, err)
@@ -316,13 +311,7 @@ func TestContentManager_NewConversation(t *testing.T) {
 		}, since, 10))
 		assert.Equal(t, 0, len(cmap)) // Conversation has 0 yield, so can't be best
 
-		// Add a Reply
-		content := "Hi!"
-		hash, size, err := cm.AddText([]byte(content))
-		assert.NoError(t, err)
-		mime := "text/plain"
-		_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{mime}, []int64{size})
-		assert.NoError(t, err)
+		conveytest.NewReply(t, cm, acc, c, m)
 
 		assert.NoError(t, cm.LookupBestConversations(func(c *conveyearthgo.Conversation) error {
 			cmap[c.ID] = c
@@ -358,13 +347,7 @@ func TestContentManager_DeleteConversation(t *testing.T) {
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
 	cm := conveyearthgo.NewContentManager(db, fs)
-	topic := "FooBar"
-	content := "Hello World!"
-	hash, size, err := cm.AddText([]byte(content))
-	assert.NoError(t, err)
-	mime := "text/plain"
-	c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-	assert.NoError(t, err)
+	c, m, _ := conveytest.NewConversation(t, cm, acc)
 
 	// Cannot delete a message you did not create
 	acc2, err := auth.NewAccount("2"+authtest.TEST_EMAIL, authtest.TEST_USERNAME+"2", []byte(authtest.TEST_PASSWORD))
@@ -408,25 +391,17 @@ func TestContentManager_NewMessage(t *testing.T) {
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
 	cm := conveyearthgo.NewContentManager(db, fs)
-	topic := "FooBar"
-	content1 := "Hello"
-	hash1, size1, err := cm.AddText([]byte(content1))
-	content2 := "World!"
-	hash2, size2, err := cm.AddText([]byte(content2))
-	assert.NoError(t, err)
-	mime := "text/plain"
-	c, m, files, err := cm.NewConversation(acc, topic, []string{hash1, hash2}, []string{mime, mime}, []int64{size1, size2})
-	assert.NoError(t, err)
+	c, m1, f1 := conveytest.NewConversation(t, cm, acc)
 	t.Run("LookupMessage", func(t *testing.T) {
-		found, err := cm.LookupMessage(m.ID)
+		found, err := cm.LookupMessage(m1.ID)
 		assert.NoError(t, err)
-		assert.Equal(t, m.ID, found.ID)
-		assert.Equal(t, m.Author, found.Author)
-		assert.Equal(t, m.ConversationID, found.ConversationID)
-		assert.Equal(t, m.ParentID, found.ParentID)
-		assert.Equal(t, m.Cost, found.Cost)
-		assert.Equal(t, m.Yield, found.Yield)
-		assert.Equal(t, m.Created, found.Created)
+		assert.Equal(t, m1.ID, found.ID)
+		assert.Equal(t, m1.Author, found.Author)
+		assert.Equal(t, m1.ConversationID, found.ConversationID)
+		assert.Equal(t, m1.ParentID, found.ParentID)
+		assert.Equal(t, m1.Cost, found.Cost)
+		assert.Equal(t, m1.Yield, found.Yield)
+		assert.Equal(t, m1.Created, found.Created)
 	})
 	t.Run("LookupMessages", func(t *testing.T) {
 		mmap := make(map[int64]*conveyearthgo.Message)
@@ -435,75 +410,52 @@ func TestContentManager_NewMessage(t *testing.T) {
 			return nil
 		}))
 		assert.Equal(t, 1, len(mmap))
-		found := mmap[m.ID]
-		assert.Equal(t, m.Author, found.Author)
-		assert.Equal(t, m.ConversationID, found.ConversationID)
-		assert.Equal(t, m.ParentID, found.ParentID)
-		assert.Equal(t, m.Cost, found.Cost)
-		assert.Equal(t, m.Yield, found.Yield)
-		assert.Equal(t, m.Created, found.Created)
+		found := mmap[m1.ID]
+		assert.Equal(t, m1.Author, found.Author)
+		assert.Equal(t, m1.ConversationID, found.ConversationID)
+		assert.Equal(t, m1.ParentID, found.ParentID)
+		assert.Equal(t, m1.Cost, found.Cost)
+		assert.Equal(t, m1.Yield, found.Yield)
+		assert.Equal(t, m1.Created, found.Created)
 
-		// Add a Reply
-		content := "Hi!"
-		hash, size, err := cm.AddText([]byte(content))
-		assert.NoError(t, err)
-		mime := "text/plain"
-		r, _, err := cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{mime}, []int64{size})
-		assert.NoError(t, err)
+		m2, _ := conveytest.NewReply(t, cm, acc, c, m1)
 
 		assert.NoError(t, cm.LookupMessages(c.ID, func(m *conveyearthgo.Message) error {
 			mmap[m.ID] = m
 			return nil
 		}))
 		assert.Equal(t, 2, len(mmap))
-		found = mmap[m.ID]
-		assert.Equal(t, m.Author, found.Author)
-		assert.Equal(t, m.ConversationID, found.ConversationID)
-		assert.Equal(t, m.ParentID, found.ParentID)
-		assert.Equal(t, m.Cost, found.Cost)
-		assert.Equal(t, m.Yield+(size/2), found.Yield)
-		assert.Equal(t, m.Created, found.Created)
+		found = mmap[m1.ID]
+		assert.Equal(t, m1.Author, found.Author)
+		assert.Equal(t, m1.ConversationID, found.ConversationID)
+		assert.Equal(t, m1.ParentID, found.ParentID)
+		assert.Equal(t, m1.Cost, found.Cost)
+		assert.Equal(t, m1.Yield+(m2.Cost/2), found.Yield)
+		assert.Equal(t, m1.Created, found.Created)
 
-		found = mmap[r.ID]
-		assert.Equal(t, r.Author, found.Author)
-		assert.Equal(t, r.ConversationID, found.ConversationID)
-		assert.Equal(t, r.ParentID, found.ParentID)
-		assert.Equal(t, r.Cost, found.Cost)
-		assert.Equal(t, r.Yield, found.Yield)
-		assert.Equal(t, r.Created, found.Created)
+		found = mmap[m2.ID]
+		assert.Equal(t, m2.Author, found.Author)
+		assert.Equal(t, m2.ConversationID, found.ConversationID)
+		assert.Equal(t, m2.ParentID, found.ParentID)
+		assert.Equal(t, m2.Cost, found.Cost)
+		assert.Equal(t, m2.Yield, found.Yield)
+		assert.Equal(t, m2.Created, found.Created)
 	})
 	t.Run("LookupFile", func(t *testing.T) {
-		found, err := cm.LookupFile(files[0].ID)
+		found, err := cm.LookupFile(f1[0].ID)
 		assert.NoError(t, err)
-		assert.Equal(t, m.ID, found.Message)
-		assert.Equal(t, hash1, found.Hash)
-		assert.Equal(t, mime, found.Mime)
-		assert.Equal(t, m.Created, found.Created)
-
-		found, err = cm.LookupFile(files[1].ID)
-		assert.NoError(t, err)
-		assert.Equal(t, m.ID, found.Message)
-		assert.Equal(t, hash2, found.Hash)
-		assert.Equal(t, mime, found.Mime)
-		assert.Equal(t, m.Created, found.Created)
+		assert.Equal(t, m1.ID, found.Message)
+		assert.Equal(t, m1.Created, found.Created)
 	})
 	t.Run("LookupFiles", func(t *testing.T) {
 		fmap := make(map[int64]*conveyearthgo.File)
-		assert.NoError(t, cm.LookupFiles(m.ID, func(f *conveyearthgo.File) error {
+		assert.NoError(t, cm.LookupFiles(m1.ID, func(f *conveyearthgo.File) error {
 			fmap[f.ID] = f
 			return nil
 		}))
-		found := fmap[files[0].ID]
-		assert.Equal(t, m.ID, found.Message)
-		assert.Equal(t, hash1, found.Hash)
-		assert.Equal(t, mime, found.Mime)
-		assert.Equal(t, m.Created, found.Created)
-
-		found = fmap[files[1].ID]
-		assert.Equal(t, m.ID, found.Message)
-		assert.Equal(t, hash2, found.Hash)
-		assert.Equal(t, mime, found.Mime)
-		assert.Equal(t, m.Created, found.Created)
+		found := fmap[f1[0].ID]
+		assert.Equal(t, m1.ID, found.Message)
+		assert.Equal(t, m1.Created, found.Created)
 	})
 }
 
@@ -517,18 +469,9 @@ func TestContentManager_DeleteMessage(t *testing.T) {
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
 	cm := conveyearthgo.NewContentManager(db, fs)
-	topic := "FooBar"
-	content1 := "Hello"
-	content2 := "Hello"
-	hash1, size1, err := cm.AddText([]byte(content1))
-	assert.NoError(t, err)
-	hash2, size2, err := cm.AddText([]byte(content2))
-	assert.NoError(t, err)
-	mime := "text/plain"
-	c, m1, _, err := cm.NewConversation(acc, topic, []string{hash1}, []string{mime}, []int64{size1})
-	assert.NoError(t, err)
-	m2, f2, err := cm.NewMessage(acc, c.ID, m1.ID, []string{hash2}, []string{mime}, []int64{size2})
-	assert.NoError(t, err)
+
+	c, m1, _ := conveytest.NewConversation(t, cm, acc)
+	m2, f2 := conveytest.NewReply(t, cm, acc, c, m1)
 
 	// Cannot delete a message you did not create
 	acc2, err := auth.NewAccount("2"+authtest.TEST_EMAIL, authtest.TEST_USERNAME+"2", []byte(authtest.TEST_PASSWORD))
@@ -575,18 +518,8 @@ func TestContentManager_DeleteMessage_WithReply(t *testing.T) {
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
 	cm := conveyearthgo.NewContentManager(db, fs)
-	topic := "FooBar"
-	content1 := "Hello"
-	content2 := "World!"
-	hash1, size1, err := cm.AddText([]byte(content1))
-	assert.NoError(t, err)
-	hash2, size2, err := cm.AddText([]byte(content2))
-	assert.NoError(t, err)
-	mime := "text/plain"
-	c, m1, f1, err := cm.NewConversation(acc, topic, []string{hash1}, []string{mime}, []int64{size1})
-	assert.NoError(t, err)
-	m2, f2, err := cm.NewMessage(acc, c.ID, m1.ID, []string{hash2}, []string{mime}, []int64{size2})
-	assert.NoError(t, err)
+	c, m1, f1 := conveytest.NewConversation(t, cm, acc)
+	m2, f2 := conveytest.NewReply(t, cm, acc, c, m1)
 
 	// Cannot delete a message you did not create
 	acc2, err := auth.NewAccount("2"+authtest.TEST_EMAIL, authtest.TEST_USERNAME+"2", []byte(authtest.TEST_PASSWORD))
@@ -604,7 +537,7 @@ func TestContentManager_DeleteMessage_WithReply(t *testing.T) {
 		assert.Equal(t, m1.ConversationID, found.ConversationID)
 		assert.Equal(t, m1.ParentID, found.ParentID)
 		assert.Equal(t, m1.Cost, found.Cost)
-		assert.Equal(t, m1.Yield+size2/2, found.Yield)
+		assert.Equal(t, m1.Yield+m2.Cost/2, found.Yield)
 		assert.Equal(t, m1.Created, found.Created)
 
 		found, err = cm.LookupMessage(m2.ID)
@@ -628,7 +561,7 @@ func TestContentManager_DeleteMessage_WithReply(t *testing.T) {
 		assert.Equal(t, m1.ConversationID, found.ConversationID)
 		assert.Equal(t, m1.ParentID, found.ParentID)
 		assert.Equal(t, m1.Cost, found.Cost)
-		assert.Equal(t, m1.Yield+size2/2, found.Yield)
+		assert.Equal(t, m1.Yield+m2.Cost/2, found.Yield)
 		assert.Equal(t, m1.Created, found.Created)
 
 		found = mmap[m2.ID]
@@ -643,15 +576,11 @@ func TestContentManager_DeleteMessage_WithReply(t *testing.T) {
 		found, err := cm.LookupFile(f1[0].ID)
 		assert.NoError(t, err)
 		assert.Equal(t, m1.ID, found.Message)
-		assert.Equal(t, hash1, found.Hash)
-		assert.Equal(t, mime, found.Mime)
 		assert.Equal(t, m1.Created, found.Created)
 
 		found, err = cm.LookupFile(f2[0].ID)
 		assert.NoError(t, err)
 		assert.Equal(t, m2.ID, found.Message)
-		assert.Equal(t, hash2, found.Hash)
-		assert.Equal(t, mime, found.Mime)
 		assert.Equal(t, m2.Created, found.Created)
 	})
 	t.Run("LookupFiles", func(t *testing.T) {
@@ -662,8 +591,6 @@ func TestContentManager_DeleteMessage_WithReply(t *testing.T) {
 		}))
 		found := fmap[f1[0].ID]
 		assert.Equal(t, m1.ID, found.Message)
-		assert.Equal(t, hash1, found.Hash)
-		assert.Equal(t, mime, found.Mime)
 		assert.Equal(t, m1.Created, found.Created)
 
 		fmap = make(map[int64]*conveyearthgo.File)
@@ -673,8 +600,6 @@ func TestContentManager_DeleteMessage_WithReply(t *testing.T) {
 		}))
 		found = fmap[f2[0].ID]
 		assert.Equal(t, m2.ID, found.Message)
-		assert.Equal(t, hash2, found.Hash)
-		assert.Equal(t, mime, found.Mime)
 		assert.Equal(t, m2.Created, found.Created)
 	})
 }
@@ -689,15 +614,8 @@ func TestContentManager_DeleteMessage_WithGift(t *testing.T) {
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
 	cm := conveyearthgo.NewContentManager(db, fs)
-	topic := "FooBar"
-	content := "Hello World!"
-	hash, size, err := cm.AddText([]byte(content))
-	assert.NoError(t, err)
-	mime := "text/plain"
-	c, m, f, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-	assert.NoError(t, err)
-	_, err = cm.NewGift(acc, c.ID, m.ID, 10)
-	assert.NoError(t, err)
+	c, m, f := conveytest.NewConversation(t, cm, acc)
+	conveytest.NewGift(t, cm, acc, c, m)
 
 	// Cannot delete a message you did not create
 	acc2, err := auth.NewAccount("2"+authtest.TEST_EMAIL, authtest.TEST_USERNAME+"2", []byte(authtest.TEST_PASSWORD))
@@ -738,8 +656,6 @@ func TestContentManager_DeleteMessage_WithGift(t *testing.T) {
 		found, err := cm.LookupFile(f[0].ID)
 		assert.NoError(t, err)
 		assert.Equal(t, m.ID, found.Message)
-		assert.Equal(t, hash, found.Hash)
-		assert.Equal(t, mime, found.Mime)
 		assert.Equal(t, m.Created, found.Created)
 	})
 	t.Run("LookupFiles", func(t *testing.T) {
@@ -750,8 +666,6 @@ func TestContentManager_DeleteMessage_WithGift(t *testing.T) {
 		}))
 		found := fmap[f[0].ID]
 		assert.Equal(t, m.ID, found.Message)
-		assert.Equal(t, hash, found.Hash)
-		assert.Equal(t, mime, found.Mime)
 		assert.Equal(t, m.Created, found.Created)
 	})
 }
@@ -766,15 +680,8 @@ func TestContentManager_NewGift(t *testing.T) {
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
 	cm := conveyearthgo.NewContentManager(db, fs)
-	topic := "FooBar"
-	content := "Hello World!"
-	hash, size, err := cm.AddText([]byte(content))
-	assert.NoError(t, err)
-	mime := "text/plain"
-	c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-	assert.NoError(t, err)
-	g, err := cm.NewGift(acc, c.ID, m.ID, 10)
-	assert.NoError(t, err)
+	c, m, _ := conveytest.NewConversation(t, cm, acc)
+	g := conveytest.NewGift(t, cm, acc, c, m)
 	t.Run("LookupGift", func(t *testing.T) {
 		found, err := cm.LookupGift(g.ID)
 		assert.NoError(t, err)
@@ -811,15 +718,8 @@ func TestContentManager_DeleteGift(t *testing.T) {
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
 	cm := conveyearthgo.NewContentManager(db, fs)
-	topic := "FooBar"
-	content := "Hello World!"
-	hash, size, err := cm.AddText([]byte(content))
-	assert.NoError(t, err)
-	mime := "text/plain"
-	c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-	assert.NoError(t, err)
-	g, err := cm.NewGift(acc, c.ID, m.ID, 10)
-	assert.NoError(t, err)
+	c, m, _ := conveytest.NewConversation(t, cm, acc)
+	g := conveytest.NewGift(t, cm, acc, c, m)
 
 	// Cannot delete a gift you did not create
 	acc2, err := auth.NewAccount("2"+authtest.TEST_EMAIL, authtest.TEST_USERNAME+"2", []byte(authtest.TEST_PASSWORD))

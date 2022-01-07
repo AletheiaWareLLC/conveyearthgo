@@ -81,14 +81,13 @@ func TestRecent(t *testing.T) {
 			topic := fmt.Sprintf("FooBar%d", i)
 			hash, size, err := cm.AddText([]byte(fmt.Sprintf("Hello World%d!", i)))
 			assert.NoError(t, err)
-			mime := "text/plain"
-			c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
+			c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{conveyearthgo.MIME_TEXT_PLAIN}, []int64{size})
 			assert.NoError(t, err)
 
 			// Add a Reply
 			hash, size, err = cm.AddText([]byte(strings.Repeat("Hi!", i)))
 			assert.NoError(t, err)
-			_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{mime}, []int64{size})
+			_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{conveyearthgo.MIME_TEXT_PLAIN}, []int64{size})
 			assert.NoError(t, err)
 		}
 		mux := http.NewServeMux()
@@ -118,14 +117,13 @@ func TestRecent(t *testing.T) {
 			topic := fmt.Sprintf("FooBar%d", i)
 			hash, size, err := cm.AddText([]byte(fmt.Sprintf("Hello World%d!", i)))
 			assert.NoError(t, err)
-			mime := "text/plain"
-			c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
+			c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{conveyearthgo.MIME_TEXT_PLAIN}, []int64{size})
 			assert.NoError(t, err)
 
 			// Add a Reply
 			hash, size, err = cm.AddText([]byte(strings.Repeat("Hi!", i)))
 			assert.NoError(t, err)
-			_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{mime}, []int64{size})
+			_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{conveyearthgo.MIME_TEXT_PLAIN}, []int64{size})
 			assert.NoError(t, err)
 		}
 		mux := http.NewServeMux()

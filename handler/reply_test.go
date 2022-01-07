@@ -34,13 +34,7 @@ func TestReply(t *testing.T) {
 		am := conveyearthgo.NewAccountManager(db)
 		cm := conveyearthgo.NewContentManager(db, fs)
 		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
-		topic := "FooBar"
-		content := "Hello World!"
-		hash, size, err := cm.AddText([]byte(content))
-		assert.Nil(t, err)
-		mime := "text/plain"
-		c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-		assert.Nil(t, err)
+		c, m, _ := conveytest.NewConversation(t, cm, acc)
 		mux := http.NewServeMux()
 		handler.AttachReplyHandler(mux, auth, am, cm, nm, tmpl)
 		request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/reply?conversation=%d&message=%d", c.ID, m.ID), nil)

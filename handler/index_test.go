@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/authgo/authtest"
 	"aletheiaware.com/conveyearthgo"
+	"aletheiaware.com/conveyearthgo/conveytest"
 	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/filesystem"
 	"aletheiaware.com/conveyearthgo/handler"
@@ -66,21 +67,8 @@ func TestIndex(t *testing.T) {
 		acc := authtest.NewTestAccount(t, auth)
 		token, _ := authtest.SignIn(t, auth)
 		cm := conveyearthgo.NewContentManager(db, fs)
-
-		// Create Conversation
-		topic := "FooBar"
-		hash, size, err := cm.AddText([]byte("Hello World!"))
-		assert.NoError(t, err)
-		mime := "text/plain"
-		c, m, _, err := cm.NewConversation(acc, topic, []string{hash}, []string{mime}, []int64{size})
-		assert.NoError(t, err)
-
-		// Add a Reply
-		hash, size, err = cm.AddText([]byte("Hi!"))
-		assert.NoError(t, err)
-		_, _, err = cm.NewMessage(acc, c.ID, m.ID, []string{hash}, []string{mime}, []int64{size})
-		assert.NoError(t, err)
-
+		c, m, _ := conveytest.NewConversation(t, cm, acc)
+		conveytest.NewReply(t, cm, acc, c, m)
 		mux := http.NewServeMux()
 		handler.AttachIndexHandler(mux, auth, cm, tmpl, dir)
 		request := httptest.NewRequest(http.MethodGet, "/", nil)

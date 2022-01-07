@@ -320,6 +320,7 @@ func (m *contentManager) NewConversation(account *authgo.Account, topic string, 
 			ID:      conversation,
 			Author:  account,
 			Topic:   topic,
+			Cost:    cost,
 			Created: created,
 		}, &Message{
 			ID:             message,
