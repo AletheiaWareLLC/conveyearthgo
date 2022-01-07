@@ -3,7 +3,6 @@ package conveyearthgo_test
 import (
 	"aletheiaware.com/conveyearthgo"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,7 +13,7 @@ func Test_ReadDigests(t *testing.T) {
 	editions, err := conveyearthgo.ReadDigests(dir)
 	assert.Error(t, os.ErrNotExist)
 
-	dir, err = ioutil.TempDir("", "test")
+	dir, err = os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	defer os.RemoveAll(dir)
 

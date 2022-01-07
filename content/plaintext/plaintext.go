@@ -3,7 +3,6 @@ package plaintext
 import (
 	"html/template"
 	"io"
-	"io/ioutil"
 	"regexp"
 )
 
@@ -13,7 +12,7 @@ var (
 )
 
 func ToHTML(reader io.Reader) (template.HTML, error) {
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return "", err
 	}

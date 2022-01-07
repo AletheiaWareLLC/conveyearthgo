@@ -2,7 +2,6 @@ package markdown_test
 
 import (
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	v8 "rogchap.com/v8go"
@@ -14,9 +13,9 @@ func Test_JSMarkdownToHTML(t *testing.T) {
 	wd, err := os.Getwd()
 	assert.NoError(t, err)
 	javascript := filepath.Join(wd, "..", "..", "cmd", "server", "assets", "html", "static")
-	commonmark, err := ioutil.ReadFile(filepath.Join(javascript, "commonmark.min.js"))
+	commonmark, err := os.ReadFile(filepath.Join(javascript, "commonmark.min.js"))
 	assert.NoError(t, err)
-	editor, err := ioutil.ReadFile(filepath.Join(javascript, "editor.js"))
+	editor, err := os.ReadFile(filepath.Join(javascript, "editor.js"))
 	assert.NoError(t, err)
 	directory := filepath.Join(wd, "testdata")
 	for name, tt := range map[string]struct {
@@ -57,7 +56,7 @@ func Test_JSMarkdownToHTML(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			markdown, err := ioutil.ReadFile(filepath.Join(directory, tt.given))
+			markdown, err := os.ReadFile(filepath.Join(directory, tt.given))
 			assert.NoError(t, err)
 			iso, err := v8.NewIsolate()
 			assert.NoError(t, err)

@@ -8,13 +8,12 @@ import (
 	"github.com/yuin/goldmark/util"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
 	"strings"
 )
 
 func ToHTML(reader io.Reader) (template.HTML, error) {
-	s, err := ioutil.ReadAll(reader)
+	s, err := io.ReadAll(reader)
 	if err != nil {
 		return "", err
 	}

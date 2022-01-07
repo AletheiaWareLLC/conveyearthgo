@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,7 +17,7 @@ import (
 )
 
 func TestBest(t *testing.T) {
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.Nil(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -45,10 +44,6 @@ func TestBest(t *testing.T) {
 	})
 	t.Run("Returns 200 With One Conversation", func(t *testing.T) {
 		db := database.NewInMemory()
-		dir, err := ioutil.TempDir("", "test")
-		assert.NoError(t, err)
-		fs := filesystem.NewOnDisk(dir)
-		defer os.RemoveAll(dir)
 		cm := conveyearthgo.NewContentManager(db, fs)
 		ev := authtest.NewEmailVerifier()
 		auth := authgo.NewAuthenticator(db, ev)

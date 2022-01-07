@@ -3,7 +3,6 @@ package markdown_test
 import (
 	"aletheiaware.com/conveyearthgo/content/markdown"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -70,7 +69,7 @@ func assertMatchesMaster(t *testing.T, directory, name string, html []byte) {
 		t.Fatalf("Master not found at %s. HTML written to %s might be used as master.", masterPath, failedPath)
 	}
 
-	master, err := ioutil.ReadFile(masterPath)
+	master, err := os.ReadFile(masterPath)
 	assert.NoError(t, err)
 
 	if !assert.Equal(t, master, html, "HTML did not match master. Actual HTML written to file://%s.", failedPath) {
@@ -83,5 +82,5 @@ func writeHTML(t *testing.T, path string, html []byte) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(path, html, 0644)
+	return os.WriteFile(path, html, 0644)
 }

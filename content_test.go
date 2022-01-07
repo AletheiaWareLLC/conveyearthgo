@@ -11,7 +11,6 @@ import (
 	"html/template"
 	"io"
 	iofs "io/fs"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -127,7 +126,7 @@ func TestMentions(t *testing.T) {
 
 func TestContentManager_Open(t *testing.T) {
 	db := database.NewInMemory()
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -157,7 +156,7 @@ func TestContentManager_Open(t *testing.T) {
 
 func TestContentManager_AddText(t *testing.T) {
 	db := database.NewInMemory()
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -171,7 +170,7 @@ func TestContentManager_AddText(t *testing.T) {
 
 func TestContentManager_AddFile(t *testing.T) {
 	db := database.NewInMemory()
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -186,7 +185,7 @@ func TestContentManager_AddFile(t *testing.T) {
 
 func TestContentManager_ToHTML(t *testing.T) {
 	db := database.NewInMemory()
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -288,7 +287,7 @@ func TestContentManager_NewConversation(t *testing.T) {
 	ev := authtest.NewEmailVerifier()
 	auth := authgo.NewAuthenticator(db, ev)
 	acc := authtest.NewTestAccount(t, auth)
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -354,7 +353,7 @@ func TestContentManager_DeleteConversation(t *testing.T) {
 	ev := authtest.NewEmailVerifier()
 	auth := authgo.NewAuthenticator(db, ev)
 	acc := authtest.NewTestAccount(t, auth)
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -404,7 +403,7 @@ func TestContentManager_NewMessage(t *testing.T) {
 	ev := authtest.NewEmailVerifier()
 	auth := authgo.NewAuthenticator(db, ev)
 	acc := authtest.NewTestAccount(t, auth)
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -513,7 +512,7 @@ func TestContentManager_DeleteMessage(t *testing.T) {
 	ev := authtest.NewEmailVerifier()
 	auth := authgo.NewAuthenticator(db, ev)
 	acc := authtest.NewTestAccount(t, auth)
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -571,7 +570,7 @@ func TestContentManager_DeleteMessage_WithReply(t *testing.T) {
 	ev := authtest.NewEmailVerifier()
 	auth := authgo.NewAuthenticator(db, ev)
 	acc := authtest.NewTestAccount(t, auth)
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -685,7 +684,7 @@ func TestContentManager_DeleteMessage_WithGift(t *testing.T) {
 	ev := authtest.NewEmailVerifier()
 	auth := authgo.NewAuthenticator(db, ev)
 	acc := authtest.NewTestAccount(t, auth)
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -762,7 +761,7 @@ func TestContentManager_NewGift(t *testing.T) {
 	ev := authtest.NewEmailVerifier()
 	auth := authgo.NewAuthenticator(db, ev)
 	acc := authtest.NewTestAccount(t, auth)
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -807,7 +806,7 @@ func TestContentManager_DeleteGift(t *testing.T) {
 	ev := authtest.NewEmailVerifier()
 	auth := authgo.NewAuthenticator(db, ev)
 	acc := authtest.NewTestAccount(t, auth)
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
@@ -847,7 +846,7 @@ func TestContentManager_DeleteGift(t *testing.T) {
 
 func TestContentManager_Lookup_Zero(t *testing.T) {
 	db := database.NewInMemory()
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.NoError(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)

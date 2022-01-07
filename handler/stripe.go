@@ -15,7 +15,7 @@ import (
 	"github.com/stripe/stripe-go/v72/loginlink"
 	"github.com/stripe/stripe-go/v72/webhook"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -162,7 +162,7 @@ func AttachStripeWebhookHandler(m *http.ServeMux, am conveyearthgo.AccountManage
 
 func StripeWebhook(am conveyearthgo.AccountManager, webhookSecretKey string, domain string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		payload, err := ioutil.ReadAll(http.MaxBytesReader(w, r.Body, MaxBodyBytes))
+		payload, err := io.ReadAll(http.MaxBytesReader(w, r.Body, MaxBodyBytes))
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusBadRequest)

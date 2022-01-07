@@ -7,7 +7,6 @@ import (
 	"aletheiaware.com/conveyearthgo/handler"
 	"github.com/stretchr/testify/assert"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -18,7 +17,7 @@ import (
 const notFound = "404 page not found\n"
 
 func TestContent(t *testing.T) {
-	dir, err := ioutil.TempDir("", "test")
+	dir, err := os.MkdirTemp("", "test")
 	assert.Nil(t, err)
 	fs := filesystem.NewOnDisk(dir)
 	defer os.RemoveAll(dir)
