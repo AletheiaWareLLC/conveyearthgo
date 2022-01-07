@@ -102,7 +102,7 @@ func TestRecent(t *testing.T) {
 		body, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		// Should display 6 (limit) recent conversations
-		assert.Equal(t, "aliceFooBar6FooBar5FooBar4FooBar3FooBar2FooBar1", string(body))
+		assert.Equal(t, authtest.TEST_USERNAME+"FooBar6FooBar5FooBar4FooBar3FooBar2FooBar1", string(body))
 	})
 	t.Run("Results Limited When Not Signed In", func(t *testing.T) {
 		db := database.NewInMemory()

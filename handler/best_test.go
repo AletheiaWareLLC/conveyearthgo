@@ -114,7 +114,7 @@ func TestBest(t *testing.T) {
 		body, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		// Should display 6 (limit) best conversations
-		assert.Equal(t, "aliceFooBar1FooBar2FooBar3FooBar4FooBar5FooBar6", string(body))
+		assert.Equal(t, authtest.TEST_USERNAME+"FooBar1FooBar2FooBar3FooBar4FooBar5FooBar6", string(body))
 	})
 	t.Run("Results Limited When Not Signed In", func(t *testing.T) {
 		db := database.NewInMemory()
