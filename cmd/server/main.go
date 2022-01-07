@@ -223,7 +223,7 @@ func main() {
 	handler.AttachRecentHandler(mux, auth, cm, templates)
 
 	// Handle About
-	handler.AttachAboutHandler(mux, auth, templates)
+	handler.AttachAboutHandler(mux, templates)
 
 	// Handle Demo
 	handler.AttachDemoHandler(mux, auth, templates)
