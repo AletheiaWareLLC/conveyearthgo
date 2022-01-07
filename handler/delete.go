@@ -64,11 +64,15 @@ func Delete(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyea
 				return
 			}
 
-			if data.Message != nil && data.Message.ParentID == 0 {
-				// Entire conversation was deleted
-				authredirect.Index(w, r)
+			if data.Message != nil {
+				if data.Message.ParentID == 0 {
+					// Entire conversation was deleted
+					authredirect.Index(w, r)
+				} else {
+					redirect.Conversation(w, r, conversation, data.Message.ParentID)
+				}
 			} else {
-				redirect.Conversation(w, r, conversation, 0)
+				redirect.Conversation(w, r, conversation, data.Gift.MessageID)
 			}
 		}
 	})
