@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-var ErrSelfGift = errors.New("Cannot Self-Gift")
+var ErrSelfGiftingNotPermitted = errors.New("Self-Gifting Not Permitted")
 
 type Gift struct {
 	ID             int64

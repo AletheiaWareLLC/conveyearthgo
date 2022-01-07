@@ -10,9 +10,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func AttachGiftHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
@@ -26,63 +23,10 @@ func Gift(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyeart
 			authredirect.SignIn(w, r, r.URL.String())
 			return
 		}
-		var conversation int64
-		if c := strings.TrimSpace(r.FormValue("conversation")); c != "" {
-			if i, err := strconv.ParseInt(c, 10, 64); err != nil {
-				log.Println(err)
-			} else {
-				conversation = int64(i)
-			}
-		}
-		var message int64
-		if m := strings.TrimSpace(r.FormValue("message")); m != "" {
-			if i, err := strconv.ParseInt(m, 10, 64); err != nil {
-				log.Println(err)
-			} else {
-				message = int64(i)
-			}
-		}
-		if conversation == 0 || message == 0 {
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-		c, err := cm.LookupConversation(conversation)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-		m, err := cm.LookupMessage(message)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-		var content template.HTML
-		if err := cm.LookupFiles(message, func(f *conveyearthgo.File) error {
-			c, err := cm.ToHTML(f.Hash, f.Mime)
-			if err != nil {
-				return err
-			}
-			content += c
-			return nil
-		}); err != nil {
-			log.Println(err)
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
 		data := &GiftData{
-			Live:           netgo.IsLive(),
-			Account:        account,
-			Topic:          c.Topic,
-			ConversationID: conversation,
-			MessageID:      message,
-			Author:         m.Author,
-			Cost:           m.Cost,
-			Yield:          m.Yield,
-			Content:        content,
-			Created:        m.Created,
-			Gift:           1,
+			Live:    netgo.IsLive(),
+			Account: account,
+			Gift:    1,
 		}
 		balance, err := am.AccountBalance(account.ID)
 		if err != nil {
@@ -94,18 +38,29 @@ func Gift(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyeart
 		data.Balance = balance
 		switch r.Method {
 		case "GET":
-			executeGiftTemplate(w, ts, data)
-		case "POST":
-			var gift int64
-			if g := strings.TrimSpace(r.FormValue("gift")); g != "" {
-				if i, err := strconv.ParseInt(g, 10, 64); err != nil {
-					log.Println(err)
-				} else {
-					gift = int64(i)
-				}
+			query := r.URL.Query()
+			conversation := netgo.ParseInt(netgo.QueryParameter(query, "conversation"))
+			message := netgo.ParseInt(netgo.QueryParameter(query, "message"))
+
+			if err := populateGiftData(cm, conversation, message, data); err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
 			}
 
+			executeGiftTemplate(w, ts, data)
+		case "POST":
+			conversation := netgo.ParseInt(r.FormValue("conversation"))
+			message := netgo.ParseInt(r.FormValue("message"))
+			gift := netgo.ParseInt(r.FormValue("gift"))
+
 			data.Gift = gift
+
+			if err := populateGiftData(cm, conversation, message, data); err != nil {
+				log.Println(err)
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
 
 			// Check account balance
 			if gift > balance {
@@ -117,8 +72,8 @@ func Gift(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyeart
 			}
 
 			// Cannot gift to self
-			if account.ID == m.Author.ID {
-				err := conveyearthgo.ErrSelfGift
+			if account.ID == data.Message.Author.ID {
+				err := conveyearthgo.ErrSelfGiftingNotPermitted
 				log.Println(err)
 				data.Error = err.Error()
 				executeGiftTemplate(w, ts, data)
@@ -135,7 +90,7 @@ func Gift(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyeart
 			}
 
 			// Send Gift Notification
-			if err := nm.NotifyGift(m.Author, account, conversation, c.Topic, message, gift); err != nil {
+			if err := nm.NotifyGift(data.Message.Author, account, conversation, data.Conversation.Topic, message, gift); err != nil {
 				log.Println(err)
 			}
 
@@ -150,18 +105,39 @@ func executeGiftTemplate(w http.ResponseWriter, ts *template.Template, data *Gif
 	}
 }
 
+func populateGiftData(cm conveyearthgo.ContentManager, conversation, message int64, data *GiftData) error {
+	c, err := cm.LookupConversation(conversation)
+	if err != nil {
+		return err
+	}
+	data.Conversation = c
+	m, err := cm.LookupMessage(message)
+	if err != nil {
+		return err
+	}
+	data.Message = m
+	var content template.HTML
+	if err := cm.LookupFiles(message, func(f *conveyearthgo.File) error {
+		c, err := cm.ToHTML(f.Hash, f.Mime)
+		if err != nil {
+			return err
+		}
+		content += c
+		return nil
+	}); err != nil {
+		return err
+	}
+	data.Content = content
+	return nil
+}
+
 type GiftData struct {
-	Live           bool
-	Error          string
-	Account        *authgo.Account
-	Balance        int64
-	Topic          string
-	ConversationID int64
-	MessageID      int64
-	Author         *authgo.Account
-	Cost           int64
-	Yield          int64
-	Content        template.HTML
-	Created        time.Time
-	Gift           int64
+	Live         bool
+	Error        string
+	Account      *authgo.Account
+	Balance      int64
+	Conversation *conveyearthgo.Conversation
+	Message      *conveyearthgo.Message
+	Content      template.HTML
+	Gift         int64
 }

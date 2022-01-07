@@ -16,13 +16,15 @@
 
             <h1 class="center">Gift</h1>
 
-            <h2 class="center">{{.Topic}}</h2>
+            <h2 class="center">{{with .Conversation}}{{.Topic}}{{end}}</h2>
 
+            {{with .Message -}}
             <div class="message">
-                <p class="meta">{{template "date-time" .Created}} {{.Author.Username}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
+                <p class="meta">{{template "date-time" .Created}} {{with .Author}}{{.Username}}{{end}} {{template "cost" .Cost}} {{template "yield" .Yield}}</p>
 
-                {{.Content}}
+                {{$.Content}}
             </div>
+            {{- end}}
 
             {{if ne .Error "" -}}
             <p class="error">{{.Error}}</p>
@@ -32,8 +34,8 @@
                 <!-- TODO(v2) add CSRF token
                 <input type="hidden" id="token" name="token" value="{ { .Token } }" />
                 -->
-                <input type="hidden" id="conversation" name="conversation" value="{{.ConversationID}}" />
-                <input type="hidden" id="message" name="message" value="{{.MessageID}}" />
+                <input type="hidden" id="conversation" name="conversation" value="{{with .Conversation}}{{.ID}}{{end}}" />
+                <input type="hidden" id="message" name="message" value="{{with .Message}}{{.ID}}{{end}}" />
 
                 <input type="number" id="gift" name="gift" min="1" max="{{.Balance}}" step="1" value="{{.Gift}}">
 
