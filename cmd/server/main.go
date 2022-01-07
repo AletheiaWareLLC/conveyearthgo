@@ -226,7 +226,7 @@ func main() {
 	handler.AttachAboutHandler(mux, templates)
 
 	// Handle Demo
-	handler.AttachDemoHandler(mux, auth, templates)
+	handler.AttachDemoHandler(mux, templates)
 
 	// Handle robots.txt
 	mux.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {

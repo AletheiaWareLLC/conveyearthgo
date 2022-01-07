@@ -11,11 +11,11 @@ import (
 	"time"
 )
 
-func AttachDemoHandler(m *http.ServeMux, a authgo.Authenticator, ts *template.Template) {
-	m.Handle("/demo", handler.Log(Demo(a, ts)))
+func AttachDemoHandler(m *http.ServeMux, ts *template.Template) {
+	m.Handle("/demo", handler.Log(Demo(ts)))
 }
 
-func Demo(a authgo.Authenticator, ts *template.Template) http.Handler {
+func Demo(ts *template.Template) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		now := time.Now()
 		time1 := now.AddDate(0, 0, -7)
