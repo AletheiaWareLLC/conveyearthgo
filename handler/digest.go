@@ -24,8 +24,13 @@ func Digest(ts *template.Template, dir string) http.Handler {
 
 		switch r.Method {
 		case "GET":
+			template := "digest-viewer.go.html"
+
 			data.Edition = strings.TrimSpace(r.FormValue("edition"))
+
 			if data.Edition == "" {
+				template = "digest.go.html"
+
 				editions, err := conveyearthgo.ReadDigests(dir)
 				if err != nil {
 					log.Println(err)
@@ -37,20 +42,14 @@ func Digest(ts *template.Template, dir string) http.Handler {
 				sort.Sort(sort.Reverse(sort.StringSlice(editions)))
 
 				data.Editions = editions
-
-				// Render template
-				executeDigestTemplate(w, ts, data)
-			} else {
-				if err := ts.ExecuteTemplate(w, "digest-viewer.go.html", data); err != nil {
-					log.Println(err)
-				}
 			}
+			executeDigestTemplate(w, ts, template, data)
 		}
 	})
 }
 
-func executeDigestTemplate(w http.ResponseWriter, ts *template.Template, data *DigestData) {
-	if err := ts.ExecuteTemplate(w, "digest.go.html", data); err != nil {
+func executeDigestTemplate(w http.ResponseWriter, ts *template.Template, template string, data *DigestData) {
+	if err := ts.ExecuteTemplate(w, template, data); err != nil {
 		log.Println(err)
 	}
 }
