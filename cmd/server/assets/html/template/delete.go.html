@@ -20,7 +20,7 @@
             <p class="error">{{.Error}}</p>
             {{- end}}
 
-            <h2 class="center">{{.Conversation.Topic}}</h2>
+            <h2 class="center">{{with .Conversation}}{{.Topic}}{{end}}</h2>
 
             {{with .Message -}}
             <div class="message">
@@ -44,7 +44,7 @@
                 <!-- TODO(v2) add CSRF token
                 <input type="hidden" id="token" name="token" value="{ { .Token } }" />
                 -->
-                <input type="hidden" id="conversation" name="conversation" value="{{.Conversation.ID}}" />
+                <input type="hidden" id="conversation" name="conversation" value="{{with .Conversation}}{{.ID}}{{end}}" />
                 <input type="hidden" id="message" name="message" value="{{with .Message}}{{.ID}}{{end}}" />
                 <input type="hidden" id="gift" name="gift" value="{{with .Gift}}{{.ID}}{{end}}" />
                 <input type="submit" value="Delete" class="danger" />
