@@ -8,12 +8,15 @@ import (
 	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/filesystem"
 	"aletheiaware.com/conveyearthgo/handler"
+	"bytes"
 	"github.com/stretchr/testify/assert"
 	"html/template"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -64,9 +67,145 @@ func TestPublish(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, "/sign-in?next=%2Fpublish", u.String())
 	})
-	// TODO Publish Success
-	// TODO Publish Topic Too Short
-	// TODO Publish Topic Too Long
-	// TODO Publish Content Too Short
-	// TODO Publish Insufficient Balance
+	t.Run("Topic Too Short", func(t *testing.T) {
+		db := database.NewInMemory()
+		ev := authtest.NewEmailVerifier()
+		auth := authgo.NewAuthenticator(db, ev)
+		authtest.NewTestAccount(t, auth)
+		token, _ := authtest.SignIn(t, auth)
+		am := conveyearthgo.NewAccountManager(db)
+		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
+		mux := http.NewServeMux()
+		handler.AttachPublishHandler(mux, auth, am, cm, nm, tmpl)
+		var buffer bytes.Buffer
+		writer := multipart.NewWriter(&buffer)
+		_ = writer.WriteField("topic", strings.Repeat("x", conveyearthgo.MINIMUM_TOPIC_LENGTH-1))
+		_ = writer.WriteField("content", conveytest.TEST_CONTENT)
+		assert.NoError(t, writer.Close())
+		request := httptest.NewRequest(http.MethodPost, "/publish", &buffer)
+		request.Header.Set("Content-Type", writer.FormDataContentType())
+		request.AddCookie(auth.NewSignInSessionCookie(token))
+		response := httptest.NewRecorder()
+		mux.ServeHTTP(response, request)
+		result := response.Result()
+		assert.Equal(t, http.StatusOK, result.StatusCode)
+		body, err := io.ReadAll(result.Body)
+		assert.Nil(t, err)
+		assert.Equal(t, conveyearthgo.ErrTopicTooShort.Error()+authtest.TEST_USERNAME, string(body))
+	})
+	t.Run("Topic Too Long", func(t *testing.T) {
+		db := database.NewInMemory()
+		ev := authtest.NewEmailVerifier()
+		auth := authgo.NewAuthenticator(db, ev)
+		authtest.NewTestAccount(t, auth)
+		token, _ := authtest.SignIn(t, auth)
+		am := conveyearthgo.NewAccountManager(db)
+		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
+		mux := http.NewServeMux()
+		handler.AttachPublishHandler(mux, auth, am, cm, nm, tmpl)
+		var buffer bytes.Buffer
+		writer := multipart.NewWriter(&buffer)
+		_ = writer.WriteField("topic", strings.Repeat("x", conveyearthgo.MAXIMUM_TOPIC_LENGTH+1))
+		_ = writer.WriteField("content", conveytest.TEST_CONTENT)
+		assert.NoError(t, writer.Close())
+		request := httptest.NewRequest(http.MethodPost, "/publish", &buffer)
+		request.Header.Set("Content-Type", writer.FormDataContentType())
+		request.AddCookie(auth.NewSignInSessionCookie(token))
+		response := httptest.NewRecorder()
+		mux.ServeHTTP(response, request)
+		result := response.Result()
+		assert.Equal(t, http.StatusOK, result.StatusCode)
+		body, err := io.ReadAll(result.Body)
+		assert.Nil(t, err)
+		assert.Equal(t, conveyearthgo.ErrTopicTooLong.Error()+authtest.TEST_USERNAME, string(body))
+	})
+	t.Run("Content Too Short", func(t *testing.T) {
+		db := database.NewInMemory()
+		ev := authtest.NewEmailVerifier()
+		auth := authgo.NewAuthenticator(db, ev)
+		authtest.NewTestAccount(t, auth)
+		token, _ := authtest.SignIn(t, auth)
+		am := conveyearthgo.NewAccountManager(db)
+		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
+		mux := http.NewServeMux()
+		handler.AttachPublishHandler(mux, auth, am, cm, nm, tmpl)
+		var buffer bytes.Buffer
+		writer := multipart.NewWriter(&buffer)
+		_ = writer.WriteField("topic", conveytest.TEST_TOPIC)
+		_ = writer.WriteField("content", strings.Repeat("x", conveyearthgo.MINIMUM_CONTENT_LENGTH-1))
+		assert.NoError(t, writer.Close())
+		request := httptest.NewRequest(http.MethodPost, "/publish", &buffer)
+		request.Header.Set("Content-Type", writer.FormDataContentType())
+		request.AddCookie(auth.NewSignInSessionCookie(token))
+		response := httptest.NewRecorder()
+		mux.ServeHTTP(response, request)
+		result := response.Result()
+		assert.Equal(t, http.StatusOK, result.StatusCode)
+		body, err := io.ReadAll(result.Body)
+		assert.Nil(t, err)
+		assert.Equal(t, conveyearthgo.ErrContentTooShort.Error()+authtest.TEST_USERNAME, string(body))
+	})
+	// TODO Content Type Not Multipart Form
+	// TODO Attachment Invalid Mime
+	t.Run("Insufficient Balance", func(t *testing.T) {
+		db := database.NewInMemory()
+		ev := authtest.NewEmailVerifier()
+		auth := authgo.NewAuthenticator(db, ev)
+		authtest.NewTestAccount(t, auth)
+		token, _ := authtest.SignIn(t, auth)
+		am := conveyearthgo.NewAccountManager(db)
+		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
+		mux := http.NewServeMux()
+		handler.AttachPublishHandler(mux, auth, am, cm, nm, tmpl)
+		var buffer bytes.Buffer
+		writer := multipart.NewWriter(&buffer)
+		_ = writer.WriteField("topic", conveytest.TEST_TOPIC)
+		_ = writer.WriteField("content", conveytest.TEST_CONTENT)
+		assert.NoError(t, writer.Close())
+		request := httptest.NewRequest(http.MethodPost, "/publish", &buffer)
+		request.Header.Set("Content-Type", writer.FormDataContentType())
+		request.AddCookie(auth.NewSignInSessionCookie(token))
+		response := httptest.NewRecorder()
+		mux.ServeHTTP(response, request)
+		result := response.Result()
+		assert.Equal(t, http.StatusOK, result.StatusCode)
+		body, err := io.ReadAll(result.Body)
+		assert.Nil(t, err)
+		assert.Equal(t, conveyearthgo.ErrInsufficientBalance.Error()+authtest.TEST_USERNAME, string(body))
+	})
+	t.Run("Success", func(t *testing.T) {
+		db := database.NewInMemory()
+		ev := authtest.NewEmailVerifier()
+		auth := authgo.NewAuthenticator(db, ev)
+		acc := authtest.NewTestAccount(t, auth)
+		token, _ := authtest.SignIn(t, auth)
+		am := conveyearthgo.NewAccountManager(db)
+		conveytest.NewPurchase(t, am, acc)
+		cm := conveyearthgo.NewContentManager(db, fs)
+		nm := conveyearthgo.NewNotificationManager(db, conveytest.NewNotificationSender())
+		mux := http.NewServeMux()
+		handler.AttachPublishHandler(mux, auth, am, cm, nm, tmpl)
+		var buffer bytes.Buffer
+		writer := multipart.NewWriter(&buffer)
+		_ = writer.WriteField("topic", conveytest.TEST_TOPIC)
+		_ = writer.WriteField("content", conveytest.TEST_CONTENT)
+		assert.NoError(t, writer.Close())
+		request := httptest.NewRequest(http.MethodPost, "/publish", &buffer)
+		request.Header.Set("Content-Type", writer.FormDataContentType())
+		request.AddCookie(auth.NewSignInSessionCookie(token))
+		response := httptest.NewRecorder()
+		mux.ServeHTTP(response, request)
+		result := response.Result()
+		assert.Equal(t, http.StatusFound, result.StatusCode)
+		u, err := result.Location()
+		assert.Nil(t, err)
+		assert.True(t, strings.HasPrefix(u.String(), "/conversation?id="))
+	})
+	// TODO Success Mention Notification
+	// TODO Success Attachment
+	// TODO Success Content Carriage Return Removed
 }
