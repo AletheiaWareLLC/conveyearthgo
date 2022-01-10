@@ -201,9 +201,6 @@ func main() {
 	// Handle Conversation
 	handler.AttachConversationHandler(mux, auth, cm, templates)
 
-	// Handle Message
-	handler.AttachMessageHandler(mux, auth, cm, templates)
-
 	// Handle Publish
 	handler.AttachPublishHandler(mux, auth, am, cm, nm, templates)
 

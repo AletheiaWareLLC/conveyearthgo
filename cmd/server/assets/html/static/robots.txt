@@ -20,7 +20,6 @@ Disallow: /conversation
 Disallow: /delete
 Disallow: /digest
 Disallow: /gift
-Disallow: /message
 Disallow: /publish
 Disallow: /reply
 
