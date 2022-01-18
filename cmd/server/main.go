@@ -226,17 +226,17 @@ func main() {
 	handler.AttachDemoHandler(mux, templates)
 
 	// Handle favicon.ico
-	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/favicon.ico", nethandler.Log(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/static/convey.svg", http.StatusFound)
-	})
+	})))
 
 	// Handle robots.txt
-	mux.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/robots.txt", nethandler.Log(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/static/robots.txt", http.StatusFound)
-	})
+	})))
 
 	// Handle markdown
-	mux.HandleFunc("/markdown", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/markdown", nethandler.Log(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := templates.ExecuteTemplate(w, "markdown.go.html", &struct {
 			Live bool
 		}{
@@ -244,10 +244,10 @@ func main() {
 		}); err != nil {
 			log.Println(err)
 		}
-	})
+	})))
 
 	// Handle subscribe-digest
-	mux.HandleFunc("/subscribe-digest", func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("/subscribe-digest", nethandler.Log(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := templates.ExecuteTemplate(w, "subscribe-digest.go.html", &struct {
 			Live bool
 		}{
@@ -255,7 +255,7 @@ func main() {
 		}); err != nil {
 			log.Println(err)
 		}
-	})
+	})))
 
 	// Handle Index
 	handler.AttachIndexHandler(mux, auth, cm, templates, digests)
