@@ -9,7 +9,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -76,8 +75,8 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 
 		scheme := conveyearthgo.Scheme()
 		host := conveyearthgo.Host()
-		data.ShareTitle = url.QueryEscape(c.Topic)
-		data.ShareURL = url.QueryEscape(fmt.Sprintf("%s://%s/conversation?id=%d", scheme, host, id))
+		data.ShareTitle = c.Topic
+		data.ShareURL = fmt.Sprintf("%s://%s/conversation?id=%d", scheme, host, id)
 
 		// Lookup Messages
 		messages := make(map[int64]*MessageData)
@@ -101,7 +100,7 @@ func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *t
 					Cost:           m.Cost,
 					Yield:          m.Yield,
 					ShareTitle:     data.ShareTitle,
-					ShareURL:       url.QueryEscape(fmt.Sprintf("%s://%s/conversation?id=%d#message%d", scheme, host, m.ConversationID, m.ID)),
+					ShareURL:       fmt.Sprintf("%s://%s/conversation?id=%d#message%d", scheme, host, m.ConversationID, m.ID),
 				}
 			}
 			return nil
