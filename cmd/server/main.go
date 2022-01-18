@@ -225,6 +225,11 @@ func main() {
 	// Handle Demo
 	handler.AttachDemoHandler(mux, templates)
 
+	// Handle favicon.ico
+	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/static/convey.svg", http.StatusFound)
+	})
+
 	// Handle robots.txt
 	mux.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/static/robots.txt", http.StatusFound)
