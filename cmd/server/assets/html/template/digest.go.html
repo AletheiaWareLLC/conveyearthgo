@@ -11,8 +11,24 @@
         <style>
             .edition {
                 margin: 0px auto;
-                width: 30%;
+                width: 50%;
                 text-align: center;
+            }
+            .edition a img {
+                width: 480px;
+            }
+            @media screen and (min-width: 600px) and (max-width: 960px) {
+                .edition a img {
+                    width: calc((100vw - 32px) / 2);
+                }
+            }
+            @media screen and (max-width: 600px) {
+                .edition {
+                    width: 100%;
+                }
+                .edition a img {
+                    width: calc(100vw - 32px);
+                }
             }
         </style>
     </head>

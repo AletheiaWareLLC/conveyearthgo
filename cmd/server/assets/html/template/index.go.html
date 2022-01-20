@@ -16,9 +16,20 @@
                 text-align: center;
                 display: inline-block;
             }
+            .edition a img {
+                width: 240px;
+            }
+            @media screen and (min-width: 600px) and (max-width: 960px) {
+                .edition a img {
+                    width: calc((100vw - 32px) / 4);
+                }
+            }
             @media screen and (max-width: 600px) {
                 .edition {
                     width: 50%;
+                }
+                .edition a img {
+                    width: calc((100vw - 32px) / 2);
                 }
             }
         </style>

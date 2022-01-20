@@ -46,6 +46,7 @@ a.danger:hover {
 body {
     background-color: white;
     font-family: "Noto Serif Regular", serif;
+    margin: 8px;
 }
 div.beta {
     background-color: red;
@@ -67,8 +68,7 @@ div.message, div.gift {
 embed.banner {
     display: block;
     height: auto;
-    margin: 10px auto 0px auto;
-    min-width: 320px;
+    margin: 8px auto 0px auto;
     width: 50%;
 }
 form {
@@ -184,12 +184,12 @@ ol {
 .content {
     margin: 0 auto;
     max-width: 960px;
-    padding: 10px;
+    padding: 8px;
 }
 .header {
     border-bottom: 1px solid deepskyblue;
     overflow: hidden;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
 }
 .header a {
     text-decoration: none;
@@ -204,7 +204,7 @@ ol {
 .footer {
     border-top: 1px solid deepskyblue;
     overflow: hidden;
-    padding-top: 10px;
+    padding-top: 8px;
 }
 .footer img {
     display: block;
