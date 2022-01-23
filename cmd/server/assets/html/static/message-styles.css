@@ -23,12 +23,6 @@
 .message-options li {
     display: inline;
 }
-.share-option {
-    color: deepskyblue;
-}
-.share-option:hover {
-    color: lightskyblue;
-}
 .share-dropdown {
     display: inline-block;
     position: relative;
