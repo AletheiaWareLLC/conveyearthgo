@@ -292,7 +292,7 @@ func main() {
 			log.Fatal(err)
 		}
 	} else {
-		// Server HTTP Requests
+		// Serve HTTP Requests
 		log.Println("HTTP Server Listening on :80")
 		if err := http.ListenAndServe(":80", mux); err != nil {
 			log.Fatal(err)
