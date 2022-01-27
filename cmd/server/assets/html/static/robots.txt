@@ -1,4 +1,8 @@
 # Blocked for Excessive Traffic
+User-agent: Adsbot
+Disallow: /
+
+# Blocked for Excessive Traffic
 User-agent: PetalBot
 Disallow: /
 
