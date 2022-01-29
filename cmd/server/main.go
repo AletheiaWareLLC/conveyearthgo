@@ -219,9 +219,6 @@ func main() {
 	// Handle About
 	handler.AttachAboutHandler(mux, templates)
 
-	// Handle Demo
-	handler.AttachDemoHandler(mux, templates)
-
 	// Handle favicon.ico
 	mux.Handle("/favicon.ico", nethandler.Log(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/static/convey.svg", http.StatusFound)
