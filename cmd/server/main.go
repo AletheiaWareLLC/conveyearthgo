@@ -19,7 +19,6 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/stripe/stripe-go/v72"
 	"html/template"
-	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -34,21 +33,12 @@ var embeddedFS embed.FS
 
 func main() {
 	// Configure Logging
-	logs, ok := os.LookupEnv("LOG_DIRECTORY")
-	if !ok {
-		logs = "logs"
-	}
-	if err := os.MkdirAll(logs, os.ModePerm); err != nil {
-		log.Fatal(err)
-	}
-	logFile, err := os.OpenFile(path.Join(logs, time.Now().UTC().Format(time.RFC3339)), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+	logFile, err := netgo.SetupLogging()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer logFile.Close()
-	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	log.Println("Log:", logFile.Name())
+	log.Println("Log File:", logFile.Name())
 
 	secure := netgo.IsSecure()
 

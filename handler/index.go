@@ -23,7 +23,7 @@ func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template
 			http.NotFound(w, r)
 			return
 		}
-		log.Println(r.RemoteAddr, r.Proto, r.Method, r.Host, r.URL, r.Header)
+		netgo.LogRequest(r)
 		limit := int64(8)
 		data := struct {
 			Live     bool
