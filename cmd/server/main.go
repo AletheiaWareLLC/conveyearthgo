@@ -240,17 +240,6 @@ func main() {
 		}
 	})))
 
-	// Handle subscribe-digest
-	mux.Handle("/subscribe-digest", nethandler.Log(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if err := templates.ExecuteTemplate(w, "subscribe-digest.go.html", &struct {
-			Live bool
-		}{
-			Live: netgo.IsLive(),
-		}); err != nil {
-			log.Println(err)
-		}
-	})))
-
 	// Handle Index
 	handler.AttachIndexHandler(mux, auth, cm, templates, digests)
 

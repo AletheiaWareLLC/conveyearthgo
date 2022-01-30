@@ -39,9 +39,13 @@
 
             <h1 class="center">Digest</h1>
 
-            {{template "editions" .Editions}}
+            {{if not .Account -}}
+            <p class="center">Sign up to get next month's edition delivered right to your inbox, filled with content that will move you.</p>
 
-            <a class="call-to-action" href="/subscribe-digest">Send Me the Digest!</a>
+            <a class="call-to-action" href="/sign-up">Sign Up</a>
+            {{- end}}
+
+            {{template "editions" .Editions}}
 
             {{template "footer"}}
         </div>
