@@ -33,6 +33,10 @@
             {{template "reply" .Replies}}
             {{- end}}
 
+            {{if not .Account -}}
+            <a class="call-to-action" href="/sign-up">Sign Up</a>
+            {{- end}}
+
             {{template "footer"}}
         </div>
     </body>
