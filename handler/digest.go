@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"aletheiaware.com/authgo"
 	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/netgo"
 	"aletheiaware.com/netgo/handler"
@@ -11,15 +12,16 @@ import (
 	"strings"
 )
 
-func AttachDigestHandler(m *http.ServeMux, ts *template.Template, dir, cache string) {
+func AttachDigestHandler(m *http.ServeMux, a authgo.Authenticator, ts *template.Template, dir, cache string) {
 	m.Handle("/digest/", handler.Log(handler.CacheControl(http.StripPrefix("/digest/", http.FileServer(http.Dir(dir))), cache)))
-	m.Handle("/digest", handler.Log(Digest(ts, dir)))
+	m.Handle("/digest", handler.Log(Digest(a, ts, dir)))
 }
 
-func Digest(ts *template.Template, dir string) http.Handler {
+func Digest(a authgo.Authenticator, ts *template.Template, dir string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data := &DigestData{
-			Live: netgo.IsLive(),
+			Live:    netgo.IsLive(),
+			Account: a.CurrentAccount(w, r),
 		}
 
 		switch r.Method {
@@ -56,6 +58,7 @@ func executeDigestTemplate(w http.ResponseWriter, ts *template.Template, templat
 
 type DigestData struct {
 	Live     bool
+	Account  *authgo.Account
 	Edition  string
 	Editions []string
 }

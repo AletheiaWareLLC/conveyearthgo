@@ -178,7 +178,7 @@ func main() {
 	log.Println("Digests Directory:", digests)
 
 	// Handle Digest
-	handler.AttachDigestHandler(mux, templates, digests, fmt.Sprintf("public, max-age=%d", 60*60*24*7*52)) // 52 week max-age
+	handler.AttachDigestHandler(mux, auth, templates, digests, fmt.Sprintf("public, max-age=%d", 60*60*24*7*52)) // 52 week max-age
 
 	// Handle Account
 	handler.AttachAccountHandler(mux, auth, am, nm, templates)

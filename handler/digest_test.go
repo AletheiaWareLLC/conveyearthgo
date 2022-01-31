@@ -1,6 +1,9 @@
 package handler_test
 
 import (
+	"aletheiaware.com/authgo"
+	"aletheiaware.com/authgo/authtest"
+	"aletheiaware.com/conveyearthgo/database"
 	"aletheiaware.com/conveyearthgo/handler"
 	"github.com/stretchr/testify/assert"
 	"html/template"
@@ -26,8 +29,10 @@ func TestDigest(t *testing.T) {
 	tmpl, err = tmpl.New("digest-viewer.go.html").Parse(`{{.Edition}}`)
 	assert.Nil(t, err)
 
+	auth := authgo.NewAuthenticator(database.NewInMemory(), authtest.NewEmailVerifier())
+
 	mux := http.NewServeMux()
-	handler.AttachDigestHandler(mux, tmpl, dir, "")
+	handler.AttachDigestHandler(mux, auth, tmpl, dir, "")
 
 	request := httptest.NewRequest(http.MethodGet, "/digest", nil)
 	response := httptest.NewRecorder()
