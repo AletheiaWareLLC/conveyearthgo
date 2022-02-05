@@ -13,7 +13,7 @@ import (
 )
 
 func AttachNotificationPreferencesHandler(m *http.ServeMux, a authgo.Authenticator, nm conveyearthgo.NotificationManager, ts *template.Template) {
-	m.Handle("/account-notification-preferences", handler.Log(NotificationPreferences(a, nm, ts)))
+	m.Handle("/account-notification-preferences", handler.Log(handler.Compress(NotificationPreferences(a, nm, ts))))
 }
 
 func NotificationPreferences(a authgo.Authenticator, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {

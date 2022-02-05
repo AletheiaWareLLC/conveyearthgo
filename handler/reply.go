@@ -14,7 +14,7 @@ import (
 )
 
 func AttachReplyHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
-	m.Handle("/reply", handler.Log(Reply(a, am, cm, nm, ts)))
+	m.Handle("/reply", handler.Log(handler.Compress(Reply(a, am, cm, nm, ts))))
 }
 
 func Reply(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {

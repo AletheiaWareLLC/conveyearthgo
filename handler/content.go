@@ -8,7 +8,7 @@ import (
 
 func AttachContentHandler(m *http.ServeMux, cm conveyearthgo.ContentManager, cache string) {
 	m.Handle("/content", http.NotFoundHandler())
-	m.Handle("/content/", handler.Log(handler.CacheControl(http.StripPrefix("/content/", Content(cm)), cache)))
+	m.Handle("/content/", handler.Log(handler.Compress(handler.CacheControl(http.StripPrefix("/content/", Content(cm)), cache))))
 }
 
 func Content(cm conveyearthgo.ContentManager) http.Handler {

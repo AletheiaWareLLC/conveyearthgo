@@ -16,7 +16,7 @@ import (
 )
 
 func AttachConversationHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) {
-	m.Handle("/conversation", handler.Log(Conversation(a, cm, ts)))
+	m.Handle("/conversation", handler.Log(handler.Compress(Conversation(a, cm, ts))))
 }
 
 func Conversation(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {

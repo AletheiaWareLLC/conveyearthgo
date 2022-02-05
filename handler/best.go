@@ -14,7 +14,7 @@ import (
 )
 
 func AttachBestHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, count, maximum int64) {
-	m.Handle("/best", handler.Log(Best(a, cm, ts, count, maximum)))
+	m.Handle("/best", handler.Log(handler.Compress(Best(a, cm, ts, count, maximum))))
 }
 
 func Best(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, count, maximum int64) http.Handler {

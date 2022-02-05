@@ -4,6 +4,7 @@ import (
 	"aletheiaware.com/authgo"
 	"aletheiaware.com/conveyearthgo"
 	"aletheiaware.com/netgo"
+	"aletheiaware.com/netgo/handler"
 	"html/template"
 	"log"
 	"net/http"
@@ -13,7 +14,7 @@ import (
 )
 
 func AttachIndexHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, dir string) {
-	m.Handle("/", Index(a, cm, ts, dir))
+	m.Handle("/", handler.Compress(Index(a, cm, ts, dir)))
 }
 
 func Index(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, dir string) http.Handler {

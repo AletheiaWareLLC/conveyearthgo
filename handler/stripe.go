@@ -25,7 +25,7 @@ import (
 const MaxBodyBytes = int64(65536)
 
 func AttachStripeHandler(m *http.ServeMux, a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template.Template) {
-	m.Handle("/stripe", handler.Log(Stripe(a, sm, ts)))
+	m.Handle("/stripe", handler.Log(handler.Compress(Stripe(a, sm, ts))))
 }
 
 func Stripe(a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template.Template) http.Handler {

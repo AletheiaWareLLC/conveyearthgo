@@ -19,7 +19,7 @@ const (
 )
 
 func AttachPublishHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
-	m.Handle("/publish", handler.Log(Publish(a, am, cm, nm, ts)))
+	m.Handle("/publish", handler.Log(handler.Compress(Publish(a, am, cm, nm, ts))))
 }
 
 func Publish(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {

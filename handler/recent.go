@@ -13,7 +13,7 @@ import (
 )
 
 func AttachRecentHandler(m *http.ServeMux, a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, count, maximum int64) {
-	m.Handle("/recent", handler.Log(Recent(a, cm, ts, count, maximum)))
+	m.Handle("/recent", handler.Log(handler.Compress(Recent(a, cm, ts, count, maximum))))
 }
 
 func Recent(a authgo.Authenticator, cm conveyearthgo.ContentManager, ts *template.Template, count, maximum int64) http.Handler {

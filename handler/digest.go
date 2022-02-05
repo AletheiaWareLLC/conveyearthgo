@@ -13,8 +13,8 @@ import (
 )
 
 func AttachDigestHandler(m *http.ServeMux, a authgo.Authenticator, ts *template.Template, dir, cache string) {
-	m.Handle("/digest/", handler.Log(handler.CacheControl(http.StripPrefix("/digest/", http.FileServer(http.Dir(dir))), cache)))
-	m.Handle("/digest", handler.Log(Digest(a, ts, dir)))
+	m.Handle("/digest/", handler.Log(handler.Compress(handler.CacheControl(http.StripPrefix("/digest/", http.FileServer(http.Dir(dir))), cache))))
+	m.Handle("/digest", handler.Log(handler.Compress(Digest(a, ts, dir))))
 }
 
 func Digest(a authgo.Authenticator, ts *template.Template, dir string) http.Handler {

@@ -13,7 +13,7 @@ import (
 )
 
 func AttachDeleteHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, ts *template.Template) {
-	m.Handle("/delete", handler.Log(Delete(a, am, cm, ts)))
+	m.Handle("/delete", handler.Log(handler.Compress(Delete(a, am, cm, ts))))
 }
 
 func Delete(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, ts *template.Template) http.Handler {

@@ -9,7 +9,7 @@ import (
 )
 
 func AttachAboutHandler(m *http.ServeMux, ts *template.Template) {
-	m.Handle("/about", handler.Log(About(ts)))
+	m.Handle("/about", handler.Log(handler.Compress(About(ts))))
 }
 
 func About(ts *template.Template) http.Handler {

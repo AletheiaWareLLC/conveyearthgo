@@ -12,7 +12,7 @@ import (
 )
 
 func AttachAccountHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
-	m.Handle("/account", handler.Log(Account(a, am, nm, ts)))
+	m.Handle("/account", handler.Log(handler.Compress(Account(a, am, nm, ts))))
 }
 
 func Account(a authgo.Authenticator, am conveyearthgo.AccountManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {

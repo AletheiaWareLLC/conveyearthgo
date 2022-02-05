@@ -20,7 +20,7 @@ import (
 )
 
 func AttachCoinBuyHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, ts *template.Template) {
-	m.Handle("/coin-buy", handler.Log(CoinBuy(a, am, ts)))
+	m.Handle("/coin-buy", handler.Log(handler.Compress(CoinBuy(a, am, ts))))
 }
 
 func CoinBuy(a authgo.Authenticator, am conveyearthgo.AccountManager, ts *template.Template) http.Handler {

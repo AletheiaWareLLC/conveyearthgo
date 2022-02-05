@@ -13,7 +13,7 @@ import (
 )
 
 func AttachGiftHandler(m *http.ServeMux, a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) {
-	m.Handle("/gift", handler.Log(Gift(a, am, cm, nm, ts)))
+	m.Handle("/gift", handler.Log(handler.Compress(Gift(a, am, cm, nm, ts))))
 }
 
 func Gift(a authgo.Authenticator, am conveyearthgo.AccountManager, cm conveyearthgo.ContentManager, nm conveyearthgo.NotificationManager, ts *template.Template) http.Handler {
