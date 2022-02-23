@@ -20,7 +20,6 @@ Disallow: /sign
 User-agent: *
 Disallow: /best
 Disallow: /content
-Disallow: /conversation
 Disallow: /delete
 Disallow: /gift
 Disallow: /publish
