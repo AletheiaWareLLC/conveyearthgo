@@ -130,6 +130,21 @@ input[type=submit].danger {
 input[type=submit].danger:hover {
     background-color: orangered;
 }
+select {
+    background-color: white;
+    border-color: deepskyblue;
+    border-style: solid;
+    border-radius: 4px;
+    border-width: 2px;
+    color: deepskyblue;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 4px 0;
+    padding: 16px 32px;
+    text-decoration: none;
+    width: 100%;
+}
 p.error {
     color: red;
     text-align:center;

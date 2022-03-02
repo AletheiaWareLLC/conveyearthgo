@@ -109,8 +109,9 @@ func Stripe(a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template
 						Requested: stripe.Bool(true),
 					},
 				},
-				Email: stripe.String(acc.Email),
-				Type:  stripe.String("express"),
+				Country: stripe.String(r.FormValue("country")),
+				Email:   stripe.String(acc.Email),
+				Type:    stripe.String("express"),
 			}
 			params.AddMetadata("domain", domain)
 			params.AddMetadata("account_id", strconv.FormatInt(acc.ID, 10))
