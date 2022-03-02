@@ -12,6 +12,14 @@ import (
 
 func FormatStripeAmount(amount float64, currency stripe.Currency) string {
 	switch currency {
+	case stripe.CurrencyBGN:
+		// Format as decimal with lev size
+		price := fmt.Sprintf("%.2f", amount/100.0)
+		// Remove trailing zeros
+		price = strings.TrimRight(price, "0")
+		// Remove trailing point
+		price = strings.TrimRight(price, ".")
+		return price + " лв."
 	case stripe.CurrencyUSD:
 		// Format as decimal with dollar size
 		price := fmt.Sprintf("$%.2f", amount/100.0)
