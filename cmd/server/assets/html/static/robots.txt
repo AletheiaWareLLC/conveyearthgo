@@ -1,3 +1,5 @@
+Sitemap: https://convey.earth/sitemap.txt
+
 # Blocked for Excessive Traffic
 User-agent: Adsbot
 Disallow: /

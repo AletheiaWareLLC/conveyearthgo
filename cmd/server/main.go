@@ -219,6 +219,11 @@ func main() {
 		http.Redirect(w, r, "/static/robots.txt", http.StatusFound)
 	})))
 
+	// Handle sitemap.txt
+	mux.Handle("/sitemap.txt", nethandler.Log(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/static/sitemap.txt", http.StatusFound)
+	})))
+
 	// Handle markdown
 	mux.Handle("/markdown", nethandler.Log(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if err := templates.ExecuteTemplate(w, "markdown.go.html", &struct {
