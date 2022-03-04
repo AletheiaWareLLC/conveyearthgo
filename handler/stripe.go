@@ -102,9 +102,6 @@ func Stripe(a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template
 			}
 			params := &stripe.AccountParams{
 				Capabilities: &stripe.AccountCapabilitiesParams{
-					CardPayments: &stripe.AccountCapabilitiesCardPaymentsParams{
-						Requested: stripe.Bool(true),
-					},
 					Transfers: &stripe.AccountCapabilitiesTransfersParams{
 						Requested: stripe.Bool(true),
 					},
@@ -112,6 +109,9 @@ func Stripe(a authgo.Authenticator, sm conveyearthgo.StripeManager, ts *template
 				Country: stripe.String(r.FormValue("country")),
 				Email:   stripe.String(acc.Email),
 				Type:    stripe.String("express"),
+				TOSAcceptance: &stripe.AccountTOSAcceptanceParams{
+					ServiceAgreement: stripe.String("recipient"),
+				},
 			}
 			params.AddMetadata("domain", domain)
 			params.AddMetadata("account_id", strconv.FormatInt(acc.ID, 10))
