@@ -279,6 +279,7 @@ p.ucc {
     max-width: 100%;
 }
 pre.ucc, code.ucc {
+    background-color: whitesmoke;
     max-width: 100%;
     overflow-wrap: break-word;
     white-space: pre-wrap;

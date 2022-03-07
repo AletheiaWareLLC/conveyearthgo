@@ -55,8 +55,7 @@ func ToHTML(reader io.Reader) (template.HTML, error) {
 			case "CodeSpan":
 				result += `<code class="ucc">`
 			case "CodeBlock", "FencedCodeBlock":
-				result += `<pre class="ucc"><code class="ucc">
-`
+				result += `<pre class="ucc"><code class="ucc">`
 				lines := n.Lines()
 				for i := 0; i < lines.Len(); i++ {
 					line := lines.At(i)
