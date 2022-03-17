@@ -114,7 +114,7 @@ function markdownToHTML(parser, markdown) {
           result += '</code>';
           break;
         case "code_block":
-          result += '<pre class="ucc"><code class="ucc">\n';
+          result += '<pre class="ucc"><code class="ucc">';
           result += escape(node.literal);
           result += '</code></pre>\n';
           break;
