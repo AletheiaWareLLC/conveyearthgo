@@ -130,6 +130,12 @@ func (db *Sql) Migrator(migrations fs.FS) (*migrate.Migrate, error) {
 }
 
 func (db *Sql) CreateUser(email, username string, password []byte, created time.Time) (int64, error) {
+	if len(email) > authgo.MAXIMUM_EMAIL_LENGTH {
+		email = email[:authgo.MAXIMUM_EMAIL_LENGTH]
+	}
+	if len(username) > authgo.MAXIMUM_USERNAME_LENGTH {
+		username = username[:authgo.MAXIMUM_USERNAME_LENGTH]
+	}
 	result, err := db.Exec(`
 		INSERT INTO tbl_users
 		SET email=?, username=?, password=?, created_unix=?`, email, username, password, created.Unix())
@@ -300,6 +306,12 @@ func (db *Sql) UpdateSignUpSessionError(token, error string) (int64, error) {
 }
 
 func (db *Sql) UpdateSignUpSessionIdentity(token, email, username string) (int64, error) {
+	if len(email) > authgo.MAXIMUM_EMAIL_LENGTH {
+		email = email[:authgo.MAXIMUM_EMAIL_LENGTH]
+	}
+	if len(username) > authgo.MAXIMUM_USERNAME_LENGTH {
+		username = username[:authgo.MAXIMUM_USERNAME_LENGTH]
+	}
 	result, err := db.Exec(`
 		UPDATE tbl_signups
 		SET email=?, username=?
@@ -311,6 +323,9 @@ func (db *Sql) UpdateSignUpSessionIdentity(token, email, username string) (int64
 }
 
 func (db *Sql) UpdateSignUpSessionReferrer(token, referrer string) (int64, error) {
+	if len(referrer) > authgo.MAXIMUM_USERNAME_LENGTH {
+		referrer = referrer[:authgo.MAXIMUM_USERNAME_LENGTH]
+	}
 	var (
 		result sql.Result
 		err    error
@@ -350,6 +365,9 @@ func (db *Sql) UpdateSignUpSessionChallenge(token, challenge string) (int64, err
 }
 
 func (db *Sql) CreateSignInSession(token, username string, authenticated bool, created time.Time) (int64, error) {
+	if len(username) > authgo.MAXIMUM_USERNAME_LENGTH {
+		username = username[:authgo.MAXIMUM_USERNAME_LENGTH]
+	}
 	result, err := db.Exec(`
 			INSERT INTO tbl_signins
 			SET token=?, username=?, authenticated=?, created_unix=?`, token, username, authenticated, created.Unix())
@@ -389,6 +407,9 @@ func (db *Sql) UpdateSignInSessionError(token, error string) (int64, error) {
 }
 
 func (db *Sql) UpdateSignInSessionUsername(token, username string) (int64, error) {
+	if len(username) > authgo.MAXIMUM_USERNAME_LENGTH {
+		username = username[:authgo.MAXIMUM_USERNAME_LENGTH]
+	}
 	result, err := db.Exec(`
 		UPDATE tbl_signins
 		SET username=?
@@ -411,6 +432,9 @@ func (db *Sql) UpdateSignInSessionAuthenticated(token string, authenticated bool
 }
 
 func (db *Sql) CreateAccountPasswordSession(token, username string, created time.Time) (int64, error) {
+	if len(username) > authgo.MAXIMUM_USERNAME_LENGTH {
+		username = username[:authgo.MAXIMUM_USERNAME_LENGTH]
+	}
 	result, err := db.Exec(`
 		INSERT INTO tbl_resets
 		SET token=?, username=?, created_unix=?`, token, username, created.Unix())
@@ -489,6 +513,9 @@ func (db *Sql) UpdateAccountRecoverySessionError(token, error string) (int64, er
 }
 
 func (db *Sql) UpdateAccountRecoverySessionEmail(token, email string) (int64, error) {
+	if len(email) > authgo.MAXIMUM_EMAIL_LENGTH {
+		email = email[:authgo.MAXIMUM_EMAIL_LENGTH]
+	}
 	result, err := db.Exec(`
 		UPDATE tbl_recoveries
 		SET email=?
@@ -500,6 +527,9 @@ func (db *Sql) UpdateAccountRecoverySessionEmail(token, email string) (int64, er
 }
 
 func (db *Sql) UpdateAccountRecoverySessionUsername(token, username string) (int64, error) {
+	if len(username) > authgo.MAXIMUM_USERNAME_LENGTH {
+		username = username[:authgo.MAXIMUM_USERNAME_LENGTH]
+	}
 	result, err := db.Exec(`
 		UPDATE tbl_recoveries
 		SET username=?
