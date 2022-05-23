@@ -207,14 +207,14 @@ ol {
     padding-bottom: 8px;
 }
 .header a {
-    text-decoration: none;
-}
-.header a h1 {
+    display: inline-block;
     font-family: "Noto Serif Extra Bold", serif;
     font-size: 64px;
     font-size: 10vw;
     margin: 0;
     text-align: center;
+    text-decoration: none;
+    width: 100%;
 }
 .footer {
     border-top: 1px solid deepskyblue;
